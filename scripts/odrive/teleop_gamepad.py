@@ -17,7 +17,7 @@ except ImportError:
     sys.exit(1)
 
 # Velocity limit (turns/s)
-VEL_LIMIT = 40.0
+VEL_LIMIT = 80.0
 
 # Deadzone for joysticks (prevent drift)
 DEADZONE = 0.15
