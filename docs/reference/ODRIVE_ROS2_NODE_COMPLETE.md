@@ -99,7 +99,7 @@ odrive_interface_node:
     # Physical parameters
     wheel_radius: 0.10    # meters (adjust to your wheels)
     track_width: 0.60     # meters (600mm per tank specs)
-    encoder_cpr: 8192     # Encoder counts per revolution
+    encoder_cpr: 2048     # Encoder counts per revolution (verified with hardware)
     
     # Velocity limits
     max_vel: 1.5          # Maximum linear velocity (m/s)
@@ -107,7 +107,7 @@ odrive_interface_node:
     
     # ODrive motor limits
     current_limit: 30.0   # Motor current limit (Amps)
-    velocity_limit: 20.0  # Motor velocity limit (turns/s)
+    velocity_limit: 100.0  # Motor velocity limit (turns/s)
     
     # Safety
     enable_watchdog: true
@@ -293,8 +293,8 @@ Before using the ROS 2 node, your ODrive must be configured:
 # In odrivetool:
 odrv0.axis0.encoder.config.mode = ENCODER_MODE_INCREMENTAL
 odrv0.axis1.encoder.config.mode = ENCODER_MODE_INCREMENTAL
-odrv0.axis0.encoder.config.cpr = 8192  # Adjust to your encoder
-odrv0.axis1.encoder.config.cpr = 8192
+odrv0.axis0.encoder.config.cpr = 2048  # Adjust to your encoder (2048 for this setup)
+odrv0.axis1.encoder.config.cpr = 2048
 odrv0.axis0.motor.config.pole_pairs = 7  # Adjust to your motor
 odrv0.axis1.motor.config.pole_pairs = 7
 odrv0.axis0.controller.config.control_mode = CONTROL_MODE_VELOCITY_CONTROL

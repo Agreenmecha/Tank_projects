@@ -59,8 +59,8 @@ odrv0.axis0.encoder.config.mode = ENCODER_MODE_INCREMENTAL
 odrv0.axis1.encoder.config.mode = ENCODER_MODE_INCREMENTAL
 
 # Set encoder CPR (counts per revolution)
-odrv0.axis0.encoder.config.cpr = 8192
-odrv0.axis1.encoder.config.cpr = 8192
+odrv0.axis0.encoder.config.cpr = 2048  # Verified with hardware
+odrv0.axis1.encoder.config.cpr = 2048
 
 # Set motor pole pairs (adjust for your motor)
 odrv0.axis0.motor.config.pole_pairs = 7  # Adjust for your motor
@@ -99,7 +99,7 @@ Edit `config/odrive_params.yaml` to match your robot:
 ```yaml
 wheel_radius: 0.10    # meters (measure your wheel diameter)
 track_width: 0.60     # meters (distance between wheels)
-encoder_cpr: 8192     # encoder counts per revolution
+encoder_cpr: 2048     # encoder counts per revolution (verified with hardware)
 max_vel: 1.5          # maximum linear velocity (m/s)
 current_limit: 30.0   # motor current limit (Amps)
 ```
@@ -275,7 +275,7 @@ odrv0.axis0.encoder.pos_estimate  # Manually spin motor, this should change
 | `axis_right` | int | 1 | ODrive axis for right motor |
 | `wheel_radius` | float | 0.10 | Wheel radius in meters |
 | `track_width` | float | 0.60 | Distance between wheels in meters |
-| `encoder_cpr` | int | 8192 | Encoder counts per revolution |
+| `encoder_cpr` | int | 2048 | Encoder counts per revolution (verified with hardware) |
 | `max_vel` | float | 1.5 | Maximum linear velocity (m/s) |
 | `max_angular_vel` | float | 2.0 | Maximum angular velocity (rad/s) |
 | `current_limit` | float | 30.0 | Motor current limit (Amps) |

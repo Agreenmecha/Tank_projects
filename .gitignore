@@ -47,6 +47,13 @@ log/
 # *.stl
 # *.dae
 
+# Machine Learning Models (large files - use Git LFS if needed)
+*.engine
+*.onnx
+*.pth
+*.pt
+*.h5
+
 # Credentials (if any)
 *.pem
 *.key
