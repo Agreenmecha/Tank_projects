@@ -495,6 +495,11 @@ Map cube: 1000m; detection range: 80-100m.
 
 11) Isaac ROS Integration & Compute Budget
 
+Official Resources:
+- GitHub: https://github.com/NVIDIA-ISAAC-ROS (121 repos)
+- Documentation: https://nvidia-isaac-ros.github.io/
+- ROS2 Humble compatible, runs on Jetson & x86_64 with CUDA
+
 Isaac ROS packages (Jetson Orin Nano optimization):
 
 isaac_ros_image_proc:
@@ -503,6 +508,7 @@ isaac_ros_image_proc:
 - Offloads preprocessing from CPU
 
 isaac_ros_dnn_inference:
+- Repo: https://github.com/NVIDIA-ISAAC-ROS/isaac_ros_dnn_inference
 - TensorRT engine for SegFormer-B0
 - Model conversion: PyTorch/ONNX → TensorRT FP16
 - 3-4x faster inference than CPU/PyTorch (~10-15ms vs ~40-50ms)
@@ -510,6 +516,7 @@ isaac_ros_dnn_inference:
 
 Setup:
 - Docker-based environment (JetPack 6.2, L4T 36.4.3)
+- Base image: nvcr.io/nvidia/isaac/ros:humble-l4t-r36.4.3
 - Model conversion script provided by Isaac ROS
 - Integrated into perception launch file
 

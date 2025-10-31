@@ -329,6 +329,43 @@ git commit -m "Adjust slope limits for 25° validation"
 
 ---
 
+## Isaac ROS Setup
+
+### Official Resources
+
+**NVIDIA Isaac ROS** provides GPU-accelerated ROS2 packages for perception on Jetson platforms:
+
+- **GitHub:** [NVIDIA-ISAAC-ROS](https://github.com/NVIDIA-ISAAC-ROS) (121 repos)
+- **Documentation:** https://nvidia-isaac-ros.github.io/
+- **License:** Apache 2.0
+
+### Packages for Tank Navigation
+
+**1. [isaac_ros_dnn_inference](https://github.com/NVIDIA-ISAAC-ROS/isaac_ros_dnn_inference)** ⭐
+- TensorRT-accelerated DNN model inference
+- For camera semantic segmentation (SegFormer-B0)
+- Supports: Jetson (ARM64) and x86_64 with CUDA GPU
+- ROS2 Humble compatible
+- Input: Camera image → Output: Segmentation masks
+
+**2. isaac_ros_image_proc**
+- VPI-accelerated image preprocessing
+- Debayering, undistortion, resize operations
+- Offloads CPU → GPU for camera pipeline
+
+### Installation
+
+Isaac ROS packages are typically run in Docker containers on Jetson for best performance:
+
+```bash
+# Pull Isaac ROS base image (includes all dependencies)
+docker pull nvcr.io/nvidia/isaac/ros:humble-l4t-r36.4.3
+
+# Or build custom container (see Docker Setup below)
+```
+
+---
+
 ## Docker Setup (for Isaac ROS)
 
 ### Dockerfile Structure
@@ -713,6 +750,105 @@ Before using with tank:
 ---
 
 ## Testing Jetson CAN Interface
+
+### Jetson Orin Nano CAN Specifications (Official NVIDIA Docs)
+
+From [NVIDIA Jetson Linux Developer Guide - CAN Controller](https://docs.nvidia.com/jetson/archives/r36.4.4/DeveloperGuide/HR/ControllerAreaNetworkCan.html):
+
+**Hardware Details:**
+| Property | Jetson Orin Nano |
+|----------|------------------|
+| **Number of controllers** | 1 (mttcan@c310000) |
+| **Pins on carrier board** | J17: CAN_RX [pin 1], CAN_TX [pin 2] |
+| **Default pin configuration** | SFIO: CAN functionality **ENABLED by default** ✅ |
+| **Pinmux can0_din** | Addr: 0x0c303018, Value: 0xc458 |
+| **Pinmux can0_dout** | Addr: 0x0c303010, Value: 0xc400 |
+| **CAN clock rate** | 50 MHz |
+
+**Capabilities:**
+- ✅ Standard and Extended Frame transmission
+- ✅ CAN FD mode with up to 15 Mbps data rate (5 Mbps typical)
+- ✅ Classic CAN: Configurable 10 kbps to 1 Mbps
+- ✅ Native Linux SocketCAN support
+- ✅ Time Triggered CAN (TTCAN) controller
+
+**CAN FD Transceiver Options:**
+
+### ⚠️ Important: WaveShare SN65HVD230 is NOT CAN FD!
+The NVIDIA docs recommend WaveShare SN65HVD230, but it's **classic CAN only** (not CAN FD). Since you need CAN FD for future Teensy 4.1 integration, use one of these:
+
+---
+
+### **RECOMMENDED: Adafruit CAN Pal (TJA1051T/3 Transceiver)**
+
+**Product:** [Adafruit CAN Pal - Product ID 5708](https://www.adafruit.com/product/5708)
+
+This is the **transceiver-only version** (not the SPI controller version). Perfect for Jetson!
+
+**Specifications (TJA1051T/3):**
+- ✅ **CAN FD capable** - Up to 5 Mbps data rate
+- ✅ **3.3V logic compatible** - Direct connection to Jetson
+- ✅ **Built-in 5V charge pump** - No external 5V power needed!
+- ✅ **Switchable 120Ω termination** - Onboard switch (flip to enable)
+- ✅ **Pre-soldered terminal block** - Easy CANH/CANL connection
+- ✅ **ISO 11898-2:2003 compliant**
+- Cost: $3.95
+
+**Why This is Perfect for Your Tank:**
+1. Uses Jetson's native mttcan controller (low latency ~50μs)
+2. CAN FD ready for future Teensy 4.1 projects
+3. Simple 4-wire connection (VCC, GND, RX, TX)
+4. Built-in termination resistor (just flip switch)
+5. Cheap and reliable
+
+**Wiring (CAN Pal to Jetson Orin Nano):**
+```
+Adafruit CAN Pal 5708    →    Jetson Orin Nano J17
+─────────────────────────────────────────────────
+VCC (3.3V)               →    Pin 17 (3.3V PWR)
+GND                      →    Pin 20 (GND)
+RX                       →    Pin 1 (CAN_RX)
+TX                       →    Pin 2 (CAN_TX)
+
+Terminal Block (CAN Pal) →    ODrive
+─────────────────────────────────────────────────
+CANH                     →    ODrive CANH
+CANL                     →    ODrive CANL
+GND (terminal)           →    ODrive GND (optional, improves noise immunity)
+```
+
+**CAN Pal Setup:**
+1. Flip the termination switch **ON** (enables 120Ω resistor)
+2. Solder header pins to VCC, GND, RX, TX pads
+3. Connect to Jetson J17 as shown above
+4. Connect ODrive to terminal block (CANH, CANL)
+5. Check ODrive termination is also enabled (typically 120Ω on each end)
+
+**Advantages:**
+- ✅ Uses Jetson's native CAN FD controller (mttcan)
+- ✅ Native Linux SocketCAN support
+- ✅ Low latency (~50μs)
+- ✅ Simple software setup (standard kernel drivers)
+- ✅ No SPI configuration needed
+- ✅ Future-proof for CAN FD projects
+
+---
+
+### **CAN Bus Termination:**
+
+For proper CAN bus operation, you need **120Ω termination at BOTH ends** of the bus:
+
+**End 1 (Jetson/CAN Pal):** Flip the termination switch on CAN Pal to **ON**
+**End 2 (ODrive):** Enable ODrive's built-in 120Ω termination
+- Check for DIP switch or solder jumper on ODrive
+- Consult ODrive documentation for your specific model
+
+**Why termination is critical:**
+- Prevents signal reflections on CAN bus
+- Without termination: "BUS-OFF" errors, unreliable communication
+- With termination: Clean signals, reliable operation
+
+---
 
 ### Step 1: Enable CAN on Jetson
 ```bash

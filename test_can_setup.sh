@@ -1,32 +1,56 @@
 #!/bin/bash
 # CAN Bus Test Script for Jetson Orin Nano + ODrive
 # Tests CAN interface, ODrive connectivity, and basic communication
+# Supports: Native CAN (J17) and Adafruit CAN Pal (SPI/MCP2518FD)
 
 set -e
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 echo "=========================================="
 echo "CAN Bus Test for ODrive + Jetson Orin Nano"
 echo "=========================================="
 echo ""
+echo -e "${BLUE}Hardware: Adafruit CAN Pal (TJA1051T/3) + Jetson Native CAN${NC}"
+echo "Testing native Jetson CAN FD controller (mttcan)"
+echo ""
+echo "Expected wiring:"
+echo "  CAN Pal VCC → J17 Pin 17 (3.3V)"
+echo "  CAN Pal GND → J17 Pin 20 (GND)"
+echo "  CAN Pal RX  → J17 Pin 1 (CAN_RX)"
+echo "  CAN Pal TX  → J17 Pin 2 (CAN_TX)"
+echo "  CAN Pal CANH/CANL → ODrive CANH/CANL"
+echo "  CAN Pal termination switch: ON"
+echo ""
+
+CAN_MODULE="mttcan"
 
 # Test 1: Check if CAN kernel modules are available
 echo -e "${YELLOW}[1/8] Checking CAN kernel modules...${NC}"
 if lsmod | grep -q "can"; then
-    echo -e "${GREEN}✓ CAN modules loaded${NC}"
+    echo -e "${GREEN}✓ CAN base modules loaded${NC}"
 else
-    echo -e "${YELLOW}⚠ Loading CAN modules...${NC}"
+    echo -e "${YELLOW}⚠ Loading CAN base modules...${NC}"
     sudo modprobe can
     sudo modprobe can_raw
-    sudo modprobe mttcan
-    if lsmod | grep -q "can"; then
-        echo -e "${GREEN}✓ CAN modules loaded successfully${NC}"
+fi
+
+# Load mttcan module
+if lsmod | grep -q "mttcan"; then
+    echo -e "${GREEN}✓ mttcan module loaded${NC}"
+else
+    echo -e "${YELLOW}⚠ Loading mttcan module...${NC}"
+    if sudo modprobe mttcan 2>/dev/null; then
+        echo -e "${GREEN}✓ mttcan loaded successfully${NC}"
     else
-        echo -e "${RED}✗ Failed to load CAN modules${NC}"
+        echo -e "${RED}✗ Failed to load mttcan${NC}"
+        echo "  Check if CAN is enabled in device tree:"
+        echo "  cat /proc/device-tree/mttcan@c310000/status"
+        echo "  Should show: okay"
         exit 1
     fi
 fi
