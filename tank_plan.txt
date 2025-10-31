@@ -1,0 +1,636 @@
+Awesome — here's the consolidated, detailed plan based on our latest decisions:
+
+GNSS (ZED-F9P) for global waypoints
+
+Two 3D LiDARs (Unitree L2): front (forward-facing) + rear (rear-facing)
+
+Point-LIO ROS2 as the local pose backbone using front L2's built-in IMU
+
+Camera semantic segmentation (Isaac ROS accelerated) for terrain meaning
+
+Reverse-aware local planning using a single fused 360° costmap
+
+ODrive motor control with encoder feedback for tracked platform
+
+Robust safety, recovery, and test regimen
+
+=== HARDWARE SPECIFICATIONS ===
+
+Platform: Tracked vehicle (differential drive)
+- Track width: 600mm
+- Contact length: 410mm
+- Center of gravity height: 229mm (9 inches)
+- Drive chain rating: 100kg payload @ 6 mph (2.7 m/s) @ 15° slope
+- Typical payload: 30 lb (13.6 kg) = 13.6% of rated capacity → significant torque headroom
+- Tip-over angle (lateral): 52.6° 
+- Tip-over angle (longitudinal): 41.8° → 30° slope target has 11.8° safety margin
+- ⚠️ NOTE: 30° target exceeds 15° manufacturer slope rating, but low payload (13.6% capacity) 
+  provides substantial torque reserve. Validate incrementally: 15° → 20° → 25° → 30°.
+
+Compute: NVIDIA Jetson Orin Nano (JetPack 6.2, L4T 36.4.3)
+
+Sensors:
+- 2x Unitree L2 3D LiDAR (with built-in 9-axis IMU)
+- e-CAM25_CUONX (AR0234 global shutter, 1920x1200, 70fps capable)
+- ZED-F9P GNSS with survey antenna (no RTK - standard GNSS accuracy ~2-5m)
+- Wheel encoders (via ODrive)
+
+Motor Control: ODrive (velocity control mode, watchdog enabled)
+
+Performance envelope:
+- Max rated speed: 2.7 m/s (6 mph) at full 100kg load
+- Target autonomous max: 1.5 m/s (conservative, 56% of rating)
+- At 30 lb payload: ~87% torque reserve available for steep slopes
+- Expected max climbable slope at 30 lb: 20-25° (safe estimate, test to validate 30°)
+
+0) Mission, Constraints, KPIs
+
+Mission goals
+
+Autonomously traverse GNSS waypoints through rugged off-road terrain.
+
+Avoid obstacles, unsafe slopes, and soft surfaces using LiDAR geometry + camera terrain class.
+
+Support confident reversing when forward is blocked.
+
+Key constraints & initial targets
+
+Speed caps: start 0.8 m/s; expand to 1.5 m/s after validation (manufacturer rated 2.7 m/s).
+
+Max slope: 30° target (exceeds 15° manufacturer rating - validate incrementally 15°→20°→25°→30°).
+
+Min obstacle clearance: ≥0.25 m from hull (tracked footprint: 410mm × 600mm).
+
+Local planning horizon: 25 m radius, 0.15 m grid; update 15 Hz.
+
+Corridor half-width: 4–5 m (GNSS-only, ~2-5m accuracy typical).
+
+MVP pass criteria (500 m mixed terrain): 0 collisions, ≤0.2 stuck events/km, 0 tip-over events, max validated slope ≥20°.
+
+KPIs to track
+
+Stuck events/km; min obstacle distance; % time in crawl/slow/fast; localization drift/min without GNSS; LiDAR packet-health %; segmentation confidence; track slip % (encoder vs LiDAR-odom); pitch angle excursions; ODrive motor temperature; GNSS fix quality (DOP/satellite count).
+
+1) Hardware Mounting & Integration
+
+Sensors
+
+Front LiDAR (Unitree L2): ~50 cm AGL, level (0°); at/just ahead of nose.
+- Built-in 9-axis IMU (primary for Point-LIO)
+- Topic: /lidar_front/pointcloud, /lidar_front/imu
+- Frame: lidar_front
+
+Rear LiDAR (Unitree L2): 45–50 cm AGL, level (0°); at/just behind tail.
+- Built-in IMU (unused, rear LiDAR for perception only)
+- Topic: /lidar_rear/pointcloud
+- Frame: lidar_rear
+
+Goal: each sees ground from ~0.3–0.5 m beyond bumper.
+
+Camera (e-CAM25_CUONX, AR0234): 35 cm AGL, 15° down-tilt; hooded lens.
+- Resolution: 1280x720 @ 20fps (downsampled from 1920x1200 for compute efficiency)
+- FOV: 128.2°(D), 104.6°(H), 61.6°(V)
+- Ground coverage: 5-10m effective range for segmentation
+- M12 lens holder for custom optics
+- MIPI CSI-2 interface, 15cm FPC cable
+
+IMU: Front L2's built-in 9-axis IMU (hardware time-synced with LiDAR).
+
+GNSS (ZED-F9P + survey antenna): highest point, unobstructed sky view; short RF cable.
+- Standard GNSS mode (no RTK corrections)
+- Expected accuracy: 2-5m typical (horizontal), degrades under tree cover
+- Multi-band (L1/L2) capability for improved accuracy
+
+Mechanical
+
+Isolation: 45–55A durometer rubber standoffs for LiDARs/camera.
+
+Matte shrouds/hoods that do not clip LiDAR FOV.
+
+Easy-access hydrophobic windows for lens/laser apertures.
+
+Electrical
+
+Common power rails with filtering; brown-out protection.
+
+Hardware E-stop in series with motor power.
+
+Motor Control (ODrive):
+- Velocity control mode for /cmd_vel compliance
+- Watchdog timeout: ≤200ms (emergency stop on signal loss)
+- Encoder feedback → wheel odometry for slip detection
+- Monitor motor temperature, voltage, current
+- Emergency brake: software-triggered input_vel = 0
+
+Acceptance checks
+
+360° LiDAR coverage; near-field visible at 0.3–0.5 m front/back.
+
+No self-hits from deck/tow points (use static body masks if needed).
+
+2) Frames, Extrinsics, Time Sync
+
+Frames
+
+map (global), odom (local), base_link, lidar_front, lidar_rear, camera, imu.
+
+Extrinsics
+
+Measure → refine via ICP (boxes/walls) for LiDARs; camera–LiDAR via checkerboard/AprilTags.
+
+Lock mounts; re-check after first rough trail session.
+
+Timing & deskew
+
+Common timebase; IMU used for LiDAR deskew.
+
+Ensure per-point timestamps in LiDAR packets.
+
+3) Data & Logging
+
+Record
+
+Deskewed front/rear point clouds; IMU; wheel encoders; GNSS (+ covariances); camera frames; /cmd_vel; planner states; estimator states; temperatures; packet loss %.
+
+Scenario coverage
+
+Dirt, gravel, grass, brush, rock gardens, ruts, puddles/mud, slopes (10–15°), dust/night.
+
+Metadata
+
+Terrain tags, weather, operator notes (simple YAML).
+
+4) State Estimation (LIO backbone)
+
+Primary: Point-LIO ROS2
+
+Point-LIO (https://github.com/dfloreaa/point_lio_ros2) using front L2 + built-in IMU.
+- Higher bandwidth than FAST-LIO2, proven with Unitree L2
+- Publishes odom frame from LiDAR-inertial fusion
+- Hardware time-sync advantage (L2's built-in IMU)
+
+Configuration:
+- Input: /lidar_front/pointcloud + /lidar_front/imu
+- Extrinsics: Identity (IMU is in LiDAR frame)
+- IMU saturation limits: acc ~3.0 m/s², gyro ~35 rad/s (verify from L2 datasheet)
+- Map cube size: 1000m, detection range: 80-100m (L2 max range)
+
+GNSS Fusion
+
+Fuse GNSS into map frame via EKF/UKF as slow drift corrector.
+- Never jerk odom - corrections applied to map↔odom transform only
+- GNSS covariance (~2-5m) used to weight corrections (lower weight than RTK)
+- Monitor drift: encoder odom vs. Point-LIO vs. GNSS cross-check
+- Under tree cover or poor satellite geometry, rely more on Point-LIO
+
+Sensor usage with two LiDARs
+
+Front L2: Point-LIO input (localization backbone)
+Rear L2: Costmap/perception only (not fed to Point-LIO initially)
+
+Future enhancement (Stage 2): Pre-fuse front+rear clouds for Point-LIO input, evaluate drift improvement.
+
+Acceptance
+
+Drift <1% over 2–3 min without GNSS; smooth map↔odom transform; encoder velocity matches Point-LIO within 15% (slip detection threshold).
+
+5) Perception → Traversability (Core)
+
+A) LiDAR geometry layer
+
+Ground extraction: Patchwork++ (handles steep slopes better than RANSAC).
+- Num zones: 4 (radial adaptive thresholding)
+- Num sectors per zone: 16
+- Max flatness threshold: 0.3 (relaxed for rough terrain)
+- Max elevation threshold: 0.8
+- Uprightness threshold: 0.5 (cos(60°) - permissive for 30° slopes)
+
+Grid: 25 m radius, 0.15 m cells, 15 Hz update rate.
+
+Per-cell features: slope, height variance/roughness, obstacle flags, pitch context.
+
+Costs & limits (tracked vehicle, low CG):
+
+Slope soft limit: >25° penalize; hard reject: >30° (11.8° margin to 41.8° tip angle).
+
+Roughness soft limit: σ_z > 6 cm; hard: >10 cm (tracks absorb better than wheels).
+
+Obstacles: lethal; inflate by tracked footprint (410mm × 600mm) + 0.45m base, 0.50m on slopes >20°.
+
+B) Camera semantic segmentation (terrain meaning)
+
+Hardware: e-CAM25_CUONX (AR0234), 1280x720 @ 20fps
+
+Isaac ROS acceleration (critical for Orin Nano performance):
+- isaac_ros_image_proc: UYVY → RGB conversion + preprocessing (VPI-accelerated)
+- isaac_ros_dnn_inference: TensorRT inference (3-4x faster than CPU/PyTorch)
+
+Model: SegFormer-B0 (convert to TensorRT FP16 engine)
+- Input: 1280x720 RGB
+- Inference latency: ~10-15ms (vs ~40-50ms without TensorRT)
+- Output: per-pixel terrain class
+
+Classes (minimal viable): drivable, vegetation_light, vegetation_dense, rock, water/mud, unknown.
+
+Training data: Collect 500-1000 labeled frames from field tests; augment with existing off-road datasets.
+
+Project to ground (homography aided by LiDAR range) → camera cost layer.
+- Camera height: 0.35m, tilt: -15°, FOV: 104.6°(H) × 61.6°(V)
+- Ground coverage: 5-10m effective range
+
+Confidence gating: 
+- Min confidence: 0.6 (drop below threshold)
+- Night mode: <30 lux → alpha = 0.3 (reduce camera weight)
+- Dust/blur detection: edge density check → alpha *= 0.5
+- AR0234 SNR: 38dB (good for outdoor conditions)
+
+C) Fusion
+
+Cellwise: cost_fused = max(cost_lidar, α * cost_cam) with α = 0.85 (baseline, tune from logs).
+
+Terrain class → cost mapping:
+- drivable: 0
+- vegetation_light: 50 (tracks push through better than wheels)
+- vegetation_dense: 180
+- rock: 80
+- water/mud: 250 (near-lethal, but tracks handle better - reduce to 200 if validated)
+- unknown: 128
+
+Tracked vehicle advantages (cost multipliers):
+- Soft terrain (mud/sand): 0.75x penalty (distributed ground pressure)
+- Vegetation: 0.85x penalty (can push through light brush)
+- Roughness tolerance: 1.2x threshold (better vibration handling)
+
+Unknown cells: moderate cost (128) at low speed; escalate toward hard (240) as speed rises (>0.8 m/s).
+
+6) Planning, Speed Scheduling, Reverse Mode
+
+Global planner (0.5–2 Hz)
+
+Waypoints → polyline; create goal corridor (half-width 4–5 m for GNSS accuracy).
+Monitor GNSS fix quality (DOP, satellite count); widen corridor to 6-7m if poor (<6 satellites or HDOP >3).
+
+Local planner (DWA @ 15 Hz)
+
+Differential drive model (tracked, skid-steer kinematics).
+
+Velocity samples: vx: 15 samples, vtheta: 25 samples (wide angular range for pivot capability).
+
+Lookahead: 2.5–6 m (scale with speed); trajectory sim time: 3.5s.
+
+Costs (tracked vehicle, low CG):
+- Obstacle: 2.5 (down from 3.0 - more stable platform)
+- Traversability: 2.0 (tracks handle roughness)
+- Slope: 3.0 (monitor pitch carefully)
+- Corridor: 1.0
+- Velocity: 0.8 (encourage using speed capability)
+- Pivot penalty: 1.5 (track wear/power cost)
+- Forward bias: 0.3 (prefer arcs over pivots when space allows)
+
+Hard constraints: lethal cells, slope >30°, tracked footprint inflation, pitch >32° (IMU-based).
+
+Speed scheduling (low CG = higher speeds safe)
+
+Clear & smooth (free path ≥ 8 m, low cost, slope <18°): up to 1.5 m/s.
+
+Moderate clutter/cost (4-8m, slope 18-25°): 0.6-0.7 m/s.
+
+Narrow/high-cost (slope 25-30°): 0.3-0.35 m/s (crawl).
+
+Pitch-based overrides (IMU monitoring):
+- abs(pitch) < 20°: 1.0x
+- 20-25°: 0.7x
+- 25-30°: 0.4x
+- ≥30°: 0.2x or stop
+
+Reverse-aware behavior (rear LiDAR)
+
+Maintain a single fused 360° costmap with per-sensor confidence.
+
+Reverse gate (must pass all to enable):
+
+Rear free-path length ≥ 2.0 m (tracks reverse well, less conservative).
+
+No lethal cells within 0.55 m of rear hull (low CG = stable).
+
+Rear slope ≤ 25° (same as forward soft limit - tracks are symmetric).
+
+Reverse parameters (tracks = more capable than wheels):
+
+Lookahead: 3.5 m.
+
+Speed cap: ≤0.8 m/s in clear conditions; ≤0.25 m/s in clutter/slopes.
+
+Max yaw-rate: ≤0.5 rad/s (can pivot reverse, but minimize track scrub).
+
+Add +8 cm to rear inflation to cover latency/reaction.
+
+Reverse distance cost: 1.1 (slight penalty for long reverse - prefer forward).
+
+Reverse pivot cost: 1.8 (higher penalty than forward pivot - track wear).
+
+Recovery routine
+
+Forward blocked > 2–3 s: stop → scan ±180° → re-evaluate.
+
+If still blocked and reverse gate OK → reverse mode to clear space.
+
+Exit reverse when forward plan feasible or after 5m backtrack.
+
+If both directions blocked within 1 m: hold, widen search, small pivot maneuver (±30°), or manual assist.
+
+Stuck detection (encoder vs Point-LIO):
+- Slip threshold: 15% velocity mismatch
+- Action moderate (15-30% slip): reduce speed to 0.5x
+- Action severe (>30% slip): stop, reassess traction/path
+
+Belly strike detection (410mm contact length risk):
+- Pitch oscillation + forward speed drop
+- IMU Z-accel spike
+- ODrive motor current spike without velocity increase
+- Recovery: back off 0.5m, re-approach at angle or alternate path
+
+7) Safety & Degradation Modes
+
+Safety
+
+Hardware E-stop (in series with motor power); software watchdog (ODrive timeout ≤200 ms).
+
+Geo-fence polygon → stop on boundary breach.
+
+Pitch angle monitoring (critical for 30° slopes):
+- Warning: 28° (13.8° from 41.8° tip limit)
+- Critical: 32° (9.8° from limit) → slow to crawl
+- Emergency stop: 38° (3.8° from limit)
+
+Health monitors: 
+- LiDAR packet loss % (both L2s)
+- Segmentation confidence (camera)
+- GNSS fix quality (satellite count, HDOP, position covariance)
+- IMU saturation (L2 built-in)
+- ODrive: motor temperature, voltage, current
+- Track slip % (encoder vs Point-LIO)
+- Pitch angle excursions
+
+Degradation
+
+Camera degraded (confidence <0.4 or TensorRT inference timeout):
+- LiDAR-only mode + speed reduction to 0.8 m/s max
+- Unknown terrain cells treated more conservatively (cost = 180)
+
+Front L2 degraded (packet loss >20%):
+- Point-LIO switches to IMU-only (short-term)
+- Rely on encoder odom + GNSS fusion
+- Speed reduction to 0.5 m/s, stop if degradation >30s
+
+Rear L2 degraded:
+- Continue with front L2 only
+- Disable reverse mode (no rear perception)
+- Forward-only navigation with conservative turnarounds
+
+Both LiDARs degraded → safe stop (cannot navigate safely).
+
+GNSS degraded (poor fix quality: HDOP >5, <4 satellites):
+- Continue on Point-LIO odom (primary localization)
+- Expand corridor width from 4-5m to 6-7m
+- Increase reliance on visual landmarks if camera available
+- If global uncertainty >15m or no GNSS for >10min, consider loiter/return
+
+GNSS complete loss:
+- Continue on Point-LIO + encoder odom
+- Navigation viable for missions <500m or <5min
+- Longer missions: require operator waypoint updates via telemetry
+
+ODrive thermal limit (>80°C):
+- Reduce max speed to 0.6 m/s
+- Increase dwell time between maneuvers
+- If >90°C, stop and cool down
+
+8) Field Test Campaign (Progressive)
+
+T1 — Lot / wide dirt
+
+Validate estimator smoothness; braking/stop; corridor bias at 0.6–0.8 m/s.
+
+T2 — Moderate
+
+Grass, shallow ruts, scattered rocks; tune inflation, slope/roughness, speed schedule.
+
+T3 — Rugged
+
+Rock garden, brush, puddles/mud, 10–15° slopes; exercise reverse & recoveries; dust/night checks.
+
+Gate metrics
+
+Stuck/km ≤ 0.2; 0 collisions; min obstacle distance ≥ inflation + 0.1–0.2 m; smooth map↔odom; acceptable % in crawl mode; packet health > 90%.
+
+9) Ops: Tuning, Versioning, Maintenance
+
+Versioned parameter packs (e.g., rugged_v01.yaml, grass_v02.yaml).
+
+One-change-at-a-time with a fixed regression loop (5-site route).
+
+Maintenance SOP: lens/LiDAR window cleaning; mount torque checks; log rotation; thermal monitoring.
+
+10) Concrete Starting Values (drop-in)
+
+Robot Footprint (Tracked)
+
+Rectangular: [0.205, 0.30], [0.205, -0.30], [-0.205, -0.30], [-0.205, 0.30] (meters)
+Contact length: 0.41m, track width: 0.6m, CG height: 0.229m
+
+Costmap
+
+Radius 25 m; resolution 0.15 m; update 15 Hz.
+
+Inflation = 0.45 m base; 0.50 m when slope >20°.
+
+Unknown handling: moderate cost (128); escalate to 240 when speed >0.8 m/s.
+
+Geometry thresholds (tracked vehicle, low CG)
+
+Slope: soft >25°, hard >30° (11.8° margin to 41.8° tip angle).
+
+Roughness (σ_z): soft >6 cm, hard >10 cm (tracks absorb better).
+
+Pitch (IMU): warning 28°, critical 32°, emergency 38°.
+
+DWA (Tracked Differential Drive)
+
+vx: 0 → 1.5 m/s (start 0.8 m/s, expand after validation).
+
+ax: 0.6 m/s².
+
+yaw_rate_max: 0.8 rad/s (forward, can pivot), 0.5 rad/s (reverse).
+
+vx_samples: 15; vtheta_samples: 25 (wide angular range).
+
+sim_time: 3.5s; sim_granularity: 0.05s.
+
+Weights: obstacle 2.5, traversability 2.0, slope 3.0, corridor 1.0, velocity 0.8, pivot_penalty 1.5, forward_bias 0.3.
+
+Reverse gate (tracks = symmetric)
+
+Rear free path ≥ 2.0 m, no lethal within 0.55 m, slope ≤ 25°.
+
+Camera (e-CAM25_CUONX)
+
+Resolution: 1280x720 @ 20fps (AR0234 sensor).
+
+Mount: 0.35m AGL, -15° tilt, 104.6° H-FOV.
+
+Isaac ROS: TensorRT SegFormer-B0 (~10-15ms inference).
+
+Terrain alpha: 0.85; confidence gate: 0.6; night mode alpha: 0.3.
+
+Point-LIO (Front L2)
+
+Topics: /lidar_front/pointcloud, /lidar_front/imu.
+
+Extrinsics: Identity (built-in IMU).
+
+IMU limits: acc ~3.0 m/s², gyro ~35 rad/s (verify L2 datasheet).
+
+Map cube: 1000m; detection range: 80-100m.
+
+11) Isaac ROS Integration & Compute Budget
+
+Isaac ROS packages (Jetson Orin Nano optimization):
+
+isaac_ros_image_proc:
+- UYVY → RGB conversion (VPI-accelerated)
+- Resize/undistortion if needed
+- Offloads preprocessing from CPU
+
+isaac_ros_dnn_inference:
+- TensorRT engine for SegFormer-B0
+- Model conversion: PyTorch/ONNX → TensorRT FP16
+- 3-4x faster inference than CPU/PyTorch (~10-15ms vs ~40-50ms)
+- Input: 1280x720 RGB, Output: terrain segmentation
+
+Setup:
+- Docker-based environment (JetPack 6.2, L4T 36.4.3)
+- Model conversion script provided by Isaac ROS
+- Integrated into perception launch file
+
+Compute budget (Orin Nano with Isaac ROS):
+- Point-LIO (front L2 + IMU):        25-30% CPU, 15% GPU
+- isaac_ros_dnn_inference:           2% CPU, 20-25% GPU
+- isaac_ros_image_proc:              1% CPU, 5% GPU
+- Rear L2 + costmap:                 10% CPU
+- Ground extraction (Patchwork++):   8% CPU
+- DWA planner (15 Hz):               12% CPU
+- ODrive interface + slip detect:   5% CPU
+- GNSS fusion (EKF):                 2% CPU
+- Health monitoring + logging:       8% CPU
+Total:                               68-73% CPU, 45-50% GPU
+Headroom:                            ~27-32% CPU, ~50% GPU
+
+12) Deliverables & "Done" Checklist
+
+Hardware integration:
+- Mount drawings + extrinsics + sync validation
+- ODrive configuration + encoder calibration
+- Camera lens calibration + distortion parameters
+- GNSS antenna placement + multi-path mitigation
+
+Software stack:
+- Point-LIO ROS2 workspace + L2 driver integration
+- Isaac ROS Docker environment + TensorRT model
+- Patchwork++ ground extraction node
+- Camera-LiDAR fusion node (terrain costmap)
+- DWA planner with tracked vehicle kinematics
+- ODrive ROS2 interface (cmd_vel → motors, encoders → odom)
+
+Configuration & tuning:
+- Logging schema + KPI dashboard
+- Estimator report (Point-LIO drift/latency)
+- Costmap config (feature thresholds, class→cost table, fusion α)
+- Planner params + recovery playbook + reverse mode spec
+- Pitch monitoring + safety thresholds
+
+Validation:
+- Safety checklist (E-stop test, ODrive watchdog, geo-fence, pitch limits)
+- Degradation mode tests (camera/LiDAR/GNSS/ODrive failures)
+- Field results vs. KPIs; parameter packs; regression routes
+- Track slip validation (encoder vs Point-LIO)
+- Incremental slope testing: 15° → 20° → 25° → 30° (validate torque margin at 30 lb payload)
+- GNSS accuracy validation in various terrain (open field vs tree cover)
+
+13) Implementation Phases
+
+Phase 1: Core Localization & Control (MVP Foundation)
+1. Unitree L2 driver setup (unilidar_sdk2) - front + rear
+2. Point-LIO ROS2 configuration (front L2 + built-in IMU)
+3. ODrive ROS2 interface (cmd_vel → motors, encoders → wheel odom)
+4. Basic safety watchdog + E-stop integration
+5. Validation: teleoperate in parking lot, verify odom accuracy
+
+Phase 2: Basic Autonomous Navigation (LiDAR-only)
+1. Patchwork++ ground extraction (both L2s → 360° costmap)
+2. Costmap fusion node (front + rear point clouds)
+3. DWA local planner (tracked kinematics, LiDAR-only costs)
+4. Simple global planner (waypoint corridors)
+5. Pitch monitoring + safety limits (28°/32°/38° thresholds)
+6. Validation: autonomous waypoint following on flat terrain (T1 test)
+
+Phase 3: Camera Perception (Isaac ROS)
+1. e-CAM25_CUONX driver (AR0234, 1280x720 @ 20fps)
+2. Isaac ROS Docker setup + environment
+3. Isaac ROS image preprocessing pipeline
+4. SegFormer-B0 training (collect 500-1000 labeled frames from Phase 2 runs)
+5. TensorRT model conversion + isaac_ros_dnn_inference integration
+6. Camera-LiDAR fusion (terrain costs, alpha blending)
+7. Validation: compare LiDAR-only vs camera-fused on T2 terrain
+
+Phase 4: GNSS & Advanced Features
+1. ZED-F9P GNSS integration (ublox_gps driver)
+2. GNSS fusion (EKF, map↔odom corrections with adaptive covariance)
+3. Corridor width adaptation (base: 4-5m, poor fix: 6-7m)
+4. Reverse mode logic (rear L2 perception, safety gates)
+5. Recovery routines (stuck detection, belly strike, pivot maneuvers)
+6. Slope progression testing (15° → 20° → 25° → 30° validation)
+7. Validation: T3 rugged terrain, full feature set
+
+Phase 5: Field Validation & Tuning
+1. Progressive test campaign (T1 → T2 → T3)
+2. KPI collection + analysis
+3. Parameter tuning (terrain costs, speed schedule, inflation)
+4. Degradation mode testing
+5. 30° slope validation (controlled environment)
+6. Final MVP acceptance (500m mixed terrain, 0 collisions, ≤0.2 stuck/km)
+
+=== OPEN ITEMS TO RESOLVE ===
+
+1. **ODrive firmware compatibility:** Using fw v0.5.6, but ROS2 Humble branch only supports v0.5.3/v0.5.1
+   - Option A: Downgrade firmware to v0.5.3 (safest, use official repo)
+   - Option B: Test v0.5.3 branch with v0.5.6 firmware (may work, minor version)
+   - Option C: Use CAN Bus (custom package, but robust for tracked vehicle) - RECOMMENDED
+   - Decision needed before Phase 1 implementation
+   - Repo: https://github.com/Factor-Robotics/odrive_ros2_control
+   - CAN hardware: Adafruit CAN Pal (TJA1051T/3) already installed on Jetson
+
+2. **ZED-F9P GNSS driver:** Use aussierobots/ublox_dgnss (ROS2 Humble)
+   - Repo: https://github.com/aussierobots/ublox_dgnss
+   - Provides high-precision HP position data, covariance for EKF fusion
+   - No RTK needed for initial implementation (2-5m accuracy sufficient)
+   - NTRIP client available if cm-level accuracy needed later
+
+3. ✅ RESOLVED: Unitree L2 IMU specs confirmed
+   - 6-axis IMU: 3-axis accelerometer + 3-axis gyroscope
+   - Hardware time-synced with LiDAR (huge advantage)
+   - Point-LIO ROS2 has official L2 launch file: mapping_unilidar_l2.launch.py
+   - Default topics: /unilidar/cloud, /unilidar/imu
+   - Need to verify acc/gyro saturation limits from Unitree support docs if available
+
+4. Measure belly clearance: affects high-center detection threshold
+
+5. Decide on initial training data source for SegFormer-B0: pre-existing dataset vs field collection first?
+
+6. RC override for manual assist: required hardware/software interface?
+
+7. Validate 30° slope claim incrementally - manufacturer rated for 15° at 100kg, test at 30 lb: 15°→20°→25°→30°
+
+8. Monitor ODrive motor current on steep slopes - ensure <80% rated continuous current
+
+9. Test CAN Bus on Jetson (when on robot): run test_can_setup.sh to validate hardware

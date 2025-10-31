@@ -1,0 +1,75 @@
+# ROS2 Build Artifacts
+tank_ws/build/
+tank_ws/install/
+tank_ws/log/
+isaac_ros_ws/build/
+isaac_ros_ws/install/
+isaac_ros_ws/log/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+
+# C++
+*.o
+*.a
+*.so
+*.dylib
+*.exe
+*.out
+*.app
+*.gch
+*.pch
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Data (large files - use Git LFS if needed)
+data/rosbags/**/*.db3
+data/rosbags/**/*.mcap
+data/segmentation_training/images/**/*.jpg
+data/segmentation_training/images/**/*.png
+
+# Models (large files)
+*.engine
+*.onnx
+*.pth
+*.pt
+*.h5
+
+# Logs
+*.log
+*.bag
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.bak
+*.backup
+
+# Calibration (may want to track some)
+# Uncomment if you want to ignore all calibration files
+# data/camera_calibration/*.yaml
+
+# Documentation builds
+docs/_build/
+docs/build/
+
+# Docker volumes
+docker/volumes/
+
+# Keep empty directories
+!**/.gitkeep
+
