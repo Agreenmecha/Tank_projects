@@ -1,0 +1,20 @@
+# Service to check reverse safety gates and enable reverse mode
+
+# Request
+bool check_gates  # If true, check all safety gates
+---
+# Response
+bool reverse_allowed
+
+# Safety gate status
+bool rear_free_path_ok      # >= 2.0m clear
+bool rear_lethal_check_ok   # No lethal within 0.55m
+bool rear_slope_ok          # <= 25 degrees
+
+# Measurements
+float32 rear_free_path_distance  # meters
+float32 rear_min_obstacle_distance
+float32 rear_slope_angle  # degrees
+
+string failure_reason  # Empty if allowed, error message if not
+

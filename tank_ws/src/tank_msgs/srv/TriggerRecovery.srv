@@ -1,0 +1,19 @@
+# Service to manually trigger a recovery behavior
+
+# Request
+uint8 recovery_type
+uint8 RECOVERY_AUTO = 0      # Let system decide
+uint8 RECOVERY_REVERSE = 1   # Force reverse
+uint8 RECOVERY_PIVOT = 2     # Pivot turn
+uint8 RECOVERY_WIGGLE = 3    # Small forward/back maneuver
+uint8 RECOVERY_STOP = 4      # Safe stop and wait
+
+float32 parameter  # Type-specific (distance for reverse, angle for pivot, etc.)
+---
+# Response
+bool success
+bool recovery_started
+
+string message
+float32 estimated_duration  # seconds
+
