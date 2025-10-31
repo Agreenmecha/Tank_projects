@@ -62,25 +62,18 @@ def generate_launch_description():
         condition=IfCondition(LaunchConfiguration('enable_lidars'))
     )
     
-    # Camera node (e-CAM25_CUONX - AR0234 global shutter)
-    # Using v4l2_camera package for simple USB camera interface
-    camera_node = Node(
-        package='v4l2_camera',
-        executable='v4l2_camera_node',
-        name='camera',
-        output='screen',
-        parameters=[{
-            'video_device': '/dev/video0',
-            'image_size': [1280, 720],
-            'camera_frame_id': 'camera_link',
-            'pixel_format': 'UYVY',  # e-CAM25 outputs UYVY
-            'framerate': 20.0,
-            'camera_name': 'ecam25_cuonx',
-        }],
-        remappings=[
-            ('image_raw', '/camera/image_raw'),
-            ('camera_info', '/camera/camera_info'),
-        ],
+    # Camera launch (e-CAM25_CUONX - AR0234 global shutter)
+    # Uses nvarguscamerasrc via gscam
+    # NOTE: Requires e-con Systems drivers installed!
+    # See: tank_ws/src/external/ECAM25_CAMERA_SETUP.md
+    camera_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource([
+            PathJoinSubstitution([
+                tank_sensors_share,
+                'launch',
+                'camera_argus.launch.py'
+            ])
+        ]),
         condition=IfCondition(LaunchConfiguration('enable_camera'))
     )
     
@@ -90,6 +83,6 @@ def generate_launch_description():
         enable_camera_arg,
         gnss_launch,
         lidar_launch,
-        camera_node,
+        camera_launch,
     ])
 

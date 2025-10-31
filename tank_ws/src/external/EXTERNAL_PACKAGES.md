@@ -1,6 +1,6 @@
-# External ROS2 Packages
+# External ROS2 Packages & Hardware Setup
 
-This directory contains external ROS2 packages that are **git cloned** (not submodules).
+This directory contains external ROS2 packages (git cloned, not submodules) and hardware setup documentation.
 
 ## Why not Git Submodules?
 
@@ -51,6 +51,33 @@ source /opt/ros/humble/setup.bash
 # Build external packages
 colcon build --packages-select unitree_lidar_ros2 point_lio ublox_dgnss --symlink-install
 ```
+
+## Hardware Setup
+
+### 0. e-CAM25_CUONX Camera
+- **Purpose:** Global shutter camera for terrain segmentation
+- **Setup:** See `ECAM25_CAMERA_SETUP.md` in this directory
+- **Important:** Requires e-con Systems custom drivers (NOT generic v4l2)
+- **Installation:** Run install script from e-con's release package
+- **Package Location:** `~/Tank_projects/ecam-25docs/`
+- **ROS2 Integration:** Uses `gscam` with `nvarguscamerasrc`
+
+**Installation Summary:**
+```bash
+# Copy release package to Jetson
+scp -r ~/Tank_projects/ecam-25docs/e-CAM25_CUONX_JETSON_ONX_ONANO_L4T36.4.0_29-MAR-2025_R04 nvidia@jetson:~/
+
+# On Jetson, run installer
+cd ~/e-CAM25_CUONX_JETSON_ONX_ONANO_L4T36.4.0_29-MAR-2025_R04
+sudo ./install_binaries.sh
+# Select 4-lane configuration
+# System will reboot automatically
+
+# Install gscam for ROS2
+sudo apt install ros-humble-gscam
+```
+
+---
 
 ## Package Details
 
