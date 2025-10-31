@@ -270,22 +270,51 @@ Global planner (0.5–2 Hz)
 Waypoints → polyline; create goal corridor (half-width 4–5 m for GNSS accuracy).
 Monitor GNSS fix quality (DOP, satellite count); widen corridor to 6-7m if poor (<6 satellites or HDOP >3).
 
-Local planner (DWA @ 15 Hz)
+Local planner (TEB @ 10 Hz)
+
+Algorithm: Timed Elastic Band (TEB) - chosen for narrow passage handling and complex off-road terrain optimization.
+
+Why TEB over DWA:
+- Optimizes full trajectory (not just velocities) - better for threading narrow gaps
+- Homotopy class planning - tries multiple path topologies around obstacles
+- Multi-step maneuver capability - can plan complex sequences (e.g., "enter gap at angle, then straighten")
+- Smoother trajectories - better for tracked vehicle stability on rough terrain
+- Superior narrow passage handling - critical for off-road trails between rocks/trees
 
 Differential drive model (tracked, skid-steer kinematics).
 
-Velocity samples: vx: 15 samples, vtheta: 25 samples (wide angular range for pivot capability).
+Trajectory Configuration:
+- Temporal resolution (dt_ref): 0.3s between poses
+- Max lookahead: 3.0 m (plans several meters ahead)
+- Allow backwards motion: true (for reverse mode integration)
+- Trajectory simulation time: 3-4s
+- Homotopy classes: 4 (tries 4 different path strategies simultaneously)
 
-Lookahead: 2.5–6 m (scale with speed); trajectory sim time: 3.5s.
+Kinematic Constraints (tracked vehicle):
+- Max vel_x: 1.5 m/s (forward)
+- Max vel_x_backwards: 1.0 m/s (reverse capability)
+- Max vel_theta: 1.2 rad/s (pivot turns)
+- Acceleration limits: 0.5 m/s² linear, 0.8 rad/s² angular
 
-Costs (tracked vehicle, low CG):
-- Obstacle: 2.5 (down from 3.0 - more stable platform)
-- Traversability: 2.0 (tracks handle roughness)
-- Slope: 3.0 (monitor pitch carefully)
-- Corridor: 1.0
-- Velocity: 0.8 (encourage using speed capability)
-- Pivot penalty: 1.5 (track wear/power cost)
-- Forward bias: 0.3 (prefer arcs over pivots when space allows)
+Obstacle Avoidance (narrow passage tuned):
+- Min obstacle distance: 0.15 m (tight clearance for threading needle)
+- Inflation distance: 0.30 m (soft inflation zone)
+- Obstacle poses affected: 25 (influences 25 trajectory poses)
+
+Optimization Weights (tracked vehicle, low CG):
+- Obstacle avoidance: 50.0 (strong - critical for safety)
+- Costmap integration: 20.0 (uses camera terrain classification!)
+- Kinematics constraints: 1000.0 (strict - respect tracked limits)
+- Forward drive preference: 50.0 (prefer forward over reverse)
+- Max velocity: 2.0 (encourage speed when safe)
+- Optimal time: 1.0 (prefer faster paths)
+- Adapt factor: 2.0 (dynamically adjust to environment)
+
+Homotopy Class Planning (KEY for complex terrain):
+- Enables parallel exploration of multiple path topologies
+- Roadmap samples: 15 (evaluates 15 different route options)
+- Roadmap area: 5.0 m (explores 5m radius around straight line)
+- Selection hysteresis: 1.0 (stable path selection)
 
 Hard constraints: lethal cells, slope >30°, tracked footprint inflation, pitch >32° (IMU-based).
 
@@ -515,23 +544,30 @@ isaac_ros_dnn_inference:
 - Input: 1280x720 RGB, Output: terrain segmentation
 
 Setup:
-- Docker-based environment (JetPack 6.2, L4T 36.4.3)
-- Base image: nvcr.io/nvidia/isaac/ros:humble-l4t-r36.4.3
+- Bare metal installation (no Docker - better for hardware integration)
+- JetPack 6.2.1 (L4T 36.4.4), CUDA 12.6, TensorRT 10.3, VPI 3.2
+- Direct hardware access: camera, CAN, GNSS, LiDAR
+- Packages: isaac_ros_common, isaac_ros_dnn_inference, isaac_ros_image_pipeline
 - Model conversion script provided by Isaac ROS
 - Integrated into perception launch file
 
-Compute budget (Orin Nano with Isaac ROS):
+Compute budget (Orin Nano with Isaac ROS, JetPack 6.2.1):
 - Point-LIO (front L2 + IMU):        25-30% CPU, 15% GPU
-- isaac_ros_dnn_inference:           2% CPU, 20-25% GPU
-- isaac_ros_image_proc:              1% CPU, 5% GPU
+- isaac_ros_dnn_inference:           2% CPU, 20-25% GPU (TensorRT 10.3)
+- isaac_ros_image_proc:              1% CPU, 5% GPU (VPI 3.2)
 - Rear L2 + costmap:                 10% CPU
 - Ground extraction (Patchwork++):   8% CPU
-- DWA planner (15 Hz):               12% CPU
+- TEB planner (10 Hz):               18-22% CPU (higher than DWA, but manageable)
+  * Homotopy planning adds ~5-7% overhead (4 parallel classes)
+  * Trajectory optimization: ~3-5ms per cycle
 - ODrive interface + slip detect:   5% CPU
 - GNSS fusion (EKF):                 2% CPU
 - Health monitoring + logging:       8% CPU
-Total:                               68-73% CPU, 45-50% GPU
-Headroom:                            ~27-32% CPU, ~50% GPU
+Total:                               74-81% CPU, 45-50% GPU
+Headroom:                            ~19-26% CPU, ~50% GPU
+
+Note: TEB uses more CPU than DWA, but Jetson Orin Nano 6-core handles it comfortably at 10 Hz.
+GPU headroom allows future additions (e.g., object detection, semantic SLAM).
 
 12) Deliverables & "Done" Checklist
 
@@ -543,11 +579,17 @@ Hardware integration:
 
 Software stack:
 - Point-LIO ROS2 workspace + L2 driver integration
-- Isaac ROS Docker environment + TensorRT model
+- Isaac ROS bare metal (no Docker) + TensorRT 10.3 model
+  * isaac_ros_common, isaac_ros_dnn_inference, isaac_ros_image_pipeline
+  * VPI 3.2 acceleration for image preprocessing
 - Patchwork++ ground extraction node
-- Camera-LiDAR fusion node (terrain costmap)
-- DWA planner with tracked vehicle kinematics
-- ODrive ROS2 interface (cmd_vel → motors, encoders → odom)
+- Camera-LiDAR fusion node (semantic + geometric costmap)
+- TEB local planner (tracked vehicle, narrow passage optimization)
+  * Homotopy class planning for multiple path strategies
+  * Tight clearances (0.15m) for threading obstacles
+- Simple corridor-based global planner (GNSS waypoint → bearing + width)
+- ODrive CAN interface (cmd_vel → motors, encoders → odom)
+  * Using Jetson native CAN FD + Adafruit CAN Pal (TJA1051T/3)
 
 Configuration & tuning:
 - Logging schema + KPI dashboard
@@ -576,19 +618,32 @@ Phase 1: Core Localization & Control (MVP Foundation)
 Phase 2: Basic Autonomous Navigation (LiDAR-only)
 1. Patchwork++ ground extraction (both L2s → 360° costmap)
 2. Costmap fusion node (front + rear point clouds)
-3. DWA local planner (tracked kinematics, LiDAR-only costs)
+3. TEB local planner (tracked kinematics, narrow passage optimization)
+   - Configure homotopy class planning for multiple path strategies
+   - Tune for tracked vehicle: tight clearances (0.15m), forward bias
 4. Simple global planner (waypoint corridors)
 5. Pitch monitoring + safety limits (28°/32°/38° thresholds)
 6. Validation: autonomous waypoint following on flat terrain (T1 test)
+   - Include narrow passage test (1.5-2m gap between obstacles)
 
 Phase 3: Camera Perception (Isaac ROS)
-1. e-CAM25_CUONX driver (AR0234, 1280x720 @ 20fps)
-2. Isaac ROS Docker setup + environment
-3. Isaac ROS image preprocessing pipeline
+1. e-CAM25_CUONX driver setup (AR0234, 1280x720 @ 20fps)
+   - Install e-con kernel drivers (custom for JetPack 6.2.1)
+   - Configure gscam with nvarguscamerasrc (Jetson ISP integration)
+   - Camera-LiDAR extrinsic calibration
+2. Isaac ROS bare metal installation (no Docker)
+   - isaac_ros_common, isaac_ros_dnn_inference, isaac_ros_image_pipeline
+   - VPI 3.2 + TensorRT 10.3 acceleration
+3. Isaac ROS image preprocessing pipeline (VPI-accelerated)
 4. SegFormer-B0 training (collect 500-1000 labeled frames from Phase 2 runs)
+   - Terrain classes: traversable, rock, vegetation, obstacle
 5. TensorRT model conversion + isaac_ros_dnn_inference integration
-6. Camera-LiDAR fusion (terrain costs, alpha blending)
+   - ~15-20% faster inference on JetPack 6.2.1 vs 6.1
+6. Camera-LiDAR costmap fusion (semantic + geometric)
+   - Alpha blending based on confidence
+   - TEB planner integrates terrain costs (weight_costmap: 20.0)
 7. Validation: compare LiDAR-only vs camera-fused on T2 terrain
+   - Measure: traversability decisions, false positives, planning smoothness
 
 Phase 4: GNSS & Advanced Features
 1. ZED-F9P GNSS integration (ublox_gps driver)
