@@ -1,0 +1,10 @@
+# External ROS2 packages (git cloned, not submodules)
+# These are excluded from git tracking
+# See EXTERNAL_PACKAGES.md for installation instructions
+
+point_lio_ros2/
+unilidar_sdk2/
+ublox_dgnss/
+patchwork-plusplus/
+odrive_ros2_control/
+

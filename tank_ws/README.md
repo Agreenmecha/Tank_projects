@@ -72,59 +72,127 @@ cd ~/Tank_projects/tank_ws
 source /opt/ros/humble/setup.bash
 
 # Build (first time - may take 10-15 minutes)
+# Build only specific packages first to check for errors:
+colcon build --packages-select tank_msgs --symlink-install
+colcon build --packages-select tank_sensors tank_localization tank_bringup --symlink-install
+
+# Then build external packages:
+colcon build --packages-select unitree_lidar_ros2 point_lio ublox_dgnss --symlink-install
+
+# Or build everything at once:
 colcon build --symlink-install
 
 # Source workspace
 source install/setup.bash
 ```
 
+**Note:** External packages are git cloned (not submodules) for easier development.
+
 ## Quick Start
 
-### Test Individual Components
+### Phase 1: Test Sensors & Localization
 
+**Important:** These commands assume you're on the Jetson with hardware connected.
+
+#### 1. Test GNSS Only
 ```bash
-# Test Point-LIO with L2
-ros2 launch point_lio mapping_unilidar_l2.launch.py
-
-# Test GNSS
+# Make sure ZED-F9P is connected (check: ls /dev/ttyACM*)
 ros2 launch tank_sensors gnss.launch.py
 
-# Test ODrive (after hardware connection)
-ros2 launch tank_control odrive_interface.launch.py
+# In another terminal, check output:
+ros2 topic echo /gnss/fix --no-arr
+ros2 topic echo /gnss/dop
 ```
 
-### Launch Full System
+#### 2. Test Single L2 LiDAR
+```bash
+# Test front L2 (ensure IP is 192.168.123.123)
+cd ~/Tank_projects/tank_ws/src/external/unilidar_sdk2/unitree_lidar_ros2
+source ~/Tank_projects/tank_ws/install/setup.bash
+ros2 launch unitree_lidar_ros2 launch.py
+
+# Check output:
+ros2 topic echo /unilidar/cloud --no-arr
+ros2 topic echo /unilidar/imu
+```
+
+#### 3. Test Dual L2 Setup
+```bash
+# Both L2s must have different IPs (123 and 124)
+ros2 launch tank_sensors lidar_dual.launch.py
+
+# Check topics:
+ros2 topic list | grep lidar
+# Should see:
+#   /lidar_front/pointcloud
+#   /lidar_front/imu
+#   /lidar_rear/pointcloud
+#   /lidar_rear/imu
+```
+
+#### 4. Test Point-LIO Localization
+```bash
+# Launches Point-LIO with front L2
+ros2 launch tank_localization point_lio.launch.py
+
+# Check odometry output:
+ros2 topic echo /point_lio/odom
+# Move the tank and verify pose increments!
+```
+
+#### 5. Launch Everything Together
+```bash
+# Full sensor suite + Point-LIO
+ros2 launch tank_bringup sensors_localization.launch.py
+
+# With RViz for visualization:
+ros2 launch tank_bringup sensors_localization.launch.py rviz:=true
+```
+
+### Phase 2+: Full Navigation (TODO)
 
 ```bash
-# Complete navigation stack
+# Complete navigation stack (not implemented yet)
 ros2 launch tank_bringup tank_full.launch.py
-
-# Or step-by-step:
-# Terminal 1: Hardware
-ros2 launch tank_sensors hardware.launch.py
-
-# Terminal 2: Localization
-ros2 launch tank_localization localization.launch.py
-
-# Terminal 3: Perception
-ros2 launch tank_perception perception.launch.py
-
-# Terminal 4: Navigation
-ros2 launch tank_navigation navigation.launch.py
 ```
 
 ## Development Status
 
+### Phase 0: Setup ✅
 - [x] Workspace structure created
-- [x] Custom messages defined
-- [ ] Sensor integration (Phase 1)
-- [ ] Point-LIO + GNSS fusion (Phase 1)
-- [ ] ODrive control (Phase 1)
-- [ ] Ground extraction (Phase 2)
-- [ ] DWA planner (Phase 2)
-- [ ] Camera segmentation (Phase 3)
-- [ ] Reverse mode (Phase 4)
-- [ ] Field testing (Phase 5)
+- [x] Custom messages defined (5 msgs, 2 srvs)
+- [x] 10 ROS2 packages created
+
+### Phase 1: Sensors & Localization (IN PROGRESS)
+- [x] External packages cloned (Point-LIO, unilidar_sdk2, ublox_dgnss)
+- [x] GNSS config & launch files
+- [x] Dual L2 LiDAR launch files
+- [x] Camera integration (v4l2_camera)
+- [x] Point-LIO configuration for L2
+- [x] Master sensors_localization launch file
+- [ ] Test on Jetson hardware
+- [ ] ODrive CAN control
+- [ ] Encoder odometry
+- [ ] Safety monitoring node
+
+### Phase 2: Navigation (TODO)
+- [ ] Ground extraction (Patchwork++)
+- [ ] DWA planner (tracked vehicle)
+- [ ] Basic waypoint following
+
+### Phase 3: Camera Perception (TODO)
+- [ ] Isaac ROS setup
+- [ ] Camera segmentation training
+- [ ] LiDAR+Camera fusion
+
+### Phase 4: Advanced (TODO)
+- [ ] Reverse mode
+- [ ] Recovery behaviors
+- [ ] 30° slope validation
+
+### Phase 5: Field Testing (TODO)
+- [ ] T1/T2/T3 test scenarios
+- [ ] KPI collection
 
 ## Documentation
 

@@ -1,0 +1,74 @@
+# ZED-F9P GNSS Configuration for Tank Navigation
+# Using aussierobots/ublox_dgnss driver
+# No RTK - standard GNSS mode (2-5m accuracy)
+
+gnss_node:
+  ros__parameters:
+    # Device settings
+    device: "/dev/ttyACM0"  # Update if different (check with: ls /dev/ttyACM*)
+    baudrate: 38400
+    frame_id: "gnss"
+    
+    # Update rate
+    rate: 5  # Hz (balance between accuracy and CPU load)
+    
+    # GNSS configuration
+    enable_gps: true
+    enable_glonass: true
+    enable_galileo: true
+    enable_beidou: true
+    
+    # Dynamic model for ground vehicle
+    dynamic_model: "automotive"  # Options: portable, stationary, pedestrian, automotive, sea, airborne1g, airborne2g, airborne4g
+    
+    # Fix mode
+    fix_mode: "auto"  # Options: 2d, 3d, auto
+    
+    # Publishing settings
+    publish_navpvt: true      # Position/velocity/time
+    publish_navsat: true      # sensor_msgs/NavSatFix
+    publish_navclock: false   # Clock data (not needed)
+    publish_navposecef: false # ECEF position (not needed)
+    publish_navposllh: true   # LLH position (lat/lon/height)
+    publish_navvelned: true   # NED velocity
+    publish_navdop: true      # DOP (dilution of precision) - IMPORTANT for corridor width!
+    
+    # RTK settings (disabled for now)
+    enable_rtk: false
+    rtcm3_reference_station: ""
+    ntrip_server: ""
+    ntrip_port: 2101
+    ntrip_mountpoint: ""
+    ntrip_username: ""
+    ntrip_password: ""
+    
+    # Differential correction (if available from base station)
+    enable_sbas: true  # Satellite-Based Augmentation System (WAAS/EGNOS)
+    
+    # Survey-in mode (for establishing base station position - not used on rover)
+    survey_in_mode: false
+    
+    # Output topics
+    navpvt_topic: "gnss/navpvt"
+    navsat_topic: "gnss/fix"
+    navposllh_topic: "gnss/pos_llh"
+    navvelned_topic: "gnss/vel_ned"
+    navdop_topic: "gnss/dop"
+    
+    # Covariance override (optional - driver usually provides this)
+    # Set based on expected accuracy without RTK: 2-5m horizontal
+    position_covariance: [4.0, 0.0, 0.0,   # 2m stddev = 4.0 variance
+                          0.0, 4.0, 0.0,
+                          0.0, 0.0, 25.0]  # 5m vertical stddev
+    
+    # QoS settings
+    qos_overrides:
+      gnss.navpvt:
+        reliability: reliable
+        durability: volatile
+        depth: 10
+      gnss.fix:
+        reliability: reliable
+        durability: volatile
+        depth: 10
+
