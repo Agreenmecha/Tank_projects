@@ -1,0 +1,304 @@
+   
+ 
+   
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Release Notes 
+Version 1.7 
+e-con Systems 
+3/29/2025 
+e-CAM25_CUONX 
+
+
+ 
+© Copyright e-con Systems. 2024. All rights reserved. 1 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Disclaimer 
+e-con Systems reserves the right to edit/modify this document without any prior 
+intimation of whatsoever.  
+
+ 
+2   e-CAM25_CUONX Release Notes 
+Contents 
+INTRODUCTION ................................ ................................ ................................ ...........................  3 
+RELEASE DETAILS ................................ ................................ ................................ .........................  4 
+DOWNLOAD RELEASE PACKAGE ................................ ................................ ................................ ... 7 
+TROUBLESHOOTING ................................ ................................ ................................ ..................... 8 
+FAQ ................................ ................................ ................................ ................................ ............. 9 
+WHAT'S NEXT? ................................ ................................ ................................ ...........................  10 
+SUPPORT ................................ ................................ ................................ ................................ ... 11 
+  
+
+ 
+© Copyright e-con Systems. 2024. All rights reserved. 3 
+Introduction 
+e-CAM25_CUONX is a 2.3 MP MIPI CSI-2 camera from e-con Systems, a company 
+with over two decades of experience in designing, developing, and manufacturing 
+OEM cameras. It is a new MIPI camera board which helps to interface AR0234 sensor 
+in either 4-lane mode or 2-lane mode depending upon the port’s lane support and 
+the user-defined configuration to the Jetson Orin™ Nano and Orin NX™. The prebuilt 
+driver for this camera along with the camera board is provided by e-con Systems. 
+e-CAM25_CUONX is 2.3 MP custom lens camera module based on 1/2.6" AR0234CS 
+CMOS image sensor from onsemi™. It is a color camera that supports UYVY image 
+format and provided with S-mount (also known as M12 board lens) lens holder. The 
+S-mount is small form-factor lens mounts for board cameras. e-con Systems 
+provides sample applications that demonstrate the features of this camera. e-
+CAM25_CUONX camera is interfaced to J20 connectors of the Orin Nano™ 
+development kit using the ACC-RB-WTB-ADP board. However, this camera can also 
+be utilized by any Video for Linux version 2 (V4L2) application. 
+
+ 
+4   e-CAM25_CUONX Release Notes 
+Release Details 
+This section describes about identifying the deliverable. 
+• Release Version: R04_RC3 
+• Release Date: 29-MAR-2025 
+• Product: e-CAM25_CUONX 
+Description Jetson Orin NX/Orin Nano 
+Host machine version required for flashing 
+software onto Jetson Orin NX/Orin Nano™. 
+Ubuntu 22.04 (64-bit) or Ubuntu 20.04 (64-bit). 
+ 
+Sample rootfs Ubuntu operating system to run 
+on Jetson Orin NX/Orin Nano™. Ubuntu 22.04 (aarch64) 
+JetPack Version. JetPack 6.1.0 
+L4T version. L4T_R36.4.0 
+Kernel version. 5.15.148-tegra 
+ecam_tk1_guvcview version. 1.7.2-g81ddbfb 
+MCU Firmware Version. 1125CUONXXXXX01110dfe152cXXXXXXX 
+Change log: Updated the MCU firmware version 
+ 
+• Release Version: R04_RC2 
+• Release Date: 25-Feb-2024 
+• Product: e-CAM25_CUONX 
+Description Jetson Orin NX/Orin Nano 
+Host machine version required for flashing 
+software onto Jetson Orin NX/Orin Nano™. 
+Ubuntu 22.04 (64-bit) or Ubuntu 20.04 (64-bit). 
+ 
+Sample rootfs Ubuntu operating system to run 
+on Jetson Orin NX/Orin Nano™. Ubuntu 22.04 (aarch64) 
+JetPack Version. JetPack 6.1.0 
+L4T version. L4T_R36.4.0 
+Kernel version. 5.15.148-tegra 
+ecam_tk1_guvcview version. 1.7.2-g81ddbfb 
+MCU Firmware Version. 1125CUONXXXXX011100301f6eXXXXXXX 
+Change log: Application bug is fixed 
+ 
+• Release Version: R04_RC1 
+• Release Date: 13-Dec-2024 
+• Product: e-CAM25_CUONX 
+
+ 
+© Copyright e-con Systems. 2024. All rights reserved. 5 
+Description Jetson Orin NX/Orin Nano 
+Host machine version required for flashing 
+software onto Jetson Orin NX/Orin Nano™. 
+Ubuntu 22.04 (64-bit) or Ubuntu 20.04 (64-bit). 
+ 
+Sample rootfs Ubuntu operating system to run 
+on Jetson Orin NX/Orin Nano™. Ubuntu 22.04 (aarch64) 
+JetPack Version. JetPack 6.1.0 
+L4T version. L4T_R36.4.0 
+Kernel version. 5.15.148-tegra 
+ecam_tk1_guvcview version. 1.7.2-g5d361af 
+MCU Firmware Version. 1125CUONXXXXX011100301f6eXXXXXXX 
+Change log: Updated to L4T36.4.0 with Jetpack 6.1.0 
+• Release Version: R03_RC2 
+• Release Date: 29-JUL-2024 
+• Product: e-CAM25_CUONX 
+Description Jetson Orin NX/Orin Nano 
+Host machine version required for flashing 
+software onto Jetson Orin NX/Orin Nano™. 
+Ubuntu 22.04 (64-bit) or Ubuntu 20.04 (64-bit). 
+ 
+Sample rootfs Ubuntu operating system to run 
+on Jetson Orin NX/Orin Nano™. Ubuntu 22.04 (aarch64) 
+JetPack Version. JetPack 6.0.0 
+L4T version. L4T_R36.3.0 
+Kernel version. 5.15.136-tegra 
+ecam_tk1_guvcview version. 1.7.2-g5d361af 
+MCU Firmware Version. 1125CUONXXXXX0111022d8d7dXXXXXXX 
+Change log: Fix for vi-capture corruption in L4T36.3.0 in JetPack 6.0.0 
+• Release Version: R03_RC1 
+• Release Date: 24-MAY-2024 
+• Product: e-CAM25_CUONX 
+Description Jetson Orin NX/Orin Nano 
+Host machine version required for flashing 
+software onto Jetson Orin NX/Orin Nano™. 
+Ubuntu 22.04 (64-bit) or Ubuntu 20.04 (64-bit). 
+ 
+Sample rootfs Ubuntu operating system to run 
+on Jetson Orin NX/Orin Nano™. Ubuntu 22.04 (aarch64) 
+JetPack Version. JetPack 6.0.0 
+L4T version. L4T_R36.3.0 
+Kernel version. 5.15.136-tegra 
+ecam_tk1_guvcview version. 1.7.2-g5d361af 
+MCU Firmware Version. 1125CUONXXXXX0111022d8d7dXXXXXXX 
+Change log: Updated to L4T36.3.0 with Jetpack 6.0.0 
+
+ 
+6   e-CAM25_CUONX Release Notes 
+• Release Version: R02_RC2 
+• Release Date: 06-DEC-2023 
+• Product: e-CAM25_CUONX 
+Description Jetson Orin NX/Orin Nano 
+Host machine version required for flashing 
+software onto Jetson Orin NX/Orin Nano™. 
+Ubuntu 20.04 (64-bit) or Ubuntu 18.04 (64-bit). 
+ 
+Sample rootfs Ubuntu operating system to run 
+on Jetson Orin NX/Orin Nano™. Ubuntu 20.04 (aarch64) 
+JetPack Version. JetPack 5.1.2 
+L4T version. L4T_R35.4.1 
+Kernel version. 5.10.120-ga43fec18c 
+ecam_tk1_guvcview version. 1.7.2-g5d361af 
+MCU Firmware Version. 1125CUONXXXXX0111022d8d7dXXXXXXX 
+Change log: Fix for device tree not updated in Jetson Orin Nano development kit. 
+• Release Version: R02 
+• Release Date: 10-NOV-2023 
+• Product: e-CAM25_CUONX 
+ 
+Description Jetson Orin NX/Orin Nano 
+Host machine version required for flashing 
+software onto Jetson Orin NX/Orin Nano™. 
+Ubuntu 20.04 (64-bit) or Ubuntu 18.04 (64-bit). 
+ 
+Sample rootfs Ubuntu operating system to run 
+on Jetson Orin NX/Orin Nano™. Ubuntu 20.04 (aarch64) 
+JetPack Version. JetPack 5.1.2 
+L4T version. L4T_R35.4.1 
+Kernel version. 5.10.120-ga43fec18c 
+ecam_tk1_guvcview version. 1.7.2-g5d361af 
+MCU Firmware Version. 1125CUONXXXXX0111022d8d7dXXXXXXX 
+
+ 
+© Copyright e-con Systems. 2024. All rights reserved. 7 
+Download Release Package  
+In this section, you can get the FTP next cloud server credentials for downloading release package 
+Download Link:  https://spaces.e-consystems.com/nextcloud/index.php/s/Ciybmwa46oR8qeR 
+Password: e-CAM25_CUONX 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+ 
+8   e-CAM25_CUONX Release Notes 
+Troubleshooting 
+In this section, you can view the list of commonly occurring issues and their 
+troubleshooting steps. 
+In lower exposure value, setting a higher gain value causes a blue noise in higher 
+resolutions. 
+This a known issue. You need to either reduce the gain or increase the exposure to 
+recover from this issue. 
+How to recover if black screen appears in ecam_tk1_guvcview camera window? 
+This is known issue. If this issue occurs, it will auto recover in few seconds and if still 
+not able to recover in few second, please restart the application. 
+ 
+
+ 
+© Copyright e-con Systems. 2024. All rights reserved. 9 
+FAQ 
+1. How can I get the updated package if any? 
+Please login to the Developer Resources website and download the latest 
+release package. 
+
+ 
+10   e-CAM25_CUONX Release Notes 
+What's Next? 
+After understanding the Release Notes, you can refer to the following documents to 
+understand more about e-CAM25_CUONX. 
+• e-CAM25_CUONX Getting Started Manual 
+• e-CAM25_CUONX Release Package Manifest 
+• e-CAM25_CUONX Linux App User Manual 
+
+ 
+© Copyright e-con Systems. 2024. All rights reserved. 11 
+Support 
+Contact Us 
+If you need any support on e-CAM25_CUONX product, please contact us using the 
+Live Chat option available on our website - https://www.e-consystems.com/ 
+Creating a Ticket 
+If you need to create a ticket for any type of issue, please visit the ticketing page on 
+our website - https://www.e-consystems.com/create-ticket.asp 
+RMA 
+To know about our Return Material Authorization (RMA) policy, please visit the RMA 
+Policy page on our website - https://www.e-consystems.com/RMA-Policy.asp 
+General Product Warranty Terms 
+To know about our General Product Warranty Terms, please visit the General 
+Warranty Terms page on our website - https://www.e-
+consystems.com/warranty.asp 
+  
+
+ 
+12   e-CAM25_CUONX Release Notes 
+Revision History 
+Rev Date Description Author 
+1.0 18-Apr-2023 Initial draft Camera Dev Team 
+1.1 10-Nov-2023 Updated to L4T35.4.1 and support given to 2 
+lane Camera Dev Team 
+1.2 06-Dec-2023 Install binaries script updated in Release Package Camera Dev Team 
+1.3 24-May-2024 Updated to L4T36.3.0  Camera Dev Team 
+1.4 26-Jul-2024 Updated Release Package to fix vi-capture 
+corruption issue Camera Dev Team 
+1.5 29-Jan-2025 Updated to L4T36.4.0 Camera Dev Team 
+1.6 25-Feb-2025 Application bug fixed Camera Dev Team 
+1.7 29-Mar-2025 Updated the MCU firmware version Camera Dev Team 
+ 
+

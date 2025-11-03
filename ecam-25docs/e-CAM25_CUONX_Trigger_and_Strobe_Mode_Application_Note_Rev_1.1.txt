@@ -1,0 +1,219 @@
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+e-CAM25_CUONX 
+Version 1.1 
+e-con Systems 
+5/24/2024 
+Application Note:  
+Trigger and Strobe Mode  
+
+ 
+ 1 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Disclaimer 
+e-con Systems reserves the right to edit/modify this document without any prior 
+intimation of whatsoever.  
+
+
+ 
+2                                                                   e-CAM25_CUONX Trigger and Strobe Mode Application  Note 
+Contents 
+INTRODUCTION TO E-CAM25_CUONX 3 
+DESCRIPTION 3 
+TRIGGER MODE 6 
+PIN DESCRIPTION 7 
+CN3 HEADER CIRCUIT 8 
+  
+
+ 
+ 3 
+Introduction to e-CAM25_CUONX 
+e-con Systems is a leading Embedded Product Design Services Company which 
+specializes in advanced camera solutions. e-CAM25_CUONX is a new Mobile 
+Industry Processor Interface (MIPI) camera which uses the AR0234 camera module. 
+It is a 4-Lane module connected to the Jetson Orin Nano™ development kit 
+supported for Jetson Orin Nano and Orin NX platforms launched by e-con Systems. 
+The prebuilt driver for this camera along with the camera board is provided by e-con 
+Systems. 
+The NVIDIA® Orin Nano™ development kit is a small, powerful computer for 
+embedded applications and Artificial Intelligence (AI) Internet of Things (IoT). It is 
+pre-flashed with a Linux environment, includes support for many common APIs, and 
+is supported by NVIDIA® complete development toolchain. Jetson Orin NX™/Orin 
+Nano™ platforms supports single camera for 4-lane configuration. 
+e-CAM25_CUONX is 2.3 MP custom lens camera module based on 1/2.6" AR0234CS 
+CMOS image sensor from onsemi™. It is a color camera which supports UYVY image 
+format and provided with S-mount (also known as M12 board lens) lens holder. The 
+S-mount is small form-factor lens mounts for board cameras. e-con Systems 
+provides the sample applications that demonstrates the features of this camera. 
+However, this camera can also be utilized by any Video for Linux version 2 (V4L2) 
+application. 
+e-CAM25_CUONX has a 2.3 MP color camera with S-mount (also known as M12 
+board lens) lens holder. The S-mount is one of the most used small form factor lens 
+mounts for board cameras. e-CAM25_CUONX camera is interfaced to J21 connector 
+of the Jetson Orin NX™/Orin Nano™ development kit using the ACC-RB-WTB-ADP 
+board. 
+e-con Systems provides the sample applications that demonstrate the features of 
+this camera. However, this camera can also be utilized by any V4L2 application. 
+This document describes external trigger setup to interface e-CAM25_CUONX board 
+on Jetson Orin NX™/Orin Nano™ development kit. 
+ 
+Description 
+This Application Note concentrates on the working of trigger mode in e-
+CAM25_CUONX. Many imaging applications commonly requires the image sensor to 
+capture an image after the triggering action. This triggering action can be the passing 
+of an object on a conveyor belt, the flash of a strobe light, or the click of a button. 
+ 
+
+ 
+4                                                                   e-CAM25_CUONX Trigger and Strobe Mode Application  Note 
+e-CAM25_CUONX offers the ability to synchronize the start of the image sensor's 
+exposure with this triggering action. This synchronization is controlled on the image 
+sensor using one trigger signal. Additionally, the camera offers the flexibility to 
+program the exposure time. 
+e-CAM25_CUONX is a two-board solution as follows: 
+• e-CAM217_CUMI0234_MOD (Camera module) 
+•  ACC-RB-WTB-ADP (Adaptor Board) 
+The front and rear views of e-CAM25_CUONX camera module and Adaptor board 
+are shown in following figures. 
+  
+Figure 1: Front View of e-CAM25 Camera Board 
+    
+Figure 2: Rear View of e-CAM25 Camera Board 
+
+
+ 
+ 5 
+ 
+Figure 3: Front view of e-CAM25 ADP Board 
+  
+Figure 4: Rear view of e-CAM25 ADP Board 
+Note: CN3 connector in the e-CAM25 ADP Board is used for trigger input and strobe output signal. 
+
+
+ 
+6                                                                   e-CAM25_CUONX Trigger and Strobe Mode Application  Note 
+Trigger Mode 
+In trigger mode, e-CAM25_CUONX camera can synchronize the exposure (or 
+integration) of the camera pixels to an external trigger pulse that can be given 
+through the GPIO connector of the camera. Since this is a global shutter camera, all 
+the pixels start and stop integrating at the same time, avoiding rolling skew during 
+the capture of fast-moving scenes. 
+In trigger mode of e-CAM25_CUONX, the preview will not be available, and the 
+camera will be kept in standby waiting for a trigger pulse to start the integration of 
+pixels and provide a global shutter image. 
+You can configure the camera settings such as white balance, exposure, still image 
+resolution, still image storage location and so on, in manual mode and then enter 
+the trigger mode. The auto function lock option can be used to lock the auto 
+functions such as exposure, white balance and so on, in auto mode. In trigger mode, 
+the camera settings will be retained, but preview will not be available. The camera 
+will be waiting for an external event on the GPIO connector, and the camera will 
+start exposing on the trigger signal.  
+All the images captured will be stored in the default location, that is, the desktop or 
+can be stored in any user specified path, in the format selected in the Still Capture 
+Settings. 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 7 
+Pin Description  
+This section describes about the pin description of e-CAM25_CUONX. 
+In trigger mode, the EXT_TRIGGER pin of the CN3 connector of ACC-RB-WTB-ADB 
+board is used for input trigger pulse. The below table lists the pin configuration of 
+CN3 External Header. 
+CN3 
+Pin No 
+Signal Name Pin Type Description 
+1 VCC_3P3 POWER 3.3V power supply 
+2 TRIGGER INPUT 3.3V trigger input to the camera 
+3 STROBE OUTPUT 3.3V strobe output from the camera 
+4 GND POWER Ground signal for digital and analog 
+Note on TRIGGER Pin: If trigger mode is enabled, the trigger pulses must be 
+provided to this pin to get the streaming. For more information on sensor trigger 
+please refer to the e-CAM25_CUONX_Linux_App_User_Manual_<REV>.pdf. 
+Note: 
+• If the trigger pulse width is lesser than the required trigger pulse width, 
+either the exposure may not start, or the captured image will be dark. 
+• If the required frame rate is 30fps, then the frequency of the trigger pulse 
+should be 30Hz. 
+• Duty cycle should be less than 10%. If the duty cycle is more than 10%, it will 
+affect exposure time and readout time of the camera. 
+  
+
+ 
+8                                                                   e-CAM25_CUONX Trigger and Strobe Mode Application  Note 
+ CN3 Header Circuit 
+This section describes the CN3 connector of e-CAM25_CUONX. 
+                 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+
+ 
+ 9 
+Revision History 
+ 
+Rev Date Description Author 
+1.0 25-Apr-2023 Initial Draft Camera Dev Team 
+1.1 24-May-2024 Added a note on external trigger 
+configuration Camera Dev Team 
+ 
+ 
+

@@ -1,0 +1,311 @@
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+e-CAM25_CUONX 
+Version 1.1 
+e-con Systems 
+1/23/2025 
+e-CAM_TK1-GUVCView Build and 
+Install Guide 
+
+
+ 
+© Copyright e-con Systems. 2023. All rights reserved. 1 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Disclaimer 
+e-con Systems reserves the right to edit/modify this document without any prior 
+intimation of whatsoever.  
+
+ 
+2   e-CAM_TK1-GUVCView Build and Install Guide 
+Contents 
+INTRODUCTION TO ECAM_TK1_GUVCVIEW 3 
+PREREQUISITES 3 
+INSTALLING BUILD DEPENDENCIES 4 
+DESCRIPTION 4 
+IDENTIFYING DELIVERABLES 6 
+BUILDING AND INSTALLING ECAM_TK1_GUVCVIEW FROM SOURCE 7 
+TROUBLESHOOTING 8 
+FAQ 9 
+WHAT'S NEXT? 10 
+GLOSSARY 11 
+SUPPORT 12 
+  
+
+ 
+© Copyright e-con Systems. 2023. All rights reserved. 3 
+Introduction to ecam_tk1_guvcview  
+e-con Systems is a leading Embedded Product Design Services Company which 
+provides ecam_tk1_guvcview sample application for demonstrating the features of 
+e-CAM25_CUONX camera. However, this camera can utilize any Video for Linux 
+version 2 (V4L2) application. 
+The ecam_tk1_guvcview application is based on guvcview, but all the controls are 
+performed with GTK+ interface allowing for a more user-friendly Graphical User 
+Interface (GUI). This application forms the basic testing tool for the e-
+CAM25_CUONX camera. ecam_tk1_guvcview is a V4L2 video viewer and capture 
+software for the camera driver of Jetson Orin NX™/Orin Nano™ development kit, 
+customized to demonstrate the features of e-CAM25_CUONX. 
+The commands in this document are represented by color as shown in below table. 
+Table 1: Notation of Color 
+Color Notation 
+Blue Commands running in development kit 
+This document explains how to build and install the ecam_tk1_guvcview application 
+from the source. 
+Prerequisites 
+The libraries such as gtk, glib, libavcodec and so on are essential to build e-
+cam_tk1_guvcview software package. Please refer to the e-
+CAM25_CUONX_Release_Notes_Rev_<ver>.pdf for the compatible Linux distribution 
+version (L4T version). 
+The package requirements are as follows: 
+• gtk+-3.0>=3.0.0 
+• glib-2.0>=2.10.0 
+• sdl>=1.2.10 
+• portaudio-2.0 
+• libpng 
+• libavcodec 
+• libavutil 
+• libv4l2 
+• libudev 
+• libusb-1.0 
+• intltool 
+Note: You must make sure that the Jetson Orin NX™/Orin Nano™ development kit 
+contains all the dependencies. 
+
+ 
+4   e-CAM_TK1-GUVCView Build and Install Guide 
+Installing Build Dependencies 
+The steps to install the build dependencies are as follows: 
+1. Run the following command in Jetson Orin NX™/Orin Nano™ development kit to 
+enable all the repositories which are required for installing the dependencies. 
+$ sudo apt-get update 
+Note: Make sure that you have connected Jetson Orin™ development kit to a 
+stable network. 
+2. Run the following command to install the dependencies in Jetson Orin™ 
+development kit. 
+$ sudo apt-get install intltool libsdl1.2-dev libusb-
+1.0-0-dev libv4l-dev libudev-dev libportaudio-ocaml-
+dev libpango1.0-dev libatk1.0-dev libgdk-pixbuf2.0-dev 
+libatk-bridge2.0-dev libcairo2-dev libgtk-3-dev 
+libavutil-dev libavcodec-dev lbzip2 
+Note: If the installation stops with unmet dependencies, then run the following 
+command to fix the libraries. 
+$ sudo apt --fix-broken install 
+3. Run the following commands to install the FFMPEG dependency package. 
+$ wget -c http://ffmpeg.org/releases/ffmpeg-
+2.8.15.tar.xz 
+$ tar -xf ffmpeg-2.8.15.tar.xz 
+$ cd ffmpeg-2.8.15 
+#For fast install change the power mode to maximum 
+$ sudo nvpmodel -m 0 
+$ sudo jetson_clocks 
+$ ./configure 
+$ make -j4 
+$ sudo make install 
+Note: You can also use the FFMPEG package source provided in e-
+CAM25_CUONX_JETSON_ONX_ONANO_<L4T_version>_<release_date>_<relea
+se_version>.tar.gz release package at 
+Application/ecam_tk1_guvcview/Source/ecam_tk1_guvcview_dependency.tar
+.gz location. 
+Description 
+The e-CAM25_CUONX guvcviewer or ecam_tk1_guvcview application is a simple 
+GTK+ interface for capturing and viewing video from the devices supported on the 
+Jetson Orin™ development kit. 
+
+ 
+© Copyright e-con Systems. 2023. All rights reserved. 5 
+Using e-CAM_TK1 guvcviewer or ecam_tk1_guvcview application, you can perform 
+the following: 
+• Enumerate and list all video devices connected. 
+• Display properties of video renderer. 
+• Change the resolution and color space or compression for video stream, if 
+different resolutions are supported by the device. 
+• Display currently configured values of preview. 
+• Capture the still images and set the path where still images will be saved. 
+• Display the average frame rate. 
+All the above listed properties can be configured by attractive and easy to use GUI. 
+
+ 
+6   e-CAM_TK1-GUVCView Build and Install Guide 
+Identifying Deliverables  
+This section describes about identifying the deliverables. 
+The release package contains the application source code, ecam_tk1_guvcview 
+application executables and documents. Please refer to the e-
+CAM25_CUONX_Release_Notes_Rev_<ver>.pdf for the Linux for Tegra (L4T) version. 
+The steps for identifying the deliverables are as follows: 
+1. Copy the release package tar file to the home directory of the Jetson Orin 
+Nano™ development kit. 
+2. Run the following commands to extract the e-CAM25_CUONX release package. 
+tar -xf e-
+CAM25_CUONX_JETSON_ONX_ONANO_<L4T_version>_<release_da
+te>_<release_version>.tar.gz 
+cd e-
+CAM25_CUONX_JETSON_ONX_ONANO_<L4T_version>_<release_da
+te>_<release_version> 
+Note: Do not right click to extract the package. 
+The source code for the ecam_tk1_guvcview application is present in the release 
+package at the following location. 
+Application/ecam_tk1_guvcview/Source/e-CAM_TK1_guvcview-src-
+1.7.2.tar.gz 
+Please refer to the Error! Reference source not found. section to build a
+pplication from the source. 
+
+ 
+© Copyright e-con Systems. 2023. All rights reserved. 7 
+Building and Installing 
+ecam_tk1_guvcview from Source  
+This section describes about building and installing ecam_tk1_guvcview from the 
+source. 
+The steps to build and install ecam_tk1_guvcview from the source are as follows: 
+1. Run the following commands to navigate to the application source directory in 
+Jetson Orin™ development kit and extract the package. 
+cd Application/ecam_tk1_guvcview/Source/ 
+tar -xf e-CAM_TK1_guvcview-src-1.7.2.tar.gz 
+cd e-CAM_TK1_guvcview-src-1.7.2/ 
+2. Run the following commands to configure the ecam_tk1_guvcview source. 
+./configure --prefix=/usr/local/ecam_tk1 
+echo 'export PATH=$PATH:/usr/local/ecam_tk1/bin' >> 
+$HOME/.bashrc 
+source ~/.bashrc 
+The configuration is required to check the presence of dependent packages and 
+to create the makefiles. If you want to change the default /usr/local/bin binary 
+installation directory, add --prefix = <path_to_install>. 
+To know more information on configuring ecam_tk1_guvcview source, run the 
+following command. 
+./configure --help 
+Note: If configuration fails, please contact the Ubuntu's Help Center to know on 
+how to install any required packages. 
+3. Run the following make command to build the ecam_tk1_guvcview application 
+from source. 
+make -j4 
+4. Run the following make install command to install the built application. 
+sudo make install 
+The ecam_tk1_guvcview application will be installed in /usr/local/ecam_tk1/bin 
+location of Jetson Orin™ development kit. This application is used to capture and 
+view video from the camera. 
+
+ 
+8   e-CAM_TK1-GUVCView Build and Install Guide 
+Troubleshooting 
+In this section, you can view the commonly occurring issue and their troubleshooting 
+step. 
+What can I do when I encounter error in make or make install stage? 
+Make sure that you have installed all the dependency packages listed in the 
+Prerequisites section. Please refer to the Installing Build Dependencies section to 
+install build dependencies and try again. 
+What can I do when apt-get update fails? 
+Make sure that you have installed all the dependency packages listed in the 
+Prerequisites section before building the binaries. If the apt-get update requires a 
+long time to run and fails, kindly wait for some time and retry. This issue might occur 
+due to network problem. 
+
+ 
+© Copyright e-con Systems. 2023. All rights reserved. 9 
+FAQ 
+1. Is the ecam_tk1_guvcview application compatible to all the L4T versions? 
+No, the application is tested and verified in specific L4T version. The steps 
+mentioned in this document is not compatible to all the L4T/Jetpack™ version. 
+Please refer to the e-CAM25_CUONX_Release_Notes_Rev_<ver>.pdf for the 
+compatible Linux distribution version (L4T version). 
+2. How can I get the updated package? 
+Please login to the Developer Resources website to download the latest release 
+package. 
+
+ 
+10   e-CAM_TK1-GUVCView Build and Install Guide 
+What's Next? 
+After understanding the build and installation procedure of eCAM_tk1_guvcview 
+application, you can refer to the following documents to understand more about e-
+CAM25_CUONX. 
+• e-CAM25_CUONX Release Notes 
+• e-CAM25_CUONX Linux App User Manual 
+
+ 
+© Copyright e-con Systems. 2023. All rights reserved. 11 
+Glossary 
+API: Application Programming Interface. 
+FFMPEG: Fast Forward Motion Picture Experts Group. 
+GIMP: GNU Image Manipulation Program. 
+GNU: GNU's Not Unix. 
+GTK: GIMP Toolkit. 
+GUI: Graphical User Interface. 
+L4T: Linux for Tegra. 
+V4L2: Video4Linux2 is a collection of device drivers and API for supporting real-time 
+video capture on Linux systems. 
+
+ 
+12   e-CAM_TK1-GUVCView Build and Install Guide 
+Support 
+Contact Us 
+If you need any support on e-CAM25_CUONX product, please contact us using the 
+Live Chat option available on our website - https://www.e-consystems.com/ 
+Creating a Ticket 
+If you need to create a ticket for any type of issue, please visit the ticketing page on 
+our website - https://www.e-consystems.com/create-ticket.asp 
+RMA 
+To know about our Return Material Authorization (RMA) policy, please visit the RMA 
+Policy page on our website - https://www.e-consystems.com/RMA-Policy.asp 
+General Product Warranty Terms 
+To know about our General Product Warranty Terms, please visit the General 
+Warranty Terms page on our website - https://www.e-
+consystems.com/warranty.asp 
+  
+
+ 
+© Copyright e-con Systems. 2023. All rights reserved. 13 
+Revision History 
+Rev Date Description Author 
+1.0 19-Apr-2023 Initial Draft Camera Dev Team 
+1.1 23-Jan-2025 Updated the Building and Installing 
+ecam_tk1_guvcview from Source section Camera dev Team 
+ 
+

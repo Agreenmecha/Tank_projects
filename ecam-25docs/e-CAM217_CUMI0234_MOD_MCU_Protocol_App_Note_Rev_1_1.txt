@@ -1,0 +1,1226 @@
+   
+ 
+   
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+e-
+CAM217_CUMI02
+34_MOD 
+Version 1.1 
+e-con Systems 
+3/24/2025 
+MCU Protocol Application Note 
+
+
+ 
+© Copyright e-con Systems. 2023. All rights reserved. 1 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Disclaimer 
+The specifications and features of e-CAM217_CUMI0234_MOD camera board are 
+provided here as reference only and e-con Systems reserves the right to edit/modify 
+this document without any prior intimation of whatsoever.  
+
+ 
+2  e-CAM217_CUMI0234_MOD MCU Protocol App Note 
+Contents 
+INTRODUCTION TO E-CAM217_CUMI0234_MOD 5 
+DESCRIPTION 5 
+FRAME RATE SUPPORTED 5 
+CAMERA OPERATION SEQUENCE 7 
+STREAMING START SEQUENCE 8 
+STREAMING STOP SEQUENCE 9 
+CHANGING CONTROL VALUES 10 
+CHANGING STREAMING RESOLUTION 11 
+MCU COMMAND OVERVIEW 12 
+MCU I2C SLAVE ADDRESS 12 
+TYPES OF CAMERA COMMANDS 12 
+LIST OF CAMERA COMMANDS 12 
+LIST OF CAMERA FORMATS 13 
+LIST OF RETURN CODES 13 
+LIST OF COMMAND STATUS CODES 14 
+CAMERA STATUS CODES 14 
+MCU STATUS CODES 14 
+MCU COMMAND DESCRIPTION 16 
+STATUS COMMAND 16 
+CONFIGURE COMMAND 16 
+QUERY-REPLY COMMAND 18 
+CONTROLS OF E-CAM217_CUMI0234_MOD 20 
+BRIGHTNESS CONTROL 21 
+SETTING (WRITE) BRIGHTNESS VALUE 21 
+GETTING (READ) CURRENT BRIGHTNESS VALUE 21 
+CONTRAST CONTROL 21 
+SETTING (WRITE) CONTRAST VALUE 21 
+GETTING (READ) CURRENT CONTRAST VALUE 22 
+SATURATION CONTROL 22 
+SETTING (WRITE) SATURATION VALUE 22 
+GETTING (READ) CURRENT SATURATION VALUE 22 
+AUTO WHITE BALANCE CONTROL 22 
+
+ 
+© Copyright e-con Systems. 2023. All rights reserved. 3 
+SETTING (WRITE) WHITE BALANCE VALUE 22 
+GETTING (READ) CURRENT WHITE BALANCE VALUE 22 
+WHITE BALANCE TEMPERATURE CONTROL 23 
+SETTING (WRITE) WHITE BALANCE TEMPERATURE VALUE 23 
+GETTING (READ) CURRENT WHITE BALANCE TEMPERATURE VALUE 23 
+GAMMA CONTROL 23 
+SETTING (WRITE) GAMMA VALUE 23 
+GETTING (READ) CURRENT GAMMA VALUE 23 
+GAIN CONTROL 23 
+SETTING (WRITE) GAIN VALUE 24 
+GETTING (READ) CURRENT GAIN VALUE 24 
+HORIZONTAL FLIP CONTROL 24 
+SETTING (WRITE) HORIZONTAL FLIP VALUE 24 
+GETTING (READ) CURRENT HORIZONTAL FLIP VALUE 24 
+VERTICAL FLIP CONTROL 24 
+SETTING (WRITE) VERTICAL FLIP VALUE 24 
+GETTING (READ) CURRENT VERTICAL FLIP VALUE 24 
+SHARPNESS CONTROL 25 
+SETTING (WRITE) SHARPNESS VALUE 25 
+GETTING (READ) CURRENT SHARPNESS VALUE 25 
+EXPOSURE CONTROL 25 
+SETTING (WRITE) EXPOSURE CONTROL VALUE 25 
+GETTING (READ) CURRENT EXPOSURE CONTROL VALUE 25 
+MANUAL EXPOSURE CONTROL 25 
+SETTING (WRITE) MANUAL EXPOSURE VALUE 26 
+GETTING (READ) CURRENT MANUAL EXPOSURE VALUE 26 
+ROI BASED EXPOSURE CONTROL 26 
+SETTING (WRITE) ROI BASED EXPOSURE VALUE 26 
+GETTING (READ) CURRENT ROI BASED EXPOSURE VALUE 26 
+ROI WINDOW SIZE 26 
+SETTING (WRITE) ROI WINDOW SIZE VALUE 27 
+GETTING (READ) CURRENT ROI WINDOW SIZE VALUE 27 
+EXTERNAL TRIGGER CONTROL 27 
+SETTING (WRITE)EXTERNAL TRIGGER CONTROL VALUE 27 
+GETTING (READ) CURRENT EXTERNAL TRIGGER CONTROL VALUE 27 
+DENOISE CONTROL 28 
+SETTING (WRITE) DENOISE CONTROL VALUE 28 
+GETTING (READ) CURRENT DENOISE CONTROL VALUE 28 
+EXPOSURE COMPENSATION CONTROL 28 
+SETTING (WRITE) EXPOSURE COMPENSATION CONTROL VALUE 28 
+GETTING (READ) CURRENT EXPOSURE COMPENSATION CONTROL VALUE 28 
+WHAT'S NEXT? 29 
+
+ 
+4  e-CAM217_CUMI0234_MOD MCU Protocol App Note 
+GLOSSARY 30 
+SUPPORT 31 
+ 
+
+ 
+© Copyright e-con Systems. 2023. All rights reserved. 5 
+Introduction to e-
+CAM217_CUMI0234_MOD 
+e-con Systems is a leading Embedded Product Design Services Company which 
+specializes in advanced camera solutions. e-CAM217_CUMI0234_MOD is a new 2-
+lane or 4-lane Mobile Industry Processor Interface (MIPI) camera which uses the 
+AR0234CS camera module. 
+e-CAM217_CUMI0234_MOD is a low voltage, small form factor, high performance 2 
+MP pluggable camera module with S-Mount lens holder. It is based on AR0234CS 
+Complementary Metal Oxide Semiconductor. (CMOS) image sensor from onsemi™. 
+e-CAM217_CUMI0234_MOD is designed to connect with any application processor 
+that has MIPI interface. The standard S-Mount lens holder can accommodate a wide 
+range of lenses based on your choice. 
+This document provides a detailed understanding of I2C based protocol used by the 
+host application processor, for communicating with the microcontroller which is 
+provided as part of e-con Systems e-CAM217_CUMI0234_MOD camera board. 
+Description 
+e-CAM217_CUMI0234_MOD can stream uncompressed HD at 120 fps, FHD at 65 
+fps, 2.3 MP at 60 fps UYVY formats. It can be used with any application processor 
+which supports 2-lane or 4-lane MIPI CSI-2 interface. 
+This document explains the microcontroller unit (MCU) protocol corresponding to 
+the 32-byte MCU firmware version ID mentioned in below table. 
+Table 1: MCU Firmware Version 
+Jetson Orin Platform MCU Firmware Version ID 
+Jetson Orin Nx™ 1125CUONXXXXX01110dfe152cXXXXXXX 
+Jetson Orin Nano™ 1125CUONXXXXX01110dfe152cXXXXXXX 
+Note: This MCU firmware version is subject to get updated in future. 
+Frame Rate Supported 
+The below table lists the frame rate supported for 2-lane configuration in e-
+CAM217_CUMI0234_MOD. 
+Table 2: Frame Rate Supported for 2-Lane Configuration 
+Format Resolution Frame Rate 
+UYVY 
+VGA  120 fps 
+HD 120 fps 
+FHD 65 fps 
+
+ 
+6  e-CAM217_CUMI0234_MOD MCU Protocol App Note 
+2.3MP 60 fps 
+The below table lists the frame rate supported for 4-lane configuration in e-
+CAM217_CUMI0234_MOD. 
+Table 3: Frame Rate Supported for 4-Lane Configuration 
+Format Resolution Frame Rate 
+UYVY 
+HD 120 fps 
+FHD 70 fps 
+2.3MP 60 fps 
+Note:  
+• The frame rates listed in the above table varies based on platform capability. 
+
+ 
+© Copyright e-con Systems. 2023. All rights reserved. 7 
+Camera Operation Sequence  
+This section describes the basic operation for initiating the stream sequence and 
+changing the control values using MCU. 
+The basic operation for initiating the stream sequence is explained below: 
+• Host processor refers to the application processor, for example, Orin Nano™, 
+Orin NX™ or FX3 processors will act as I2C Master throughout this protocol. 
+• MCU acts as I2C Slave in this entire protocol. 
+• The I2C Master always initializes every transaction. 
+• Length of the byte sequence between the MCU and host processor is either 
+constant or pre-negotiated for each transaction. 
+• If a transaction is from host processor to MCU, the host processor will perform 
+the following I2C sequence: 
+o I2C start condition. 
+o 7-bit slave address of MCU. 
+o Write bit. 
+o Host processor provides data according to the byte sequence defined for 
+that specific command. For more details, please refer to the MCU Command 
+Description section. 
+o I2C stop condition. 
+• If a transaction is from MCU to host processor, the host processor will perform 
+the following I2C sequence: 
+o I2C start condition. 
+o 7-bit slave address of MCU. 
+o Read bit. 
+o MCU will provide data according to the byte sequence specified in the 
+command. 
+o I2C stop condition. 
+• Checksum is calculated by performing bitwise XOR of the payload data which is 
+not same as the traditional checksum. 
+The below table lists the legend and its description used in flowchart. 
+Table 4: Legend and its Description 
+Legend Description 
+ 
+Start or Stop 
+ 
+MCU Command Block 
+
+
+ 
+8  e-CAM217_CUMI0234_MOD MCU Protocol App Note 
+ 
+Process Block 
+ 
+Decision Block 
+Streaming Start Sequence 
+To start streaming, the sequence to be performed are as follows: 
+1. Send Init Camera command through I2C interface. 
+2. Send Get Command Status command sequence through I2C interface 
+repeatedly, until the return status code is 0x0000. 
+3. Send Stream Configure command with desired frame format, width, height and 
+frame rate. 
+4. Send Get Command Status command sequence through I2C interface 
+repeatedly, until the return status code is 0x0000. 
+5. Send Stream ON command to initiate streaming with updated stream 
+configurations. 
+6. Send Get Command Status command sequence through I2C interface 
+repeatedly, until the return status code is 0x0000. 
+The flowchart of streaming start sequence is shown below. 
+
+
+ 
+© Copyright e-con Systems. 2023. All rights reserved. 9 
+ 
+Figure 1: Flowchart of Streaming Start Sequence 
+Streaming Stop Sequence 
+To stop streaming, the sequence to be performed are as follows: 
+
+
+ 
+10  e-CAM217_CUMI0234_MOD MCU Protocol App Note 
+1. Send Stream OFF command through I2C interface. 
+2. Send Get Command Status command sequence through I2C interface 
+repeatedly, until the return status code is 0x0000. 
+3. Send De-Init Camera command through I2C interface. 
+4. Send Get Command Status command sequence through I2C interface 
+repeatedly, until the return status code is 0x0000. 
+The flowchart of streaming stop sequence is shown below. 
+ 
+Figure 2: Flowchart of Streaming Stop Sequence 
+Changing Control Values 
+To change the control values, the sequence to be followed are as follows: 
+1. Ensure whether the camera is in streaming state, by performing the sequence of 
+Streaming Start Sequence section. 
+2. Send Set Control Value command with desired control index, and ID value. 
+
+
+ 
+© Copyright e-con Systems. 2023. All rights reserved. 11 
+3. Send Get Command Status command sequence through I2C interface 
+repeatedly, until the return status code is 0x0000. 
+The flowchart of changing control values is shown below. 
+ 
+Figure 3: Flowchart of Changing Control Values 
+Changing Streaming Resolution 
+To change the streaming resolution, the sequence to be performed are as follows: 
+1. Follow the steps of Streaming Stop Sequence section if the streaming is already 
+started. 
+2. Follow the steps of Streaming Start Sequence section with the desired stream 
+configuration. 
+
+
+ 
+12  e-CAM217_CUMI0234_MOD MCU Protocol App Note 
+MCU Command Overview  
+This section describes all the commands transferred between the host processor 
+and MCU, and the return values from MCU to Host processor. 
+MCU I2C Slave Address 
+MCU has a I2C Slave address of 0x42, which is 7-bit addressing mode. 
+Note: The above address is required for all the transactions. 
+Types of Camera Commands 
+The different types of camera commands are as follows: 
+• Status command 
+• Configure command 
+• Query-Reply command 
+The below table lists the types of MCU commands. 
+Table 5: Types of MCU Commands 
+Status Configure Query-Reply 
+Get Command Status Configure lane Get Firmware Version 
+ Init Camera Get Stream Info 
+ De-Init Camera Get Control Info 
+ Stream ON Get Control Value 
+ Stream OFF  
+ Configure Stream  
+ Set Control Value  
+List of Camera Commands 
+The below table lists and describes all the camera commands that are supported by 
+MCU. 
+Table 6: List of Camera Commands 
+S.NO Command Description 
+Query 
+Command 
+ID (Hex) 
+1 Get Firmware Version 
+This command is used to get the 
+actual firmware version in the 
+MCU. 
+0x00 
+2 Init Camera This command initializes the 
+camera by changing state of 0x04 
+
+ 
+© Copyright e-con Systems. 2023. All rights reserved. 13 
+hardware pins and writing 
+appropriate settings to the 
+camera. This command returns 
+immediately. 
+3 Get Command Status 
+This command is used to query 
+the status of any executed 
+command. Additionally, it will 
+return the current status of 
+camera (Idle, Busy, and so on) 
+and the hardware specific errors 
+with respect to MCU. 
+0x05 
+4 De-Init Camera 
+This command de-initializes the 
+camera by changing the state of 
+hardware pins and writing the 
+necessary configuration 
+settings. 
+0x06 
+5 Stream On This command will start the 
+camera streaming process. 0x07 
+6 Stream Off This command will stop the 
+camera streaming process. 0x08 
+7 Configure Stream 
+This command sets the format, 
+width, height and frame rate in 
+the camera. The valid values are 
+specified by Get Stream Info 
+command. 
+0x09 
+8 Get Control value 
+This command gets the value of 
+any control enumerated by Get 
+Control Info command. 
+0x10 
+9 Set Control Value 
+This command sets the value of 
+any control enumerated by Set 
+Control Info command. 
+0x11 
+10 Configure lane This command is used to 
+configure the number of lanes 0x17 
+List of Camera Formats 
+The below table lists the camera format codes that are returned from MCU to host 
+processor. 
+Table 7: List of Camera Formats 
+Format Code Description 
+0x59565955 YUV 4:2:2 (UYVY) 
+List of Return Codes 
+The below table lists all the return codes that are transmitted from MCU to host 
+processor. 
+
+ 
+14  e-CAM217_CUMI0234_MOD MCU Protocol App Note 
+Table 8: List of Return Codes 
+Return Code Description 
+0x00 Success or Command Completed 
+0x01 Busy or Command in Progress 
+0x02 Invalid Argument 
+0x03 Permission Denied 
+0x04 Device Not Found 
+0x05 I/O Error between ISP and MCU 
+0x06 Hardware Specific Error 
+0x07 Try Again 
+0x08 Already in Effect 
+0x09 Not Implemented 
+0x0A Out of Range 
+0x0B - 0xFE Reserved 
+0xFF Unknown Failure 
+Note: For more details, please refer to the Status Command section. 
+List of Command Status Codes 
+The length of command status is 2-bytes. The command status code is returned by 
+the MCU to the host processor. The below table lists the command status code and 
+its description. 
+Table 9: List of Command Status Codes (General) 
+Command Status Code Description 
+0x0000 No error or Command Completed 
+0xF000 Command in Progress 
+Note: For more details, please refer to the Status Command section. 
+Camera Status Codes 
+The below table lists the error codes returned by camera to the host processor. 
+Table 10: List of Command Status Codes (ISP) 
+Command Status Code Description 
+0x0FF0 Camera is Powered Down 
+0x0FF1 Camera is Uninitialized 
+MCU Status Codes 
+The below table lists the error codes which describes the enumerations of errors 
+specific to MCU. 
+Table 11: List of Command Status Codes (MCU) 
+Command Status Code Description 
+0x2001 Master I2C Init Error 
+0x2002 Master I2C Timeout 
+
+ 
+© Copyright e-con Systems. 2023. All rights reserved. 15 
+0x2003 Master I2C I/O Error 
+0x2004 SPI Init Error 
+0x2005 SPI Timeout Error 
+0x2006 SPI I/O Error 
+0x2007 USART Init Error 
+0x2008 Framework Error 
+0x2009 Slave I2C I/O Error 
+0x200A CRC Error 
+Note: The return values help in querying the current state of MCU. 
+
+ 
+16  e-CAM217_CUMI0234_MOD MCU Protocol App Note 
+MCU Command Description  
+This section explains the transactions handled from MCU to host processor while 
+processing the basic MCU Commands. 
+Status Command 
+The status command is used to query the status of MCU using the Get Command 
+Status command. This command involves three transactions where the reply length 
+from MCU is always constant. The transaction of status command is shown below. 
+Transaction 1 
+(Host 
+Processor to 
+MCU) (Write) 
+0x43 0x05 0x00, 0x01 0x01 
+Communication 
+ID (1 Byte) 
+Command ID 
+(1 Byte) 
+Payload 
+Length (2 
+Bytes) 
+Check Sum 
+of Payload 
+(1Byte) 
+ 
+Transaction 2 
+(Host 
+Processor to 
+MCU) (Write) 
+0x43 0x05 0xFF 
+Communication 
+ID (1 Byte) 
+Command ID 
+(1 Byte) 
+Query Command ID 
+(Payload length) 
+ 
+Transaction 3 
+(MCU to Host 
+Processor) 
+(Read) 
+0x43 0x05 0xXX 0xXX, 0xXX 0xXX 0xXX 
+Communication 
+ID (1 Byte) 
+Command ID 
+(1 Byte) 
+Command 
+ID of Issued 
+Command 
+(1 Byte) 
+Command 
+Status Code (2 
+Bytes) 
+Check 
+Sum (1 
+Byte) 
+Return 
+code (1 
+Byte) 
+ 
+Figure 4: Transaction of Status Command 
+Note: The command ID returned by the MCU in Transaction 3 corresponds to the 
+Command ID that was used prior to Get Command Status command. Please refer to 
+the List of Command Status Codes section to know the various command status 
+codes returned by MCU. 
+Configure Command 
+The configure command is used for starting an operation in the sensor through 
+MCU. For example, Lane Config, Stream Config, Set Control Config, Init Cam and so 
+on. This command always returns immediately, while MCU executes the request in 
+the background. The status of the last issued command can be queried through the 
+Get Command Status command. The configure command involves two transactions 
+as shown below. 
+Transaction 1 
+(Write) 
+0x43 0xXX 0xXX, 0xXX 0xXX 
+Communication 
+ID (1 Byte) 
+Command ID 
+(1 Byte) 
+Payload 
+Length (2 
+Bytes) 
+Checksum (1 
+Byte) 
+ 
+
+ 
+© Copyright e-con Systems. 2023. All rights reserved. 17 
+Transaction 2 
+(Write) 
+0x43 0xXX 0xXX, 0xXX 0xXX 
+Communication 
+ID (1 Byte 
+Command ID 
+(1 Byte) 
+Payload Data 
+(Payload 
+Length bytes) 
+Checksum (1 
+Byte) 
+ 
+Figure 5: Transaction of Configure Command 
+The below table lists the transaction values of configure command. 
+Table 12: Configure Command Transaction Values 
+Transacti
+on Packet Configur
+e lane 
+Init 
+Camer
+a 
+De Init 
+Camer
+a 
+Strea
+m ON 
+Strea
+m OFF 
+Configur
+e 
+Stream 
+Set 
+Contr
+ol 
+Value 
+Transactio
+n 1 (Host 
+Processor 
+to MCU) 
+Communicati
+on ID 0x43 0x43 0x43 0x43 0x43 0x43 0x43 
+Command ID 0x17 0x04 0x06 0x07 0x08 0x09 0x11 
+Payload 
+Length 
+Byte 1 0x00 0x00 0x00 0x00 0x00 0x00 
+0xXX, 
+0xXX 
+(Based 
+on 
+Contr
+ol 
+Index) 
+Byte 2 0x02 0x00 0x00 0x00 0x00 0x0E 
+Checksum 0x02 0x00 0x00 0x00 0x00 0x0E 
+0xXX 
+(Based 
+on 
+Contr
+ol 
+Index) 
+Transactio
+n 2 (Host 
+Processor 
+to MCU) 
+Communicatio
+n ID 0x43 0x43 0x43 0x43 0x43 0x43 0x43 
+Command ID 0x17 0x04 0x06 0x07 0x08 0x09 0x11 
+Payload 
+2-byte 
+data 
+(Based 
+on 
+Number 
+of 
+lanes). 
+For 
+more 
+details, 
+please 
+refer to 
+Table 13 
+- - - - 
+14-byte 
+data 
+(Based 
+on 
+Format 
+Index). 
+For 
+more 
+details, 
+please 
+refer to 
+Table 14 
+0xXX 
+(Based 
+on 
+Contr
+ol 
+Index)
+. For 
+more 
+details
+, 
+please 
+refer 
+to 
+Table 
+16 
+Checksum 
+0xXX 
+(Based 
+on 
+- - - - 
+0xXX 
+(Based 
+on 
+0xXX 
+(Based 
+on 
+
+ 
+18  e-CAM217_CUMI0234_MOD MCU Protocol App Note 
+Number 
+of lanes) 
+Format 
+Index) 
+Contr
+ol 
+Type) 
+Note: Please traverse the above table from top to bottom. 
+The below table lists the details about the communication to MCU from host, for 
+configure lane. 
+Table 13: Configure Lane Payload Data 
+Number of 
+Lanes 
+Payload Data 
+(2B) 
+Payload 
+Checksum (1B) 
+1 0x00, 0x01 0x01 
+2 0x00, 0x02 0x02 
+4 0x00, 0x04 0x04 
+Note: Lanes must be configured before Camera Init. 
+The below table lists the details about the communication to MCU from host, for 
+configure stream. 
+Table 14: Configure Stream Payload Data 
+Formats 
+Payload Data in Bytes Payload 
+Checksum 
+(1 B) 
+Stream 
+Index 
+(2 B) 
+FourCC 
+Format (4 
+B) 
+Width 
+(2 B) 
+Height 
+(2 B) 
+Frame Rate 
+(Numerator) 
+(2 B) 
+Frame Rate 
+(Denominator) 
+(2 B) 
+720pat 
+120 fps 
+0x00, 
+0x00 
+0x59,0x56, 
+0x59,0x55 
+0x05, 
+0x00 
+0x02, 
+0xD0 0x00, 0x78 0x00, 0x01 0xAD 
+1080p at 
+70 fps 
+0x00, 
+0x01 
+0x59,0x56, 
+0x59,0x55 
+0x07, 
+0x80 
+0x04, 
+0x38 0x00, 0x46 0x00, 0x01 0xFE 
+1920x1200 
+at 60 fps 
+0x00, 
+0x02 
+0x59,0x56, 
+0x59,0x55 
+0x07, 
+0x80 
+0x04, 
+0xB0 0x00, 0x3C 0x00, 0x01 0x0F 
+Note: Please traverse the above table from left to right. 
+Query-Reply Command 
+The query-reply command is used to query information such as Streaming formats, 
+Controls and so on, from MCU. This command uses four transactions between the 
+host and MCU as shown below. 
+Transaction 
+1 (Write) 
+0x43 0xXX 0xXX 0xXX 
+Communication 
+ID (1 Byte) 
+Command 
+ID (1 Byte) 
+Payload 
+Length (2 
+Bytes) 
+Checksum 
+(1 Byte) 
+ 
+Transaction 
+2 (Write) 
+0x43 0xXX 0xXX, 0xXX 0xXX 
+Communication 
+ID (1 Byte) 
+Command 
+ID (1 Byte) 
+Payload Data (Payload 
+Length)  
+Checksum 
+(1 Byte) 
+ 
+
+ 
+© Copyright e-con Systems. 2023. All rights reserved. 19 
+Transaction 
+3 (Read) 
+0x43 0xXX 0xXX, 0xXX 0xXX 0xXX 
+Communication 
+ID (1 Byte) 
+Command 
+ID (1 Byte) 
+Reply Length 
+(2 Bytes) 
+Checksum 
+(1 Byte) 
+Return 
+Code (1 
+Byte) 
+ 
+Transaction 
+4 (Read) 
+0x43 0x00 0xXX, 0xXX 0xXX 0xXX 
+Communication 
+ID (1 Byte) 
+Command 
+ID (1 Byte) 
+Reply Data (Reply 
+Length) 
+Check 
+sum (1 
+Byte) 
+Return 
+code (1 
+Byte) 
+ 
+Figure 6: Transaction of Query-Reply Command 
+The below table lists the transaction values of query-reply command. 
+Table 15: Query-Reply Command Transaction Values 
+Transaction Packet Get Firmware 
+Version 
+Get Control 
+Value 
+Transaction 1 
+(Host Processor 
+to MCU) 
+Communication 
+ID 0x43 0x43 
+Command ID 0x00 0x10 
+Payload 
+Length 
+Byte 1 0x00 0x00 
+Byte 2 0x00 0x02 
+Checksum 0x00 0x02 
+Transaction 2 
+(Host Processor 
+to MCU) 
+Communication 
+ID 0x43 0x43 
+Command ID 0x00 0x10 
+Payload Data - 0xXX, 0xXX 
+(Control Index) 
+Checksum - 0x00 
+Transaction 3 
+(MCU to Host 
+Processor) 
+Communication 
+ID 0x43 0x43 
+Command ID 0x00 0x10 
+Reply 
+Length 
+Byte 1 0x00 0x00 
+Byte 2 0x20 0x09 
+Checksum 0x20 0x09 
+Return Code 0x00 0x00 
+Transaction 4 
+(MCU to Host 
+Processor) 
+Communication 
+ID 0x43 0x43 
+Command ID 0x00 0x10 
+Reply Data 
+Firmware 
+version - 32-
+bytes 
+Based on Control 
+Index. For more 
+details, please 
+refer to Table 16 
+Checksum Based on reply 
+data 
+Based on reply 
+data 
+Return Code 0x00 0x00 
+Note: Please traverse the above table from top to bottom. 
+
+ 
+20  e-CAM217_CUMI0234_MOD MCU Protocol App Note 
+Controls of e-CAM217_CUMI0234_MOD 
+This section describes the controls available in e-CAM217_CUMI0234_MOD, which 
+can be set or get through the MCU. 
+The available controls of e-CAM217_CUMI0234_MOD are as follows: 
+• Brightness 
+• Contrast 
+• Saturation 
+• White Balance (both automatic and manual) 
+• Gamma 
+• Gain 
+• Horizontal Flip 
+• Vertical Flip 
+• Sharpness 
+• Exposure (auto, manual and region of interest (ROI) based exposure) 
+• ROI Window Size 
+• External Trigger 
+• Strobe 
+• Denoise 
+• Exposure Compensation 
+The below table lists the get or set control payload data of e-
+CAM217_CUMI0234_MOD controls. 
+Table 16: Get or Set Control Payload Data 
+Control Name Control Index 
+(2 B) 
+Payload Data in Bytes 
+Control ID (4 B) Control 
+Type (1 B) Current Value (4 B) 
+Brightness 0x00 0x00 0x00 0x98 0x09 0x00 0x01 0xXX 0xXX 0xXX 0xXX 
+Contrast 0x00 0x01 0x00 0x98 0x09 0x01 0x01 0xXX 0xXX 0xXX 0xXX 
+Saturation 0x00 0x02 0x00 0x98 0x09 0x02 0x01 0xXX 0xXX 0xXX 0xXX 
+White Balance 
+(Auto) 0x00 0x03 0x00 0x98 0x09 0x0C 0x01 0xXX 0xXX 0xXX 0xXX 
+Gamma 0x00 0x04 0x00 0x98 0x09 0x10 0x01 0xXX 0xXX 0xXX 0xXX 
+White Balance 
+Temperature 0x00 0x05 0x00 0x98 0x09 0x1A 0x01 0xXX 0xXX 0xXX 0xXX 
+Sharpness 0x00 0x06 0x00 0x98 0x09 0x1B 0x01 0xXX 0xXX 0xXX 0xXX 
+Gain 0x00 0x07 0x00 0x98 0x09 0x13 0x01 0xXX 0xXX 0xXX 0xXX 
+Auto Exposure  0x00 0x08 0x00 0x9A 0x09 0x01 0x01 0xXX 0xXX 0xXX 0xXX 
+Manual 
+Exposure 0x00 0x09 0x00 0x9A 0x09 0x02 0x01 0xXX 0xXX 0xXX 0xXX 
+Denoise 0x00 0x0A 0x00 0x9A 0x09 0x2d 0x01 0xXX 0xXX 0xXX 0xXX 
+Horizontal Flip 0x00 0x0B 0x00 0x98 0x09 0x14 0x01 0xXX 0xXX 0xXX 0xXX 
+Vertical Flip 0x00 0x0C 0x00 0x98 0x09 0x15 0x01 0xXX 0xXX 0xXX 0xXX 
+
+ 
+© Copyright e-con Systems. 2023. All rights reserved. 21 
+ROI Based 
+Exposure 0x00 0x0D 0x00 0x9A 0x09 0x26 0x01 0xXX 0xXX 0xXX 0xXX 
+ROI Window 
+Size 0x00 0x0E 0x00 0x9A 0x09 0x24 0x01 0xXX 0xXX 0xXX 0xXX 
+Exposure 
+Compensation 0x00 0x0F 0x00 0x9A 0x09 0x31 0x01 0xXX 0xXX 0xXX 0xXX 
+External 
+Trigger 0x00 0x10 0x00 0x9A 0x09 0x2A 0x01 0xXX 0xXX 0xXX 0xXX 
+Strobe 0x00 0x11 0x00 0x9A 0x09 0x2B 0x01 0xXX 0xXX 0xXX 0xXX 
+Note: Please traverse the above table from left to right. 
+Brightness Control 
+The brightness values can be changed from a minimum value of -15 to 15. This 
+control increases the low light performance of e-CAM217_CUMI0234_MOD. The 
+default value is 0. 
+Range: -15 (0xFFFFFFF1) to 15 (0x0000000F) 
+Data Type: 32-bit signed integer 
+Control ID: 0x00980900 
+Setting (Write) Brightness Value 
+MCU command type: Configuration command. Please refer to the Set Control Value 
+of Table 12. 
+Getting (Read) Current Brightness Value 
+MCU command type: Query-Reply command. Please refer to the Get Control Value 
+of Table 15. 
+Contrast Control 
+The contrast values can be changed from a minimum value of 0 to 30. Increasing the 
+contrast value increases the luminance of e-CAM217_CUMI0234_MOD. The default 
+value is 10. 
+Range: 0 (0x00000000) to 30 (0x0000001E) 
+Data Type: 32-bit unsigned integer 
+Control ID: 0x00980901 
+Setting (Write) Contrast Value 
+MCU command type: Configuration command. Please refer to the Set Control Value 
+of Table 12. 
+
+ 
+22  e-CAM217_CUMI0234_MOD MCU Protocol App Note 
+Getting (Read) Current Contrast Value 
+MCU command type: Query-Reply command. Please refer to the Get Control Value 
+of Table 15. 
+Saturation Control 
+The saturation values can be changed from a minimum value of 0 to 60. Increasing 
+the saturation value increases the intensity of the color of e-
+CAM217_CUMI0234_MOD. The default value is 16. 
+Range: 0 (0x00000000) to 60 (0x0000003C) 
+Data Type: 32-bit unsigned integer 
+Control ID: 0x00980902 
+Setting (Write) Saturation Value 
+MCU command type: Configuration command. Please refer to the Set Control Value 
+of Table 12. 
+Getting (Read) Current Saturation Value 
+MCU command type: Query-Reply command. Please refer to the Get Control Value 
+of Table 13. 
+Auto White Balance Control 
+The white balance values can be toggled between 0 (manual) to 1 (auto). The default 
+value is 1. 
+Range: 0 (0x00000000) to 1 (0x00000001) 
+Data Type: 32-bit unsigned integer 
+Control ID: 0x0098090C 
+Setting (Write) White Balance Value 
+MCU command type: Configuration command. Please refer to the Set Control Value 
+of Table 12. 
+Getting (Read) Current White Balance Value 
+MCU command type: Query-Reply command. Please refer to the Get Control Value 
+of Table 15. 
+
+ 
+© Copyright e-con Systems. 2023. All rights reserved. 23 
+White Balance Temperature Control 
+The manual white balance values can be changed from 10 to 10000. The default 
+value is 4600. This control can be enabled only when auto white balance is set to 0 
+(manual). 
+Range: 1000 (0x0000000A) to 10000 (0x00002710) 
+Data Type: 32-bit unsigned integer 
+Control ID: 0x0098091A 
+Setting (Write) White Balance Temperature Value 
+MCU command type: Configuration command. Please refer to the Set Control Value 
+of Table 12. 
+Getting (Read) Current White Balance Temperature Value 
+MCU command type: Query-Reply command. Please refer to the Get Control Value 
+of Table 15. 
+Gamma Control 
+The gamma values can be changed from a minimum value of 40 to 500. The default 
+value is 220. 
+Range: 40 (0x00000028) to 500 (0x000000DC) 
+Data Type: 32-bit unsigned integer 
+Control ID: 0x00980910 
+Setting (Write) Gamma Value 
+MCU command type: Configuration command. Please refer to the Set Control Value 
+of Table 12. 
+Getting (Read) Current Gamma Value 
+MCU command type: Query-Reply command. Please refer to the Get Control Value 
+of Table 15. 
+Gain Control 
+The gain values can be changed from a minimum value of 1 to 40. The changes will 
+be updated only when exposure mode is set to manual. The default value is 1. 
+Range: 1 (0x00000001) to 40(0x00000028) 
+Data Type: 32-bit unsigned integer 
+Control ID: 0x00980913 
+
+ 
+24  e-CAM217_CUMI0234_MOD MCU Protocol App Note 
+Setting (Write) Gain Value 
+MCU command type: Configuration command. Please refer to the Set Control Value 
+of Table 12. 
+Getting (Read) Current Gain Value 
+MCU command type: Query-Reply command. Please refer to the Get Control Value 
+of Table 15. 
+Horizontal Flip Control 
+The preview from the sensor can be horizontally flipped by setting the horizontal flip 
+mode control value to 1 (ON). The default value is 0 (OFF). 
+Values: 0x00000000 (OFF) or 0x00000001 (ON) 
+Data Type: 32-bit unsigned integer 
+Control ID: 0x00980914 
+Setting (Write) Horizontal Flip Value 
+MCU Command type: Configuration command. Please refer to the Set Control Value 
+of Table 12. 
+Getting (Read) Current Horizontal Flip Value 
+MCU Command type: Query-Reply command. Please refer to the Get Control Value 
+of Table 15. 
+Vertical Flip Control 
+The preview from the sensor can be vertically flipped by setting the vertical flip 
+mode control value to 1 (ON). The default value is 0 (OFF). 
+Values: 0x00000000 (OFF) or 0x00000001 (ON) 
+Data Type: 32-bit unsigned integer 
+Control ID: 0x00980915 
+Setting (Write) Vertical Flip Value 
+MCU command type: Configuration command. Please refer to the Set Control Value 
+of Table 12. 
+Getting (Read) Current Vertical Flip Value 
+MCU command type: Query-Reply command. Please refer to the Get Control Value 
+of Table 15. 
+
+ 
+© Copyright e-con Systems. 2023. All rights reserved. 25 
+Sharpness Control 
+The sharpness values can be changed from a minimum value of 0 to 127. This 
+control increases the image clarity of e-CAM217_CUMI0234_MOD. The default value 
+is 16. 
+Range: 0x00000000 to 0x0000007F 
+Data Type: 32-bit unsigned integer 
+Control ID: 0x0098091B 
+Setting (Write) Sharpness Value 
+MCU command type: Configuration command. Please refer to the Set Control Value 
+of Table 12. 
+Getting (Read) Current Sharpness Value 
+MCU command type: Query-Reply command. Please refer to the Get Control Value 
+of Table 15. 
+Exposure Control 
+e-CAM217_CUMI0234_MOD supports manual, auto and ROI based exposure 
+controls. When exposure time is changed, the frame rate varies accordingly. The 
+default exposure mode is Full FOV Auto Mode. 
+Values: 0x00000000 (Full FOV Auto Mode) 
+ 0x00000001 (Manual Mode) 
+ 0x00000002 (ROI based Auto Mode) 
+Data Type: 32-bit unsigned integer 
+Control ID: 0x009A0901 
+Setting (Write) Exposure Control Value 
+MCU command type: Configuration command. Please refer to the Set Control Value 
+of Table 12. 
+Getting (Read) Current Exposure Control Value 
+MCU command type: Query-Reply command. Please refer to the Get Control Value 
+of Table 15. 
+Manual Exposure Control 
+The manual exposure control is used to set the absolute exposure time for e-
+CAM217_CUMI0234_MOD. When exposure time is changed, the frame rate varies 
+accordingly. The values range from 1 to 10000. The default value is 312. This control 
+can be changed only when exposure control is set to manual mode. 
+
+ 
+26  e-CAM217_CUMI0234_MOD MCU Protocol App Note 
+Values: 1 (0x00000001) to 4300 (0x00002710) 
+Data Type: 32-bit unsigned integer 
+Control ID: 0x009A0902 
+Setting (Write) Manual Exposure Value 
+MCU command type: Configuration command. Please refer to the Set Control Value 
+of Table 12. 
+Getting (Read) Current Manual Exposure Value 
+MCU command type: Query-Reply command. Please refer to the Get Control Value 
+of Table 15. 
+ROI Based Exposure Control 
+The ROI based exposure control is used to set the ROI to adjust the exposure. This 
+control can be changed only when exposure control is set to ROI based auto mode. 
+The preview window is mapped from 0 to 255 in both X and Y coordinates and is 
+used as value. 
+The Y coordinate is represented in bits from 0 to 7. 
+The X coordinate is represented in bits from 8 to 15. 
+For example, (X, Y) = (100, 200) is represented as 0x000064C8. 
+The control values range from (X, Y) = (0,0) to (X, Y) = (255, 255). 
+Default value is (X, Y) = (128, 128). 
+Values: 0x00000000 (0, 0) to 0x0000FFFF (255, 255) 
+Data Type: 32-bit unsigned integer 
+Control ID: 0x009A0926 
+Setting (Write) ROI Based Exposure Value 
+MCU command type: Configuration command. Please refer to the Set Control Value 
+of Table 12. 
+Getting (Read) Current ROI Based Exposure Value 
+MCU command type: Query-Reply command. Please refer to the Get Control Value 
+of Table 15. 
+ROI Window Size 
+The ROI window size can be changed from a minimum value of 8 to 64. The default 
+size is 24. This control can only be changed in steps of 8, for example, 8, 16, 24 and 
+so on. 
+Values: 8 (0x00000008) to 64 (0x00000040) 
+
+ 
+© Copyright e-con Systems. 2023. All rights reserved. 27 
+Data Type: 32-bit unsigned integer 
+Control ID: 0x009A0924 
+Setting (Write) ROI Window Size Value 
+MCU command type: Configuration command. Please refer to the Set Control Value 
+of Table 12. 
+Getting (Read) Current ROI Window Size Value 
+MCU command type: Query-Reply command. Please refer to the Get Control Value 
+of Table 15. 
+External Trigger Control 
+The External Trigger control is used to enable external sensor trigger. The default 
+value is 0. 
+Values: 0 (0x00000000) to 1 (0x00000001) 
+Data Type: 32-bit unsigned integer 
+Control ID: 0x009A092A 
+Setting (Write) External Trigger Control Value 
+MCU command type: Configuration command. Please refer to the Set Control Value 
+of Table 12. 
+Getting (Read) Current External Trigger Control Value 
+MCU command type: Query-Reply command. Please refer to the Get Control Value 
+of Table 15. 
+Strobe 
+The Strobe control is used to enable strobe. The default value is 0. 
+Values: 0 (0x00000000) to 1(0x00000001) 
+Data Type: 32-bit unsigned integer 
+Control ID: 0x009A092B 
+Setting (Write)Strobe Control Value 
+MCU command type: Configuration command. Please refer to the Set Control Value 
+of Table 12. 
+Getting (Read) Current Strobe Control Value 
+MCU command type: Query-Reply command. Please refer to the Get Control Value 
+of Table 15. 
+
+ 
+28  e-CAM217_CUMI0234_MOD MCU Protocol App Note 
+Denoise Control 
+The denoise control is used to reduce noise in low lighting conditions. The default 
+value is 8. 
+Values: 0 (0x00000000) to 15 (0x0000000F) 
+Data Type: 32-bit unsigned integer 
+Control ID: 0x009A092D 
+Setting (Write) Denoise Control Value 
+MCU command type: Configuration command. Please refer to the Set Control Value 
+of Table 12. 
+Getting (Read) Current Denoise Control Value 
+MCU command type: Query-Reply command. Please refer to the Get Control Value 
+of Table 15. 
+Exposure Compensation Control 
+The exposure compensation control adjusts the upper limit of auto exposure. The 
+default value is 16000. 
+Values: 8000 (0x00001F40) to 1000000 (0x000F4240) 
+Data Type: 32-bit unsigned integer 
+Control ID: 0x009A0931 
+Setting (Write) Exposure Compensation Control Value 
+MCU command type: Configuration command. Please refer to the Set Control Value 
+of Table 12. 
+Getting (Read) Current Exposure Compensation Control Value 
+MCU command type: Query-Reply command. Please refer to the Get Control Value 
+of Table 125. 
+
+ 
+© Copyright e-con Systems. 2023. All rights reserved. 29 
+What's Next? 
+After understanding the detailed information of I2C based protocol used by the host 
+application processor for communicating with the microcontroller, you can refer to 
+the e-CAM217_CUMI0234_MOD Datasheet to understand more about e-
+CAM217_CUMI0234_MOD. 
+
+ 
+30  e-CAM217_CUMI0234_MOD MCU Protocol App Note 
+Glossary 
+CMOS: Complementary Metal Oxide Semiconductor. 
+CSI: Camera Serial Interface. 
+FHD: Full HD (Industry name for 1920 x 1080P resolution). 
+HD: High Definition (Industry name for 1280 x 720 resolution). 
+MCU: Microcontroller unit. 
+MIPI: Mobile Industry Processor Interface. 
+ROI: Region of Interest. 
+UYVY: YUV422 16-bit image format with UYVY ordering. 
+VGA: Video Graphics Array (Industry name for 640 x 480 resolution). 
+
+ 
+© Copyright e-con Systems. 2023. All rights reserved. 31 
+Support 
+Contact Us 
+If you need any support on e-CAM217_CUMI0234_MOD product, please contact us 
+using the Live Chat option available on our website - https://www.e-
+consystems.com/ 
+Creating a Ticket 
+If you need to create a ticket for any type of issue, please visit the ticketing page on 
+our website - https://www.e-consystems.com/create-ticket.asp 
+RMA 
+To know about our Return Material Authorization (RMA) policy, please visit the RMA 
+Policy page on our website - https://www.e-consystems.com/RMA-Policy.asp 
+General Product Warranty Terms 
+To know about our General Product Warranty Terms, please visit the General 
+Warranty Terms page on our website - https://www.e-
+consystems.com/warranty.asp 
+  
+
+ 
+32  e-CAM217_CUMI0234_MOD MCU Protocol App Note 
+Revision History 
+Rev Date Description Author 
+1.0 19-Apr-2023 Initial draft Camera Dev Team 
+1.1 24-Mar-2025 The mode 320 x 240 is removed and updated MCU 
+firmware version Camera Dev Team 
+ 
+ 
+

@@ -1,0 +1,204 @@
+   
+ 
+   
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+e-CAM25_CUONX 
+Version 1.3 
+e-con Systems 
+1/23/2025 
+Release Package Manifest 
+
+
+  
+© Copyright e-con Systems. 2024. All rights reserved. 1 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Disclaimer 
+e-con Systems reserves the right to edit/modify this document without any prior 
+intimation of whatsoever.  
+
+ 
+2  e-CAM25_CUONX Release Package Manifest 
+Contents 
+INTRODUCTION TO E-CAM25_CUONX 3 
+PACKAGE MANIFEST 4 
+OVERVIEW OF PACKAGE MANIFEST DIRECTORY 5 
+APPLICATION 5 
+KERNEL 5 
+GLOSSARY 6 
+SUPPORT 7 
+  
+
+  
+© Copyright e-con Systems. 2024. All rights reserved. 3 
+Introduction to e-CAM25_CUONX 
+e-CAM25_CUONX is a 2.3 MP MIPI CSI-2 camera from e-con Systems, a company 
+with over two decades of experience in designing, developing, and manufacturing 
+OEM cameras. It is a new MIPI camera board which helps to interface AR0234 sensor 
+in either 4-lane mode or 2-lane mode depending upon the port’s lane support and 
+the user-defined configuration to the Jetson Orin™ Nano and Orin NX™. The prebuilt 
+driver for this camera along with the camera board is provided by e-con Systems. 
+This document explains the directories of package manifest and the contents of 
+release package for Jetson Orin NX™/Orin Nano™ development kit. 
+
+ 
+4  e-CAM25_CUONX Release Package Manifest 
+Package Manifest 
+This section describes the detailed information of package manifest. 
+The below table lists the top level directories and files that are created when you 
+extract the e-
+CAM25_CUONX_JETSON_ONX_ONANO_<L4T_version>_<release_date>_<release_
+version>.tar.gz release package. 
+Table 1: Package Manifest Directory Contents and its Description 
+Directory Contents Description 
+Application/ Directory containing application source code 
+and dependencies 
+Kernel/ Directory containing patch files for e-
+CAM25_CUONX. 
+e-CAM25_CUONX_ 
+<L4T_version>_<JP_VERSION>_JETSO
+N-ONX-
+ONANO_<release_version>.tar.gz 
+Compressed archive containing the required 
+binaries for updating Jetson Orin NX™ and 
+Jetson Orin Nano™. 
+install_binaries.sh Install script for installing pre-built kernel, 
+application binaries and miscellaneous on the 
+Jetson Orin NX™/Orin Nano™. 
+release_integrity.md5 Encrypted file containing the md5sum of the 
+e-CAM25_CUONX archive. 
+
+  
+© Copyright e-con Systems. 2024. All rights reserved. 5 
+Overview of Package Manifest Directory  
+This section provides detailed information about each directory of the release 
+package. 
+Application 
+The below table lists the directories containing the application source code and 
+dependencies required for e-CAM25_CUONX camera on the Jetson Orin NX™/Orin 
+Nano™ development kit. 
+Table 2: Application Directory Contents and its Description 
+Directory Contents Description 
+ecam_tk1_guvcview/Source/ 
+Directory containing application 
+related source code for Jetson Orin 
+NX™/Orin Nano™. 
+ecam_tk1_guvcview/Source/ 
+ecam_tk1_guvcview_dependency.tar.gz 
+Archive file containing application 
+dependency for Jetson Orin NX™/Orin 
+Nano™. 
+ecam_tk1_guvcview/Source/ 
+e-CAM_TK1_guvcview-src-1.7.2.tar.gz 
+Archive file containing 
+ecam_tk1_guvcview application source 
+code for Jetson Orin NX™/Orin Nano™. 
+Kernel 
+The below table lists the patch files required for e-CAM25_CUONX camera on the 
+Jetson Orin NX™/Orin Nano™ development kit. 
+Table 3: Kernel Directory Contents and its Description 
+Directory Contents Description 
+e-
+CAM25_CUONX_JETSON_ONX_ONAN
+O_<L4T_version>_oot.patch 
+The patch file related to the default 
+nvidia-oot for Jetson Orin NX™/Orin 
+Nano™ that adds support for e-
+CAM25_CUONX. 
+e-
+CAM25_CUONX_JETSON_ONX_ONAN
+O_<L4T_version>_dtb.patch 
+The patch file related to the default device 
+tree for Jetson Orin NX™/Orin Nano™ that 
+adds support for e-CAM25_CUONX. 
+e-
+CAM25_CUONX_JETSON_ONX_ONAN
+O_<L4T_version>_module.patch 
+The patch file for e-con e-CAM25_CUONX 
+sensor driver. 
+
+ 
+6  e-CAM25_CUONX Release Package Manifest 
+Glossary 
+DTB: Device Tree Blob. 
+MIPI: Mobile Industry Processor Interface. 
+
+  
+© Copyright e-con Systems. 2024. All rights reserved. 7 
+Support 
+Contact Us 
+If you need any support on e-CAM25_CUONX product, please contact us using the 
+Live Chat option available on our website - https://www.e-consystems.com/ 
+Creating a Ticket 
+If you need to create a ticket for any type of issue, please visit the ticketing page on 
+our website - https://www.e-consystems.com/create-ticket.asp 
+RMA 
+To know about our Return Material Authorization (RMA) policy, please visit the RMA 
+Policy page on our website - https://www.e-consystems.com/RMA-Policy.asp 
+General Product Warranty Terms 
+To know about our General Product Warranty Terms, please visit the General 
+Warranty Terms page on our website - https://www.e-
+consystems.com/warranty.asp 
+  
+
+ 
+8  e-CAM25_CUONX Release Package Manifest 
+Revision History 
+Rev Date Description Author 
+1.0 18-Apr-2023 Initial draft Camera Dev Team 
+1.1 10-Nov-2023 Updated to L4T35.4.1 and supported 2 lane 
+configuration Camera Dev Team 
+1.2 24-May-2024 Added v4l2-compliance to misc for L4T36.3.0 Camera Dev Team 
+1.3 23-Jan-2025 Updated for L4T36.4.0 Camera Dev Team 
+ 
+

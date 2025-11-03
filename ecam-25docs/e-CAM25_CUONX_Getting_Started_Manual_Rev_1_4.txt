@@ -1,0 +1,672 @@
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+e-CAM24_CUNX 
+Version 1.4 
+e-con Systems 
+6/3/2020 
+Getting Started Manual 
+e-CAM25_CUONX 
+Version 1.4 
+e-con Systems 
+3/20/2025 
+
+
+ 
+© Copyright e-con Systems. 2024. All rights reserved. 1 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Disclaimer 
+The specifications of e-CAM25_CUONX board and instructions on how to use this 
+board with Jetson Orin Nano™ and Orin NX™ development kits are provided as 
+reference only and e-con Systems reserves the right to edit/modify this document 
+without any prior intimation of whatsoever. 
+  
+
+ 
+2  e-CAM25_CUONX Getting Started Manual 
+Contents  
+INTRODUCTION TO E-CAM25_CUONX 3 
+PARTS SUPPLIED 3 
+DESCRIPTION 4 
+E-CAM25_CUONX BOARD HANDLING PROCEDURE 6 
+CAMERA BOARD CONNECTION 6 
+INTERFACING WITH JETSON ORIN NX DEVELOPMENT KIT 8 
+INTERFACING WITH JETSON ORIN NANO DEVELOPMENT KIT 13 
+SOFTWARE QUICK SETUP 19 
+STEPS FOR EXTRACTING AND FLASHING BINARIES 19 
+STEPS FOR LAUNCHING APPLICATION IN DEVELOPMENT KIT 20 
+REFERENCE DOCUMENTS 22 
+SOFTWARE DOCUMENTS 22 
+HARDWARE DOCUMENTS 22 
+TROUBLESHOOTING 24 
+FAQ 25 
+WHAT’S NEXT? 26 
+GLOSSARY 27 
+SUPPORT 28 
+  
+
+ 
+© Copyright e-con Systems. 2024. All rights reserved. 3 
+Introduction to e-CAM25_CUONX 
+e-CAM25_CUONX is a 2.3 MP MIPI CSI-2 camera from e-con Systems, a company 
+with over two decades of experience in designing, developing, and manufacturing 
+OEM cameras.  This camera module targets the NVIDIA® Jetson Orin Nano™/Orin 
+NX™ development kit. It can be directly interfaced with Jetson Orin Nano™/Orin 
+NX™ development kit through CAM1 and CAM0 connectors. 
+e-CAM25_CUONX is provided with S-mount (also known as M12 board lens) lens 
+holder. The S-mount is one of the most used small form factor lens mounts for 
+board cameras. e-CAM25_CUONX is a color camera that supports uncompressed 
+UYVY format in both still capture and video recording. The supported resolutions 
+and frame rates are listed in following table. 
+Table 1: Supported Resolutions and Frame Rates in 2 Lane 
+S. NO Resolution Frame Rate (fps) 
+1 640 x 480 120 
+2 1280 x 720 120 
+3 1920 x 1080 65 
+4 1920 x 1200 60 
+ 
+Table 2: Supported Resolutions and Frame Rates in 4 Lane 
+S. NO Resolution Frame Rate (fps) 
+1 1280 x 720 120 
+2 1920 x 1080 70 
+3 1920 x 1200 60 
+This document describes how to interface the e-CAM25_CUONX board on Jetson 
+Orin Nano™/Orin NX™ development kit and how to use the e-CAM25_CUONX board. 
+Parts Supplied 
+The following table lists the parts supplied with the kit. 
+Table 3: Parts Supplied and its Quantity 
+Parts Supplied Images Quantity 
+e-CAM25_CUONX Camera 
+Module 
+ 
+1 
+
+
+ 
+4  e-CAM25_CUONX Getting Started Manual 
+15cm FPC Cable 
+ 
+1 
+Lens 
+ 
+1 
+Description 
+Jetson Orin Nano™ and Jetson Orin NX™ are newly launched small size, low power, 
+artificial intelligence (AI) system-based evaluation kits, developed by NVIDIA®. Orin 
+Nano™/Orin NX™ development kit supports 4-lane/2-lane in CAM1 and 2-lane in 
+CAM0 MIPI CSI connector.  e-CAM25_CUONX uses this 4-lane and 2-lane MIPI CSI-2 
+interface for connecting 2.3 MP camera module. 
+e-CAM25_CUONX is a multi-board solution, which has two boards as follows: 
+ Camera module (e-CAM217_CUMI0234_MOD) 
+ Adaptor board (ACC-RB-WTB-ADP) 
+The camera module is a small, low-power, high performance 2.3 MP camera with a 
+built-in Image Signal Processor (ISP), which supports uncompressed UYVY format. 
+This camera module is based on AR0234CS CMOS image sensor from onsemi™. The 
+AR0234CS is a 1/2.6" optical form factor, CMOS image sensor with global shutter. 
+The front and rear views of e-CAM25_CUONX module are shown in following 
+figures. 
+ 
+Figure 1: Front View of e-CAM25_CUONX Module 
+
+
+ 
+© Copyright e-con Systems. 2024. All rights reserved. 5 
+ 
+Figure 2: Rear View of e-CAM25_CUONX Module 
+e-CAM25_CUONX camera module has 26-pin Samtec connector (CN2) for mating 
+with e-CAM25_CUONX adaptor board. e-CAM25_CUONX adaptor board acts as a 
+bridge between the camera module and the Jetson Orin Nano™/Orin NX™ 
+development kit. The adaptor board provides the voltages required for the camera 
+module. e-CAM25_CUONX adaptor board consists of 22-pin FFC connector (CN1), 
+through which e-CAM25_CUONX is connected to Orin Nano™/Orin NX™ 
+development kits over FPC cable of maximum 15 cm length. 
+
+
+ 
+6  e-CAM25_CUONX Getting Started Manual 
+e-CAM25_CUONX Board 
+Handling Procedure  
+This section describes the handling procedure of e-CAM25_CUONX board. 
+The procedure to assemble camera board to Jetson Orin Nano™/Orin NX™ 
+development kit is described in the following section. 
+ Camera Board Connection 
+ Interfacing with Orin NX Development Kit 
+ Interfacing with Orin Nano Development Kit 
+Camera Board Connection 
+e-CAM25_CUONX is provided with 15cm FPC cable for connecting with Jetson Orin 
+Nano™/Orin NX™ development kit. 
+The conductive and insulation side location of the FPC cable is shown in following 
+figure. 
+ 
+Figure 3: FPC Cable Conductive and Insulation Side Location 
+The procedure to assemble camera board is as follows: 
+1. Unlock the CN1 connector in adapter board for inserting the FPC cable. 
+The CN1 connector has a lock actuator which is used for locking and unlocking 
+the cable as shown in following figure. 
+
+
+ 
+© Copyright e-con Systems. 2024. All rights reserved. 7 
+ 
+                                                               Figure 4: CN1 Connector Location 
+2. Lift the lock actuator at centre with slight force for unlocking the connector as 
+shown in following figures. 
+ 
+Figure 5: Unlocking CN1 Connector 
+ 
+Figure 6: CN1 Unlocked Connector Position 
+3. Insert the FPC cable to CN1 connector in adapter board. 
+4. Lock the CN1 connector by pressing the lock actuator from top to bottom. 
+The conductive side of the cable must face the board as shown in following 
+figure. 
+
+
+ 
+8  e-CAM25_CUONX Getting Started Manual 
+ 
+Figure 7: Cable Locked to CN1 Connector of e-CAM25_CUONX 
+Note: Care must be taken, while connecting cable to e-CAM25_CUONX 
+connector. 
+Warning: If FPC cable is connected in reverse direction to CN1 connector of e-
+CAM25_CUONX, it might damage e-CAM25_CUONX as well as Jetson Orin 
+Nano™/Orin NX™ development kit. 
+Interfacing with Jetson Orin NX Development Kit 
+Jetson Orin NX™ development kit has a connector CAM1 interface with camera 
+module. 
+The procedure for interfacing with the camera module is as follows: 
+1. Insert the FPC cable on CAM1 connector of the Jetson Orin NX™ development kit 
+before powering ON the Jetson Orin NX™ development kit. 
+The CAM1 connector location in the Jetson Orin NX™ development kit is shown 
+in following figure. 
+ 
+ 
+Figure 8: Camera Connector Location in Jetson Orin NX Development Kit 
+2. Unlock the CAM1 connector for inserting the FPC cable. 
+ 
+
+
+ 
+© Copyright e-con Systems. 2024. All rights reserved. 9 
+The location of actuator in Jetson Orin NX™ development kit is shown in following 
+figure. 
+ 
+Figure 9: Camera Connector Actuator Location in Orin NX Development Kit 
+3. Pull out the actuator at centre with slight force for unlocking the connector as 
+shown in following figures. 
+ 
+Figure 10: Unlocking Jetson Orin NX Development Kit Camera Connector 
+ 
+Figure 11: Unlocked Position of Jetson Orin NX Development Kit Camera Connector 
+
+
+ 
+10  e-CAM25_CUONX Getting Started Manual 
+4. Insert the FPC cable to the CAM1 connector of Jetson Orin NX™ development kit 
+as shown in following figure. 
+ 
+Figure 12: FPC Cable Insertion to CAM1 Connector of Jetson Orin NX Development Kit 
+5. Lock the CAM1 connector by pressing both ends of actuator with same equal 
+force as shown in following figures. 
+ 
+Figure 13: Locking FPC Cable 
+ 
+Figure 14: FPC Cable Locked Position on Jetson Orin NX Development Kit 
+
+
+ 
+© Copyright e-con Systems. 2024. All rights reserved. 11 
+Note: Care must be taken, while connecting cable to camera connector of 
+Jetson Orin NX™ development kit. 
+Warning: If FPC cable is connected in reverse direction to CAM1 connector of 
+Jetson Orin NX™ development kit, it might damage e-CAM25_CUONX as well as 
+Jetson Orin NX™ development kits. 
+Now, e-CAM25_CUONX is connected to Jetson Orin NX™ development kit as 
+shown in following figure. 
+  
+Figure 15: e-CAM25_CUNX Setup Interfaced to Jetson Orin NX Development Kit 
+Jetson Orin NX™ development kit can be powered either from USB Type-C 
+connector or DC power jack connector. Since USB Type-C is used for low power 
+applications, e-CAM25_CUONX supports only low resolutions in this power 
+supply. Connecting 19V power supply to DC jack will be the ideal solution, when 
+using e-CAM25_CUONX with Jetson Orin NX™ development kit to use its full 
+listed resolutions. 
+The power supply connectors in Jetson Orin NX™ development kit is shown in 
+following figure. 
+
+
+ 
+12  e-CAM25_CUONX Getting Started Manual 
+ 
+Figure 16: Power Supply Connectors in Jetson Orin NX Development Kit 
+6. Connect 19V power supply to DC jack to power ON the Jetson Orin NX™ 
+development kit as shown in following figure. 
+ 
+Figure 17: Power Supply Connected to Jetson Orin NX Development Kit 
+After powering ON the Jetson Orin NX™ development kit, the greenish yellow 
+color LED on Orin NX™ development kit will glow. This serves as an indication 
+for power-up of base board. The LED location is shown in following figure. 
+ 
+Figure 18: Status LED Indicating Jetson Orin NX Development Kit Powered ON 
+
+
+ 
+© Copyright e-con Systems. 2024. All rights reserved. 13 
+After powering ON the Jetson Orin NX™ development kit, the greenish yellow 
+color LED on e-CAM25_CUONX adapter board will glow. This serves as an 
+indication for power-up of e-CAM25_CUONX camera module. LED location is 
+shown in following figure. 
+ 
+Figure 19: Status LED Indicating e-CAM25_CUONX Module Powered ON 
+Interfacing with Jetson Orin Nano Development Kit 
+Jetson Orin Nano™ development kit has CAM1 connector to interface with camera 
+module. 
+The procedure for interfacing with the camera module is as follows: 
+1. Insert the FPC cable on the CAM1 connector of the Jetson Orin Nano™ 
+development kit before powering ON the Jetson Orin Nano™ development kit. 
+The CAM1 connector location in the Jetson Orin Nano™ development kit is 
+shown in following figure. 
+ 
+Figure 20: Camera Connector Location in Jetson Orin Nano Development Kit 
+2. Unlock the CAM1 connector for inserting the FPC cable. 
+The location of actuator in the Jetson Orin Nano™ development kit is shown in 
+following figure. 
+
+
+ 
+14  e-CAM25_CUONX Getting Started Manual 
+ 
+Figure 21: Jetson Orin Nano Kit Camera Connector Actuator Location 
+3. Pull out the actuator at centre with slight force for unlocking the connector as 
+shown in following figures. 
+ 
+Figure 22: Unlocking Jetson Orin Nano Development Kit Camera Connector 
+ 
+Figure 23: Unlocked Position of Jetson Orin Nano Development Kit Camera Connector 
+4. Insert the FPC cable to the CAM1 connector of Jetson Orin Nano™ development 
+kit as shown in following figure. 
+
+
+ 
+© Copyright e-con Systems. 2024. All rights reserved. 15 
+ 
+Figure 24: FPC Cable Insertion to CAM1 Connector of Jetson Orin Nano Development Kit 
+The FPC cable must be inserted in conductive side of the cable to face board 
+side as shown in following figure. 
+ 
+Figure 25: FPC Cable inserted to Jetson Orin Nano Development Kit 
+5. Lock the CAM1 connector by pressing both ends of actuator with same equal 
+force as shown in following figures. 
+ 
+Figure 26: Locking FPC Cable 
+
+
+ 
+16  e-CAM25_CUONX Getting Started Manual 
+ 
+Figure 27: FPC Cable Locked Position on Jetson Orin Nano Development Kit 
+Note: Care must be taken, while connecting cable to camera connector of 
+Jetson Orin Nano™ development kit. 
+Now, e-CAM25_CUONX is connected to Jetson Orin Nano™ development kit as 
+shown in following figure. 
+ 
+Figure 28: e-CAM25_CUONX Setup Interfaced to Jetson Orin Nano Development Kit 
+Jetson Orin Nano™ development kit can be powered either from USB Type-C 
+connector or DC power jack connector. Since USB Type-C is used for low power 
+applications, e-CAM25_CUONX supports only low resolutions in this power 
+supply. Connecting 19V power supply to DC jack will be the ideal solution, when 
+using e-CAM25_CUONX with Jetson Orin Nano™ development kit to use its full 
+listed resolutions. 
+
+
+ 
+© Copyright e-con Systems. 2024. All rights reserved. 17 
+The power supply connectors in the Jetson Orin Nano™ development kit are 
+shown in the following figure. 
+ 
+Figure 29: Power Supply Connectors in Orin Nano Development Kit 
+6. Connect 19V power supply to DC jack to power ON the Jetson Orin Nano™ 
+development kit as shown in the following figure. 
+ 
+Figure 30: Power Supply Connected to Jetson Orin Nano Development Kit 
+After powering ON the Jetson Orin Nano™ development kit, the greenish yellow 
+color LED on the Jetson Orin Nano™ development kit will glow. This serves as an 
+indication for power-up of base board as shown in the following figure. 
+
+
+ 
+18  e-CAM25_CUONX Getting Started Manual 
+ 
+Figure 31: Status LED Indicating Jetson Orin Nano Development Kit Powered ON 
+After powering ON the Jetson Orin NX™ development kit, the greenish yellow 
+color LED on e-CAM25_CUONX adapter board will glow. This serves as an 
+indication for power-up of e-CAM25_CUONX camera module. LED location is 
+shown in following figure. 
+ 
+Figure 32: Status LED Indicating e-CAM25_CUONX Module Powered ON 
+ 
+
+
+ 
+© Copyright e-con Systems. 2024. All rights reserved. 19 
+Software Quick Setup  
+This section describes the extracting and flashing of e-con Systems provided 
+binaries. 
+The commands and output messages in this manual are represented by different 
+colors as shown in following table. 
+Table 4: Notation of Colors 
+Color Notation 
+Blue Commands running in Host PC 
+Green Commands running in Development Kit 
+Orange Output message in Development Kit 
+Before extracting and flashing the e-con provided binaries, flash the Jetpack 6.1.0 in 
+Jetson Orin Nano™/Orin NX™ development kit provided by NVIDIA®, using the SDK 
+Manager. 
+The steps to setup the Jetson Orin Nano™/Orin NX™ development kit for e-
+CAM25_CUONX camera are as follows: 
+1. Download the SDK Manager using the link https://developer.nvidia.com/nvidia-
+sdk-manager . 
+2. Sign up to an account in NVIDIA® developer site to use the SDK Manager. 
+3. Run the following command to install the SDK Manager in the host PC. 
+sudo apt-get install ./sdk-manager-
+[version].[build#].deb 
+After installing the SDK Manager in the host PC, follow the instructions in the 
+https://docs.nvidia.com/sdk-manager/index.html link to flash the Jetson Orin 
+Nano™/Orin NX™ development kit. 
+4. Copy the release package into the HOME Directory of the flashed Jetson Orin 
+Nano™/Orin NX™ development kit. 
+Steps for Extracting and Flashing binaries 
+The steps to extract and flash the binaries are as follows: 
+1. Run the following commands to extract the release package in the Jetson Orin 
+Nano™/Orin NX™ development kit to obtain the binaries. 
+tar -xaf e-
+CAM25_CUONX_JETSON_ONX_ONANO_<L4T_version>_<release_da
+te>_<release_version>.tar.gz 
+cd  e-
+CAM25_CUONX_JETSON_ONX_ONANO_<L4T_version>_<release_da
+te>_<release_version> 
+
+ 
+20  e-CAM25_CUONX Getting Started Manual 
+The folder contains the necessary tools to immediately flash the binaries in 
+Jetson Orin Nano™/Orin NX™ development kit with the kernel, camera drivers 
+and applications. 
+2. Run the following commands in the Jetson Orin Nano™/Orin NX™ development 
+kit to install e-con provided binaries with support for e-CAM25_CUONX. 
+sudo chmod +x ./install_binaries.sh 
+sudo -E ./install_binaries.sh 
+This script will reboot the Jetson Orin Nano™/Orin NX™ development kit 
+automatically after installing the binaries successfully. 
+Steps for Launching Application in Development Kit 
+The steps to launch the application in the development kit are as follows: 
+1. Run the following command to confirm whether the camera is initialized. 
+$ sudo dmesg | grep -i "ar0234" 
+The output message appears as shown below. 
+// For Orin development kit 
+subdev ar0234 10-0042 bound 
+The output message indicates that the camera is initialized properly. 
+2. Run the following command to check the presence of camera video node. 
+ls /dev/video* 
+The output message appears as shown below. 
+/dev/video* 
+Where (*) represents the number of cameras connected. The number of times 
+the output message displayed above must be equal to the number of cameras 
+connected to the Jetson Orin Nano™/Orin NX™ development kit. 
+3. Run the following command to set the power mode to maximum for better 
+performance. 
+$ sudo nvpmodel –m 0 
+4. Run the following Jetson clocks command before launching the 
+ecam_tk1_guvcview application in the Jetson Orin Nano™/Orin NX™ 
+development kit. 
+$ sudo jetson_clocks 
+5. Run the following command to launch the sample camera application. 
+ecam_tk1_guvcview 
+When the application is launched, you can view the screen similar to the screen 
+shown below. 
+
+ 
+© Copyright e-con Systems. 2024. All rights reserved. 21 
+ 
+Figure 33: Initial Window when Application is Launched 
+Note: The login credentials of the Jetson Orin™ development kit are fully 
+configurable on the first boot, and the sample login credentials are listed in below. 
+Table 5: Sample Login Credentials 
+Fields Inputs 
+Username nvidia 
+Password nvidia 
+ 
+
+
+ 
+22  e-CAM25_CUONX Getting Started Manual 
+Reference Documents  
+This section describes the software and hardware documents of e-CAM25_CUONX. 
+You can download the software and hardware documents from Developer 
+Resources website. 
+Software Documents 
+The software documents and its description are listed in following table. 
+Table 6: Description of Software Documents 
+S.NO What I need Documents to Refer 
+1 
+View the camera stream and 
+change the camera controls 
+using GUI. 
+e-
+CAM25_CUONX_Linux_App_User_Manual_Rev_<ver>.
+pdf 
+2 
+Build and install the GUI based 
+ecam_tk1_guvcview camera 
+application. 
+e-CAM_TK1-
+GUVCView_Build_and_Install_Guide_Rev_<ver>.pdf 
+3 
+Use GStreamer to control the 
+e-CAM25_CUONX camera on 
+the Orin Nano™/Orin NX™ 
+development kit. 
+e-
+CAM25_CUONX_Gstreamer_Usage_Guide_Rev_<ver>.
+pdf 
+4 
+Build custom kernel with 
+support for using e-
+CAM25_CUONX. 
+e-CAM25_CUONX_Developer_Guide_Rev_<ver>.pdf 
+5 
+Information about the 
+directory structure and 
+contents of the release 
+package for e-CAM25_CUONX. 
+e-
+CAM25_CUONX_Release_Package_Manifest_Rev_<ver
+>.pdf 
+6 
+Integrate e-con's e-
+CAM217_CUMI0234_MOD 
+with any host system other 
+than what is supported by e-
+con directly 
+e-
+CAM217_CUMI0234_MOD_MCU_Protocol_App_Note_
+<REV>.pdf 
+7 Integrates e-con’s 
+EXT_TRIGGER support 
+e-
+CAM25_CUONX_Trigger_and_Strobe_Mode_Applicatio
+n_Note_<REV>.pdf 
+Hardware Documents 
+The hardware documents and its description are listed in following table. 
+
+ 
+© Copyright e-con Systems. 2024. All rights reserved. 23 
+Table 7: Description of Hardware Documents 
+S.NO Documents Name Description 
+1 e-CAM25_CUONX_Datasheet_Rev_<ver>.pdf 
+Describes the features, connector pin-
+out details and mechanical dimensions 
+of e-CAM25_CUONX. 
+2 
+e-
+CAM217_CUMI0234_MOD_Datasheet_Rev_
+<ver>.pdf 
+Describes the features and specification 
+of e-CAM217_CUMI0234_MOD camera 
+module. 
+3 
+e-
+CAM25_CUONX_Lens_Datasheet_Rev_<ver>
+.pdf 
+Describes the optical specification of 
+lenses used in e-CAM25_CUONX. 
+4 e-CAM25_CUONX_REV_<ver>.stp 3D drawing file for e-CAM25_CUONX 
+product. 
+5 
+e-
+CAM217_CUMI0234_MOD_REV_<ver>_3D.s
+tp 
+3D drawing file for the e-
+CAM217_CUMI0234_MOD 
+6 ACC-RB-WTB-ADP_REV_<ver>_3D.stp 3D drawing file for adapter board. 
+
+ 
+24  e-CAM25_CUONX Getting Started Manual 
+Troubleshooting 
+In this section, you can view the commonly occurring issue and their troubleshooting 
+step. 
+What could be the issue If the LED given in e-CAM25_CUONX is not glowing? 
+The LED indicates the power on state of e-CAM25_CUONX camera module. 
+If the LED is not glowing, please follow the following steps: 
+1. Check whether the power to the camera module is not properly connected.  
+2. Check whether the FPC cable connection is given as per the manual. Still the 
+issue is not resolved, kindly write to https://www.e-
+consystems.com/support.asp 
+
+ 
+© Copyright e-con Systems. 2024. All rights reserved. 25 
+FAQ 
+1. Do e-con Systems have any plan to support longer length cable? 
+e-con Systems provide a very flexible 15 cm FPC cable along with this kit. For 
+customization, please write to camerasolutions@e-consystems.com with your 
+requirement. 
+2. Does e-CAM25_CUONX camera support OpenCV? 
+e-CAM25_CUONX works using Video for Linux version 2 (V4L2) APIs and is V4L2 
+compliant. So, any V4L2 based application can be used to access this camera. 
+OpenCV is also compatible since it uses V4L2 to access the camera. 
+Please refer to https://www.e-
+consystems.com/Articles/Camera/accessing_cameras_in_opencv_with_high_pe
+rformance.asp for detailed information about OpenCV support in e-con Systems 
+cameras. 
+3. How can I get the updated package? 
+Please login to the Developer Resources website and download the latest 
+release package. 
+4. What are the voltage levels of External Trigger Signal? 
+e-CAM25_CUONX supports 3.3V I/O external trigger input. For more details 
+please refer to e-CAM25_CUONX_Datasheet_Rev_<ver>.pdf. 
+
+ 
+26  e-CAM25_CUONX Getting Started Manual 
+What’s Next? 
+After understanding the specifications of e-CAM25_CUONX camera board and 
+instructions on how to use this camera board with Jetson Orin Nano™/Orin NX™ 
+development kit, you can refer to the following documents to understand more 
+about e-CAM25_CUONX. 
+ e-CAM25_CUONX Developer Guide 
+ e-CAM25_CUONX Linux App User Manual 
+
+ 
+© Copyright e-con Systems. 2024. All rights reserved. 27 
+Glossary 
+AI: Artificial Intelligence. 
+API: Application Program Interface. 
+CMOS: Complementary Metal Oxide Semiconductor. 
+CSI: Camera Serial Interface. 
+FFC: Flexible Flat Connector. 
+FPC: Flexible Printed Circuit. 
+GUI: Graphical User Interface. 
+LED: Light-Emitting Diode. 
+MCU: Micro Controller Unit. 
+MIPI: Mobile Industry Processor Interface. 
+USB: Universal Serial Bus. 
+UYVY: YUV422 16-bit image format with UYVY ordering. 
+V4L2: Video4Linux2 is a collection of device drivers and API for supporting real-time 
+video capture on Linux systems. 
+
+ 
+28  e-CAM25_CUONX Getting Started Manual 
+Support 
+Contact Us 
+If you need any support on e-CAM25_CUONX product, please contact us using the 
+Live Chat option available on our website – https://www.e-consystems.com/ 
+Creating a Ticket 
+If you need to create a ticket for any type of issue, please visit the ticketing page on 
+our website – https://www.e-consystems.com/create-ticket.asp 
+RMA 
+To know about our Return Material Authorization (RMA) policy, please visit the RMA 
+Policy page on our website – https://www.e-consystems.com/RMA-Policy.asp 
+General Product Warranty Terms 
+To know about our General Product Warranty Terms, please visit the General 
+Warranty Terms page on our website – https://www.e-
+consystems.com/warranty.asp 
+  
+
+ 
+© Copyright e-con Systems. 2024. All rights reserved. 29 
+Revision History 
+Rev Date Description Author 
+1.0 18-Apr-2023 Initial draft Camera Dev Team 
+1.1 10-Nov-2023 Updated to L4T35.4.1 and supported 2 lane 
+configuration Camera Dev Team 
+1.2 24-May-2024 Updated jetpack version to 6.0.0 Camera Dev Team 
+1.3 23-Jan-2025 Updated jetpack version to 6.1.0 Camera Dev Team 
+1.4 20-Mar-2025 Removed 320x240 resolution Camera Dev Team 
+ 
+
