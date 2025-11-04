@@ -8,12 +8,23 @@
   <license>MIT</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
+  <buildtool_depend>ament_cmake_python</buildtool_depend>
 
-  <depend>rclcpp</depend>
+  <depend>rclpy</depend>
   <depend>geometry_msgs</depend>
   <depend>sensor_msgs</depend>
-  <depend>tank_msgs</depend>
+  <depend>nav_msgs</depend>
+  <depend>std_msgs</depend>
+  <depend>std_srvs</depend>
+
+  <!-- IMPORTANT: Use odrive v0.5.4 with FW v0.5.6 -->
+  <!-- Install with: pip3 install odrive==0.5.4 -->
+  <exec_depend>python3-odrive</exec_depend>
+
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+
   <export>
-    <build_type>ament_cmake</build_type>
+    <build_type>ament_cmake_python</build_type>
   </export>
 </package>

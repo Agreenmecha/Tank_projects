@@ -1,0 +1,25 @@
+safety_monitor_node:
+  ros__parameters:
+    # Temperature monitoring
+    motor_temp_warning: 70.0    # Celsius - log warning
+    motor_temp_critical: 80.0   # Celsius - reduce speed
+    motor_temp_shutdown: 90.0   # Celsius - emergency stop
+    
+    # Current monitoring
+    motor_current_warning: 25.0  # Amps - sustained current warning
+    motor_current_peak: 40.0     # Amps - peak current limit
+    
+    # Pitch angle monitoring (from IMU)
+    pitch_warning: 28.0     # degrees - start speed reduction
+    pitch_critical: 32.0    # degrees - crawl mode (0.2 m/s)
+    pitch_emergency: 38.0   # degrees - emergency stop
+    
+    # Watchdog
+    cmd_vel_timeout: 0.5    # seconds - no cmd_vel received
+    imu_timeout: 1.0        # seconds - no IMU data received
+    odrive_timeout: 1.0     # seconds - no ODrive status received
+    
+    # E-stop
+    estop_gpio_pin: -1      # GPIO pin for hardware E-stop (-1 = disabled)
+    estop_active_low: true  # true = E-stop triggered when pin is LOW
+

@@ -1,0 +1,30 @@
+odrive_interface_node:
+  ros__parameters:
+    # ODrive connection
+    odrive_serial: ""  # Empty string = auto-find first ODrive, or specify serial number
+    
+    # Axis configuration
+    axis_left: 0   # ODrive axis 0 for left motor
+    axis_right: 1  # ODrive axis 1 for right motor
+    
+    # Physical parameters
+    wheel_radius: 0.10    # meters (adjust to your actual wheel diameter)
+    track_width: 0.60     # meters (600mm per your tank specs)
+    encoder_cpr: 8192     # Encoder counts per revolution
+    
+    # Velocity limits
+    max_vel: 1.5          # Maximum linear velocity (m/s)
+    max_angular_vel: 2.0  # Maximum angular velocity (rad/s)
+    
+    # ODrive motor limits
+    current_limit: 30.0   # Motor current limit (Amps)
+    velocity_limit: 20.0  # Motor velocity limit (turns/s)
+    
+    # Safety
+    enable_watchdog: true
+    watchdog_timeout: 0.2  # seconds - stop motors if no command for this long
+    
+    # Control timing
+    control_rate: 50.0    # Hz - velocity command rate
+    publish_rate: 20.0    # Hz - status/odometry publish rate
+
