@@ -1,0 +1,15 @@
+Native Protocol
+This protocol is what the odrivetool uses to talk to the ODrive. If you have a choice, this is the recommended protocol for all applications. The native protocol runs on USB and on UART.
+
+Python
+The odrivetool you installed as part of the Getting Started guide comes with a library that you can use to easily control the ODrive from Python.
+
+Assuming you already installed the odrive library (pip install odrive), the simplest program to control the ODrive is this:
+
+import odrive
+odrv0 = odrive.find_any()
+print(str(odrv0.vbus_voltage))
+For a more comprehensive example, see tools/odrive_demo.py.
+
+Other Languages
+We don’t have an official library for you just yet. Check the community, there might be someone working on it. If you want to write a library yourself, refer to the native protocol specification. You are of course welcome to contribute it back.
