@@ -19,8 +19,7 @@
 ### **2. Test Scripts**
 | File | Purpose | Status |
 |------|---------|--------|
-| `test_can_setup.sh` | Bash script to test Jetson CAN + ODrive | ✅ Ready |
-| `test_odrive_can.py` | Python script for advanced ODrive CAN testing | ✅ Ready |
+| `test_odrive_usb.py` | Python script for ODrive USB testing | ✅ Ready |
 
 ---
 
@@ -35,7 +34,7 @@
   - ZED-F9P GNSS (no RTK - standard GNSS mode)
   - Wheel encoders (via ODrive)
 - ✅ **Motor Control:** ODrive (firmware v0.5.6)
-- ✅ **CAN Transceiver:** Adafruit CAN Pal (TJA1051T/3) - already installed
+- ✅ **ODrive Interface:** USB (native protocol) - configured and tested
 
 ### **Software Stack (Finalized)**
 - ✅ **Localization:** Point-LIO ROS2 (front L2 + built-in IMU)
@@ -43,7 +42,7 @@
 - ✅ **Ground Extraction:** Patchwork++ (handles 30° slopes)
 - ✅ **Camera Segmentation:** Isaac ROS + SegFormer-B0 (TensorRT)
 - ✅ **Planning:** DWA local planner (tracked vehicle kinematics)
-- ✅ **ODrive Interface:** CAN Bus (recommended) OR USB (TBD after testing)
+- ✅ **ODrive Interface:** USB (native protocol) - chosen and configured
 
 ### **Target Capabilities**
 - ✅ Max speed: 1.5 m/s (conservative, 56% of 2.7 m/s rating)
@@ -56,10 +55,11 @@
 ## ⚠️ **Open Items (To Be Resolved)**
 
 ### **Critical (Before Phase 1)**
-1. **ODrive Interface Decision:**
-   - [ ] Test CAN Bus (run `test_can_setup.sh` on Jetson)
-   - [ ] OR test USB with firmware v0.5.3 branch
-   - [ ] Implement chosen interface (~1 week for CAN, ~2 days for USB)
+1. **ODrive Interface:** ✅ **DECIDED - USB**
+   - [x] USB interface chosen (native protocol via odrivetool)
+   - [x] ODrive 0.5.4 installed and verified
+   - [x] USB udev rules configured
+   - [ ] Implement ODrive ROS 2 node using USB interface
 
 2. **Hardware Measurements:**
    - [x] ✅ Verify Unitree L2 specs (6-axis IMU, hardware time-synced)
@@ -87,7 +87,7 @@
 
 ### **Phase 1: Core Localization (2-3 weeks)**
 - [ ] `tank_sensors` - Sensor driver wrappers
-- [ ] `tank_control` - ODrive interface (CAN or USB)
+- [ ] `tank_control` - ODrive interface (USB via odrivetool)
 - [ ] `tank_localization` - Point-LIO + GNSS fusion
 - [ ] `tank_description` - URDF with sensor transforms
 
@@ -129,14 +129,14 @@ git remote add origin git@github.com:YourUsername/tank_autonomous_nav.git
 git push -u origin main
 ```
 
-### **Step 2: Test CAN Bus (When on Jetson - 30 min)**
+### **Step 2: ODrive USB Interface (✅ Completed)**
 ```bash
 # On Jetson Orin Nano
-cd ~/Tank_projects
-./test_can_setup.sh
+# ODrive 0.5.4 installed via USB
+odrivetool --version
 
-# If successful → implement CAN package
-# If failed → use USB interface instead
+# Test connection
+odrivetool list
 ```
 
 ### **Step 3: Create ROS2 Workspace (1 day)**
@@ -154,11 +154,9 @@ git clone https://github.com/unitreerobotics/unilidar_sdk2.git
 git clone https://github.com/url-kaist/patchwork-plusplus.git
 git clone https://github.com/aussierobots/ublox_dgnss.git
 
-# ODrive (choose one):
-# Option A: Official USB driver
-git clone -b humble-fw-v0.5.3 https://github.com/Factor-Robotics/odrive_ros2_control.git
-
-# Option B: CAN (custom package - implement tank_odrive_can)
+# ODrive: USB interface (chosen)
+# Using native odrivetool protocol via USB
+# Custom ROS 2 node will wrap odrivetool for control
 
 # Build
 cd ~/tank_autonomous_nav/tank_ws
@@ -193,9 +191,8 @@ See `workspace_structure.md` for detailed package structure and code examples.
 
 ### **Hardware Documentation**
 - [ODrive v0.5.6 Docs](https://docs.odriverobotics.com/v/0.5.6/)
-- [ODrive CAN Protocol](https://docs.odriverobotics.com/v/0.5.6/can-protocol.html)
+- [ODrive USB Protocol](https://docs.odriverobotics.com/v/0.5.6/api-reference.html)
 - [e-CAM25_CUONX Camera](https://www.e-consystems.com/nvidia-cameras/jetson-orin-nx-cameras/full-hd-ar0234-global-shutter-camera.asp)
-- [Adafruit CAN Pal](https://www.adafruit.com/product/5708)
 
 ---
 
