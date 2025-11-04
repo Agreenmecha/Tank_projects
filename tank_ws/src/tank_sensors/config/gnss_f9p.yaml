@@ -1,74 +1,77 @@
 # ZED-F9P GNSS Configuration for Tank Navigation
 # Using aussierobots/ublox_dgnss driver
-# No RTK - standard GNSS mode (2-5m accuracy)
+# UBX-style configuration parameters
 
-gnss_node:
+ublox_dgnss_node:
   ros__parameters:
-    # Device settings
-    device: "/dev/ttyACM0"  # Update if different (check with: ls /dev/ttyACM*)
-    baudrate: 38400
-    frame_id: "gnss"
+    # Device identification
+    DEVICE_FAMILY: "F9P"
+    FRAME_ID: "gnss"
     
-    # Update rate
-    rate: 5  # Hz (balance between accuracy and CPU load)
+    # Message output configuration (1 = publish, 0 = disabled)
+    # NAV-PVT: Position, Velocity, Time solution
+    CFG_MSGOUT_UBX_NAV_PVT_USB: 1
     
-    # GNSS configuration
-    enable_gps: true
-    enable_glonass: true
-    enable_galileo: true
-    enable_beidou: true
+    # NAV-HP-POS-LLH: High-precision Lat/Lon/Height
+    CFG_MSGOUT_UBX_NAV_HPPOSLLH_USB: 1
     
-    # Dynamic model for ground vehicle
-    dynamic_model: "automotive"  # Options: portable, stationary, pedestrian, automotive, sea, airborne1g, airborne2g, airborne4g
+    # NAV-COV: Covariance (for EKF fusion)
+    CFG_MSGOUT_UBX_NAV_COV_USB: 1
     
-    # Fix mode
-    fix_mode: "auto"  # Options: 2d, 3d, auto
+    # NAV-DOP: Dilution of Precision (IMPORTANT for path planning)
+    CFG_MSGOUT_UBX_NAV_DOP_USB: 1
     
-    # Publishing settings
-    publish_navpvt: true      # Position/velocity/time
-    publish_navsat: true      # sensor_msgs/NavSatFix
-    publish_navclock: false   # Clock data (not needed)
-    publish_navposecef: false # ECEF position (not needed)
-    publish_navposllh: true   # LLH position (lat/lon/height)
-    publish_navvelned: true   # NED velocity
-    publish_navdop: true      # DOP (dilution of precision) - IMPORTANT for corridor width!
+    # NAV-STATUS: Fix quality status
+    CFG_MSGOUT_UBX_NAV_STATUS_USB: 1
     
-    # RTK settings (disabled for now)
-    enable_rtk: false
-    rtcm3_reference_station: ""
-    ntrip_server: ""
-    ntrip_port: 2101
-    ntrip_mountpoint: ""
-    ntrip_username: ""
-    ntrip_password: ""
+    # NAV-SAT: Satellite information
+    CFG_MSGOUT_UBX_NAV_SAT_USB: 1
     
-    # Differential correction (if available from base station)
-    enable_sbas: true  # Satellite-Based Augmentation System (WAAS/EGNOS)
+    # NAV-SIG: Signal information
+    CFG_MSGOUT_UBX_NAV_SIG_USB: 1
     
-    # Survey-in mode (for establishing base station position - not used on rover)
-    survey_in_mode: false
+    # Update rate (milliseconds between measurements)
+    # 200ms = 5 Hz (good balance for ground vehicle)
+    CFG_RATE_MEAS: 200
+    CFG_RATE_NAV: 1  # Navigation solution every measurement
+    CFG_RATE_TIMEREF: 0  # UTC time
     
-    # Output topics
-    navpvt_topic: "gnss/navpvt"
-    navsat_topic: "gnss/fix"
-    navposllh_topic: "gnss/pos_llh"
-    navvelned_topic: "gnss/vel_ned"
-    navdop_topic: "gnss/dop"
+    # Enable GNSS constellations (all for best accuracy)
+    CFG_SIGNAL_GPS_ENA: 1        # GPS
+    CFG_SIGNAL_GPS_L1CA_ENA: 1   # GPS L1 C/A
+    CFG_SIGNAL_GPS_L2C_ENA: 1    # GPS L2C
     
-    # Covariance override (optional - driver usually provides this)
-    # Set based on expected accuracy without RTK: 2-5m horizontal
-    position_covariance: [4.0, 0.0, 0.0,   # 2m stddev = 4.0 variance
-                          0.0, 4.0, 0.0,
-                          0.0, 0.0, 25.0]  # 5m vertical stddev
+    CFG_SIGNAL_GAL_ENA: 1        # Galileo
+    CFG_SIGNAL_GAL_E1_ENA: 1     # Galileo E1
+    CFG_SIGNAL_GAL_E5B_ENA: 1    # Galileo E5b
     
-    # QoS settings
-    qos_overrides:
-      gnss.navpvt:
-        reliability: reliable
-        durability: volatile
-        depth: 10
-      gnss.fix:
-        reliability: reliable
-        durability: volatile
-        depth: 10
-
+    CFG_SIGNAL_GLO_ENA: 1        # GLONASS
+    CFG_SIGNAL_GLO_L1_ENA: 1     # GLONASS L1
+    CFG_SIGNAL_GLO_L2_ENA: 1     # GLONASS L2
+    
+    CFG_SIGNAL_BDS_ENA: 1        # BeiDou
+    CFG_SIGNAL_BDS_B1_ENA: 1     # BeiDou B1I
+    CFG_SIGNAL_BDS_B2_ENA: 1     # BeiDou B2I
+    
+    CFG_SIGNAL_QZSS_ENA: 1       # QZSS (regional, Japan/Asia-Pacific)
+    CFG_SIGNAL_QZSS_L1CA_ENA: 1
+    CFG_SIGNAL_QZSS_L2C_ENA: 1
+    
+    # SBAS (Satellite-Based Augmentation - WAAS/EGNOS)
+    CFG_SIGNAL_SBAS_ENA: 1
+    CFG_SIGNAL_SBAS_L1CA_ENA: 1
+    
+    # Dynamic platform model
+    # 4 = Automotive (for ground vehicles, <84 m/s)
+    CFG_NAVSPG_DYNMODEL: 4
+    
+    # Fix mode: 0 = 2D/3D auto
+    CFG_NAVSPG_FIXMODE: 0
+    
+    # Disable NMEA output on USB (we use UBX only)
+    CFG_USBOUTPROT_NMEA: 0
+    CFG_USBOUTPROT_UBX: 1
+    
+    # Disable info messages
+    CFG_INFMSG_UBX_USB: 0
+    CFG_INFMSG_NMEA_USB: 0

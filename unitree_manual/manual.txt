@@ -1,0 +1,203 @@
+Unilidar 2
+Unitree Lidar
+2024.11
+v 1.0User Manual
+Uniliar 2
+Purpose of the Software
+Operating Environment
+Hardware Configuration
+Interface Overview
+Point Cloud Display Interface Description
+Device Management Interface Description
+Output Mode Settings
+Lidar Info Module
+IMU Data Window
+Connecting L2 to PC
+Preparations Before Use
+Getting Started
+Version Information Acquisition
+2
+2
+2
+2
+3
+4
+5
+6
+7
+2
+2
+3
+9
+9
+CONTENTS
+2024 Unitree Robotics. All rights reserved.
+Introduction to Unilidar 2
+Preparations Before Use
+·Purpose of the Software
+Unilidar 2 is a software designed specifically for the Unitree 4D LIDAR L2, which can display
+real-time point cloud data from the laser detection and ranging device connected to a computer.
+With Unilidar 2, users can easily view the device status and point cloud data.
+·Connecting L2 to PC
+UART TTL Connection
+L2 supports both UART serial port connection and ENET network port connection. Ensure that the
+device is connected to a 12V power supply.
+For temporary testing or use of L2, it is recommended to use the converter module, power adapter,
+and data cable provided in the package. The connection method is as follows:
+a. Insert the 4PIN serial port of L2 into the converter module.
+b. Connect the power adapter to the power supply port of the cable for power supply.
+c. Insert the Type-C interface of the data cable into the data communication port of the converter
+module, and connect the other end to your personal computer.
+·Hardware Configuration
+There are no special configuration requirements for using Unilidar 2. However, due to the software's
+extensive point cloud display functions, please choose a computer with a high-performance
+graphics card.
+·Operating Environment
+Unilidar 2 currently supports Windows (64-bit) systems.
+222024 Unitree Robotics. All rights reserved.
+Unitree4D LiDAR-L2 UART Switching module Connect a power supply
+USB to TypeC cable
+Unitree
+ENET UDP Connection
+L2 supports network UDP data transmission. Connect the network cable to the network port and
+power port of L2 to use it.
+The network port of L2 can be directly used for data transmission. When using it, insert the network
+port into a switch or computer, and connect the power adapter to the power supply port of the
+cable. The default configuration information for L2 is:
+IP: 192.168.1.62, Gateway: 192.168.1.1, Subnet Mask: 255.255.255.0, the default target server IP
+address for sending data is 192.168.1.2. The radar UDP data transmission port is 6101, and the target
+server's receiving port is 6201. When using for the first time, please ensure that the target server's
+address and L2's IP do not conflict. If you need to modify the configuration information, it can be
+done through the host computer or SDK.
+· The converter module, power adapter, and data cable are all included with the package, which
+can be used for power connection, control signal transmission, and data transmission. You can also
+use other cables according to your needs to improve the convenience and protection of the system
+(such as dust and waterproofing).
+· When debugging, please be sure to place L2 on the rubber mat provided and place the rubber
+mat on a flat surface to ensure the radar works stably to avoid bumps and falls.
+Getting Started
+·Interface Overview
+After launching Unilidar 2, you will enter the main interface of the software. The Unilidar main
+interface includes two parts: the device management interface and the point cloud display
+interface.
+32024 Unitree Robotics. All rights reserved.
+·Point Cloud Display Interface Description
+Once Unilidar 2 connects to the device and starts sampling, the point cloud display interface will
+display the point cloud image, which includes a reference coordinate system.
+You can zoom in or out of the point cloud image using the mouse wheel.
+You can control the image display angle using the left mouse button or the up, down, left, and right
+arrow keys on the keyboard.
+After the IMU display is activated, the coordinate system will automatically follow the direction of
+the radar and cannot be dragged.
+42024 Unitree Robotics. All rights reserved.
+·Device Management Interface Description
+The device management interface on the left side of the software is as follows:
+52024 Unitree Robotics. All rights reserved.
+·Output Mode Settings
+L2 can only output point cloud data through one of the two methods: UDPMode (ENET UDP) or
+SerialMode (UART TTL). Set this through "Work Mode" with "ENET/UART Select", and click
+"SetMode" to issue the command. If successful, a success prompt will be returned, and then click
+"Restart" to restart the radar for the changes to take effect. The default point cloud output for L2 is
+ENETUDP.
+The default parameters for L2 are:
+IP: 192.168.1.62, Gateway: 192.168.1.1, Subnet Mask: 255.255.255.0, the default target server IP
+address for sending data is 192.168.1.2. The radar UDP data transmission port is 6101, and the target
+server's receiving port is 6201.
+When using UDPMode, please select the local address of the computer that receives the radar data.
+For the first use, please change the local IP of the computer to 192.168.1.2, the gateway to
+192.168.1.1, and the subnet mask to 255.255.255.0.
+After clicking "Open UDP Port", a connection with the radar will be established, and you can set the
+radar parameters below.
+When using SerialMode, you need to use a serial port converter board to connect L2 to the
+computer. After the serial port is recognized, select the corresponding COM port from the
+drop-down menu and click "Open Serial Port" to open the serial port and establish a connection.
+62024 Unitree Robotics. All rights reserved.
+·Lidar Info Module
+·Work Mode Module
+Please note that the default point cloud output for L2 radar is ENETUDP. If you need to view
+real-time point cloud data via the serial port, please set the parameters to "UART" through "Work
+Mode" after the connection is established, click "SetMode" to issue the command. If successful, a
+success prompt will be returned, and then click "Restart" to restart the radar for the changes to
+take effect.
+Additionally, if you forget the previously set IP parameters of L2, you can also reset the parameters
+by connecting to L2 via the serial port, and then reconfigure the parameters in "Config Setting" by
+clicking "Change" to issue the command. If successful, a success prompt will be returned, and then
+click "Restart" to restart the radar for the changes to take effect.
+sys_rotation_period：The speed of the horizontal low-speed motor, in revolutions per minute (r/min).
+com_rotation_period：The speed of the vertical high-speed motor, in revolutions per minute (r/min).
+dirty_index：The index of dirt on the radar's optical surface.
+packet_lost_up：The packet loss rate of the upper board of the radar.
+packet_lost_down：The packet loss rate of the lower board of the radar.
+apd_temperarure：The temperature of the APD, in degrees Celsius (℃).
+apd_voltage：The voltage of the APD, in Volts (V).
+laser_ voltage：The voltage of the laser emitter, in Volts (V).
+imu_temperature：The temperature of the IMU, in Volts (V).
+Point cloud count：Sets the time for each point display, with options for 500 milliseconds, 1 second,
+2 seconds, and 4 seconds.
+Work Mode：Can set "Normal Mode" and "NEGA Mode", which are the normal mode and negative
+angle mode, respectively. In negative angle mode, the field of view is 360 ° x96 ° . Note that in
+negative angle mode, the furthest measurement distance in the expanded angle range is slightly
+closer. After selecting the setting, click "SetMode" to issue the command, and then restart the radar
+by clicking "Restart" for the changes to take effect. The default is NEGA Mode.
+3D/2D Mode：Can set "3D Mode" and "2D Mode", which sets the radar to 3D mode or 2D mode,
+respectively. The default is "3D Mode". After selecting the setting, click "SetMode" to issue the
+command, and then restart the radar by clicking "Restart" for the changes to take effect. The
+default is "3D Mode".
+IMU Display Enable：After the IMU display is activated, the coordinate system will automatically
+follow the direction of the radar. You can set it to "Enable" or "Disable". After selecting the setting,
+click "SetMode" to issue the command, and then restart the radar by clicking "Restart" for the
+changes to take effect. The default is "Disable".
+ENET/UART Select：L2 can only output point cloud data through one of the two methods: UDPMode
+(ENET UDP) or SerialMode (UART TTL). Set this through "ENET" or "UART". After selecting the setting,
+click "SetMode" to issue the command, and then click "Restart" to restart the radar for the changes
+to take effect. The default is "ENET".
+72024 Unitree Robotics. All rights reserved.
+·Config Setting Module
+Power On mode：Sets whether the radar starts automatically. Select "SELF START", and the radar
+will start automatically when powered on. Select "CMD START", and the radar will enter standby
+mode (Standby) without data output after powering on. You can start it by clicking "Normal" and
+then "Standby" in the Work Mode section of the host computer, or you can start it through the SDK
+interface. After selecting the setting, click "SetMode" to issue the command, and then restart the
+radar by clicking "Restart" for the changes to take effect. The default is "SELF START".
+Gray Enable：Enables or disables the output of grayscale data. Select "Gray ON" to output
+grayscale data, or "Gray OFF" to disable the analysis of grayscale information and output no
+grayscale data. After selecting the setting, click "SetMode" to issue the command, and then restart
+the radar by clicking "Restart" for the changes to take effect. The default is "Gray ON".
+Normal/Standby：Switches the status of L2 between normal working mode and standby mode in
+real-time.
+SetMode：Except for the display time setting, all other parameter settings require clicking
+"SetMode" to issue the command after setting, and then click "Restart" to restart for the changes to
+take effect.
+Restart：Restarts L2.
+Synchronous：Obtains parameter information from L2.
+Lidar ChangeIP：Sets the IP address of the radar when outputting via ENET.
+Lidar ChangePort：Sets the UDP data transmission port of the radar when outputting via ENET.
+Lidar Gateway： Set the gateway for the radar when outputting via ENET.
+Lidar SubnetMask： Set the subnet mask for the radar when outputting via ENET.
+Usr ChangeIP：Sets the IP address of the target server when the radar sends data via ENET.
+Usr ChangePort: Sets the UDP data reception port of the target server when the radar sends data
+via ENET.
+Change：After setting the parameters, click to issue the command, and then click "Restart" to
+restart the radar for the changes to take effect.
+Restart：Restarts L2。
+Restore Factory Defaults：Restores the IP parameter information to the factory configuration, which
+is IP: 192.168.1.62, Gateway: 192.168.1.1, Subnet Mask: 255.255.255.0, the default target server IP
+address for sending data is 192.168.1.2. The radar UDP data transmission port is 6101, and the target
+server's receiving port is 6201.
+82024 Unitree Robotics. All rights reserved.
+Version Information Acquisition
+·IMU Data Window
+You can obtain radar version information by clicking "GetVersion", which is usually used to
+determine whether a successful connection has been established with the radar.
+Q1, Q2, Q3, Q4: These parameters represent the quaternion, which is used to describe the rotation
+state of the IMU (Inertial Measurement Unit).
+ACC1, ACC2, ACC3: These parameters represent the acceleration data of the three axes of the
+accelerometer, corresponding to the acceleration values of the X, Y, Z axes.
+GYRO1, GYRO2, GYRO3: These parameters represent the angular velocity data of the three axes
+of the gyroscope, corresponding to the angular velocity values of the X, Y, Z axes.
+92024 Unitree Robotics. All rights reserved.
+This manual will not be notified separately if updated.
+You can check the latest version of the "User Manual" on the official website of Unitree.
+Unitree is a trademark of Hangzhou Yushu Technology Co., Ltd.
+Windows is a registered trademark of Microsoft Corporation and its subsidiaries in the United States.
+https://www.unitree.com/en/download

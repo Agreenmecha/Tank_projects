@@ -31,7 +31,7 @@ def generate_launch_description():
     
     # GNSS node
     gnss_node = Node(
-        package='ublox_dgnss',
+        package='ublox_dgnss_node',
         executable='ublox_dgnss_node',
         name='gnss_node',
         output='screen',
