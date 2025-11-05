@@ -1,0 +1,84 @@
+╔══════════════════════════════════════════════════════════════════╗
+║          Fixed Git Commit Steps (Large Files Removed)           ║
+╚══════════════════════════════════════════════════════════════════╝
+
+PROBLEM SOLVED:
+══════════════════════════════════════════════════════════════════
+
+✅ Large NVIDIA .tbz2 files removed from Git tracking
+✅ Files still on disk (you can use them locally)
+✅ Future commits won't include them (thanks to .gitignore)
+
+══════════════════════════════════════════════════════════════════
+
+NOW COMMIT EVERYTHING:
+══════════════════════════════════════════════════════════════════
+
+cd /home/agreen/Tank_projects
+
+# Add all the new camera build files
+git add camera_build_workspace/
+git add CAMERA_BUILD_INSTRUCTIONS.md
+git add nvidiaR36.4.3/quickstart.txt
+git add .gitignore
+
+# Check what will be committed (should be small files only)
+git status
+
+# Commit everything (including removal of large files)
+git commit -m "Add camera build infrastructure and remove large binary files
+
+- Added camera_build_workspace with build scripts and documentation
+- Removed NVIDIA .tbz2 files from Git (2.6GB) - kept locally
+- Updated .gitignore to prevent future tracking of large binaries
+- Added CAMERA_BUILD_INSTRUCTIONS.md for quick reference"
+
+# Push to GitHub (should be fast now!)
+git push origin main
+
+══════════════════════════════════════════════════════════════════
+
+VERIFY SUCCESS:
+══════════════════════════════════════════════════════════════════
+
+After pushing, verify on GitHub:
+  • Repository size should be small (~100KB added)
+  • No .tbz2 files visible in nvidiaR36.4.3/
+  • All documentation and scripts present
+
+══════════════════════════════════════════════════════════════════
+
+ON LINUX PC (after cloning):
+══════════════════════════════════════════════════════════════════
+
+Since the .tbz2 files won't be in the repo:
+
+Option 1 - Transfer from WSL (recommended):
+  # On WSL
+  cd /home/agreen/Tank_projects/nvidiaR36.4.3
+  tar -czf nvidia_files.tar.gz *.tbz2
+  
+  # Copy nvidia_files.tar.gz to Linux PC (USB or network)
+  
+  # On Linux PC
+  cd ~/Tank_projects/nvidiaR36.4.3/
+  tar -xzf ~/nvidia_files.tar.gz
+  rm ~/nvidia_files.tar.gz
+
+Option 2 - Re-download:
+  See camera_build_workspace/docs/BUILD_GUIDE_NATIVE_PC.md
+
+══════════════════════════════════════════════════════════════════
+
+WHY THIS HAPPENED:
+══════════════════════════════════════════════════════════════════
+
+The .tbz2 files were committed to Git before .gitignore was updated.
+Git doesn't automatically "forget" tracked files when you add them
+to .gitignore - you must explicitly remove them with:
+
+  git rm --cached <file>
+
+This removes them from Git tracking but keeps them on your disk.
+
+══════════════════════════════════════════════════════════════════
