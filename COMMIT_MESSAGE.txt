@@ -1,0 +1,37 @@
+Add camera driver build infrastructure for e-CAM25_CUONX
+
+Setup comprehensive build system for e-CAM25_CUONX camera drivers targeting
+Jetson Orin Nano with JetPack 6.2.1 (L4T 36.4.7).
+
+Added:
+- camera_build_workspace/ directory structure
+  - Complete build documentation (BUILD_GUIDE_NATIVE_PC.md)
+  - Quick start guide (QUICK_START.txt)
+  - Automated build script (build_drivers.sh)
+  - Installation script for Jetson (install_on_jetson.sh)
+  - .gitignore to exclude large binary files
+
+- CAMERA_BUILD_INSTRUCTIONS.md - Top-level quick reference
+- Updated nvidiaR36.4.3/quickstart.txt with new instructions
+
+Key Features:
+- Repository-based workflow for easy cloning and building
+- Automated build process with progress tracking
+- Built-in checks for WSL/architecture compatibility
+- Generates installation script for Jetson
+- Handles JetPack 6.2.x specific patches automatically
+
+Build Requirements:
+- Native Linux PC (Ubuntu 20.04/22.04, NOT WSL)
+- 50GB disk space, 8GB+ RAM
+- NVIDIA L4T 36.4.3 sources (not in repo, download separately)
+- Bootlin aarch64 toolchain (download via build script)
+
+Output:
+- Kernel modules (ar0234.ko, tegra-camera.ko, etc.)
+- Device tree overlay (4-lane configuration for 1280x720@20fps)
+- ISP tuning file
+- Ready-to-install package for Jetson
+
+Note: Large binary files (.tbz2, extracted sources) excluded via .gitignore
+      Download instructions provided in documentation

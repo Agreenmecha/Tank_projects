@@ -73,3 +73,30 @@ docker/volumes/
 # Keep empty directories
 !**/.gitkeep
 
+# Large binary files (NVIDIA & Toolchains) - Camera Build
+*.tbz2
+*.tar.bz2
+nvidiaR36.4.3/*.tbz2
+nvidiaR36.4.3/*.tar.bz2
+
+# Camera build workspace (large extracted files)
+camera_build_workspace/Linux_for_Tegra/
+camera_build_workspace/aarch64--glibc--stable-2022.08-1/
+camera_build_workspace/sensor_driver/
+camera_build_workspace/jetson_binaries/
+camera_build_workspace/*.tar.bz2
+camera_build_workspace/*.tbz2
+
+# Build artifacts
+*.ko
+*.mod
+*.mod.c
+*.symvers
+*.order
+.tmp_versions/
+
+# Patch backups
+*.orig
+*.rej
+*.modified
+

@@ -1,0 +1,166 @@
+╔════════════════════════════════════════════════════════════════════╗
+║     e-CAM25_CUONX Driver Build - Quick Start                      ║
+║     For Native Linux PC (Ubuntu 20.04/22.04)                      ║
+║     Repository: Tank_projects                                     ║
+╚════════════════════════════════════════════════════════════════════╝
+
+IMPORTANT: Must build on NATIVE Linux PC, not WSL!
+
+═══════════════════════════════════════════════════════════════════════
+
+STEP 1: CLONE REPOSITORY ON LINUX PC
+═════════════════════════════════════════════════════════════════════
+
+cd ~
+git clone https://github.com/YOUR_USERNAME/Tank_projects.git
+cd Tank_projects/camera_build_workspace
+
+═══════════════════════════════════════════════════════════════════════
+
+STEP 2: INSTALL BUILD TOOLS
+═════════════════════════════════════════════════════════════════════
+
+sudo apt update
+sudo apt install -y build-essential bc bison flex libssl-dev \
+    libncurses-dev git wget curl tar bzip2 lbzip2 \
+    python3 python3-pip device-tree-compiler
+
+═══════════════════════════════════════════════════════════════════════
+
+STEP 3: DOWNLOAD BOOTLIN TOOLCHAIN
+═════════════════════════════════════════════════════════════════════
+
+cd ~/Tank_projects/camera_build_workspace
+wget https://toolchains.bootlin.com/downloads/releases/toolchains/aarch64/tarballs/aarch64--glibc--stable-2022.08-1.tar.bz2
+
+═══════════════════════════════════════════════════════════════════════
+
+STEP 4: VERIFY NVIDIA FILES (May need to download)
+═════════════════════════════════════════════════════════════════════
+
+cd ~/Tank_projects/nvidiaR36.4.3
+ls -lh *.tbz2
+
+Required files:
+  ✓ Jetson_Linux_R36.4.3_aarch64.tbz2 (683MB)
+  ✓ Tegra_Linux_Sample-Root-Filesystem_R36.4.3_aarch64.tbz2 (1.8GB)
+  ✓ public_sources.tbz2 (216MB)
+
+If missing, download from:
+  https://developer.nvidia.com/embedded/jetpack
+  → Select JetPack 6.2 → L4T 36.4.3
+
+═══════════════════════════════════════════════════════════════════════
+
+STEP 5: RUN BUILD SCRIPT (30-60 MINUTES)
+═════════════════════════════════════════════════════════════════════
+
+cd ~/Tank_projects/camera_build_workspace
+./scripts/build_drivers.sh
+
+Watch for completion message.
+
+═══════════════════════════════════════════════════════════════════════
+
+STEP 6: TRANSFER TO JETSON
+═════════════════════════════════════════════════════════════════════
+
+cd ~/Tank_projects/camera_build_workspace/jetson_binaries
+scp * aaron@<jetson-ip>:~/
+
+═══════════════════════════════════════════════════════════════════════
+
+STEP 7: INSTALL ON JETSON
+═════════════════════════════════════════════════════════════════════
+
+On Jetson:
+  cd ~
+  bash install_on_jetson.sh
+  sudo reboot
+
+═══════════════════════════════════════════════════════════════════════
+
+STEP 8: VERIFY (AFTER REBOOT)
+═════════════════════════════════════════════════════════════════════
+
+On Jetson:
+  ls /dev/video0 && lsmod | grep ar0234 && echo "✅ Camera ready!"
+  v4l2-ctl --list-devices
+
+═══════════════════════════════════════════════════════════════════════
+
+QUICK COMMANDS REFERENCE:
+═════════════════════════════════════════════════════════════════════
+
+Build:
+  cd ~/Tank_projects/camera_build_workspace && ./scripts/build_drivers.sh
+
+Transfer:
+  cd ~/Tank_projects/camera_build_workspace/jetson_binaries && \
+      scp * aaron@<jetson-ip>:~/
+
+Install:
+  bash install_on_jetson.sh && sudo reboot
+
+Test GStreamer:
+  gst-launch-1.0 v4l2src device=/dev/video0 ! \
+      'video/x-raw,width=1280,height=720,framerate=20/1' ! \
+      xvimagesink sync=false
+
+Test ROS2:
+  cd ~/Tank_projects/tank_ws && source install/setup.bash
+  ros2 launch gscam gscam.launch.py
+
+═══════════════════════════════════════════════════════════════════════
+
+TROUBLESHOOTING:
+═════════════════════════════════════════════════════════════════════
+
+Build fails:
+  → Check you're on native Linux, not WSL
+  → Verify: uname -m  (should show x86_64, not aarch64)
+  → Check disk space: df -h (need 50GB)
+
+No /dev/video0:
+  → Check: sudo dmesg | grep ar0234
+  → Load manually: sudo modprobe ar0234
+  → Verify overlay: cat /boot/extlinux/extlinux.conf | grep OVERLAY
+
+Module not found:
+  → Rebuild and verify: sudo depmod -a
+
+═══════════════════════════════════════════════════════════════════════
+
+FILES IN REPOSITORY:
+═════════════════════════════════════════════════════════════════════
+
+Committed to Git:
+  ✓ camera_build_workspace/docs/        (documentation)
+  ✓ camera_build_workspace/scripts/     (build scripts)
+  ✓ e-CAM25_CUONX_.../                  (camera patches)
+
+NOT in Git (too large - download separately):
+  ✗ nvidiaR36.4.3/*.tbz2                (NVIDIA files, 2.6GB)
+  ✗ camera_build_workspace/*.tar.bz2    (toolchain, 138MB)
+  ✗ camera_build_workspace/Linux_for_Tegra/  (extracted, 30GB+)
+  ✗ camera_build_workspace/jetson_binaries/  (build output)
+
+═══════════════════════════════════════════════════════════════════════
+
+ESTIMATED TIME:
+═════════════════════════════════════════════════════════════════════
+
+Setup:          10-15 minutes
+Build:          30-60 minutes
+Transfer:        2-5 minutes
+Install:         5 minutes
+─────────────────────────────────
+Total:          50-85 minutes
+
+═══════════════════════════════════════════════════════════════════════
+
+For detailed instructions, see:
+  docs/BUILD_GUIDE_NATIVE_PC.md
+
+═══════════════════════════════════════════════════════════════════════
+

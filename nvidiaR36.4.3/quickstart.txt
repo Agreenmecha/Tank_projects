@@ -1,0 +1,45 @@
+╔════════════════════════════════════════════════════════════════╗
+║  e-CAM25_CUONX Camera Driver Build - Quick Reference          ║
+║  For Tank Project (Jetson Orin Nano JetPack 6.2.1)           ║
+╚════════════════════════════════════════════════════════════════╝
+
+IMPORTANT: Build on Native Linux PC (Ubuntu 20.04/22.04), NOT WSL!
+
+══════════════════════════════════════════════════════════════════
+
+COMPLETE DOCUMENTATION:
+  See: ../camera_build_workspace/docs/BUILD_GUIDE_NATIVE_PC.md
+
+══════════════════════════════════════════════════════════════════
+
+QUICK START:
+
+1. Clone repository on Linux PC:
+   cd ~ && git clone <repo-url> Tank_projects
+
+2. Download toolchain:
+   cd Tank_projects/camera_build_workspace
+   wget https://toolchains.bootlin.com/downloads/releases/toolchains/aarch64/tarballs/aarch64--glibc--stable-2022.08-1.tar.bz2
+
+3. Verify NVIDIA files in this directory (../nvidiaR36.4.3/):
+   - Jetson_Linux_R36.4.3_aarch64.tbz2
+   - Tegra_Linux_Sample-Root-Filesystem_R36.4.3_aarch64.tbz2
+   - public_sources.tbz2
+
+4. Run build (30-60 minutes):
+   ./scripts/build_drivers.sh
+
+5. Transfer to Jetson:
+   cd jetson_binaries && scp * aaron@<jetson-ip>:~/
+
+6. Install on Jetson:
+   bash install_on_jetson.sh && sudo reboot
+
+══════════════════════════════════════════════════════════════════
+
+NVIDIA FILES IN THIS DIRECTORY:
+  These files are NOT in git (too large, .gitignore)
+  Download from: https://developer.nvidia.com/embedded/jetpack
+  Select: JetPack 6.2 → L4T 36.4.3
+
+══════════════════════════════════════════════════════════════════

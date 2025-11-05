@@ -1,0 +1,110 @@
+╔══════════════════════════════════════════════════════════════════╗
+║            Git Commit Guide for Camera Build Setup              ║
+╚══════════════════════════════════════════════════════════════════╝
+
+WHAT TO COMMIT:
+══════════════════════════════════════════════════════════════════
+
+✅ Files to commit (documentation & scripts):
+  • camera_build_workspace/README.md
+  • camera_build_workspace/.gitignore
+  • camera_build_workspace/docs/BUILD_GUIDE_NATIVE_PC.md
+  • camera_build_workspace/docs/QUICK_START.txt
+  • camera_build_workspace/scripts/build_drivers.sh
+  • CAMERA_BUILD_INSTRUCTIONS.md
+  • nvidiaR36.4.3/quickstart.txt (updated)
+  • .gitignore (updated)
+
+❌ Will be automatically ignored (.gitignore):
+  • nvidiaR36.4.3/*.tbz2 (NVIDIA files - 2.6GB)
+  • camera_build_workspace/*.tar.bz2 (toolchain)
+  • camera_build_workspace/Linux_for_Tegra/ (extracted sources)
+  • camera_build_workspace/jetson_binaries/ (build output)
+
+══════════════════════════════════════════════════════════════════
+
+COMMIT COMMANDS:
+══════════════════════════════════════════════════════════════════
+
+cd /home/agreen/Tank_projects
+
+# Check status
+git status
+
+# Add new camera build files
+git add camera_build_workspace/
+git add CAMERA_BUILD_INSTRUCTIONS.md
+git add nvidiaR36.4.3/quickstart.txt
+git add .gitignore
+
+# Review what will be committed
+git status
+
+# Commit with message
+git commit -F COMMIT_MESSAGE.txt
+
+# Or use your own message:
+# git commit -m "Add camera driver build infrastructure for e-CAM25_CUONX"
+
+# Push to GitHub
+git push origin main
+
+══════════════════════════════════════════════════════════════════
+
+VERIFY COMMIT:
+══════════════════════════════════════════════════════════════════
+
+After committing, verify large files were NOT committed:
+
+git log --stat -1 | head -30
+
+Should show only small text files (documentation & scripts)
+Should NOT show any .tbz2 or large binary files
+
+══════════════════════════════════════════════════════════════════
+
+CLONE ON LINUX PC:
+══════════════════════════════════════════════════════════════════
+
+After pushing, clone on your Linux PC:
+
+cd ~
+git clone https://github.com/YOUR_USERNAME/Tank_projects.git
+cd Tank_projects/camera_build_workspace
+
+# Download required files (not in repo)
+wget https://toolchains.bootlin.com/downloads/releases/toolchains/aarch64/tarballs/aarch64--glibc--stable-2022.08-1.tar.bz2
+
+# Download NVIDIA files to ../nvidiaR36.4.3/
+# (See docs/BUILD_GUIDE_NATIVE_PC.md)
+
+# Run build
+./scripts/build_drivers.sh
+
+══════════════════════════════════════════════════════════════════
+
+FILE SIZES (for verification):
+══════════════════════════════════════════════════════════════════
+
+Documentation & scripts (WILL be committed):
+  BUILD_GUIDE_NATIVE_PC.md     ~35KB
+  build_drivers.sh             ~15KB
+  QUICK_START.txt              ~3KB
+  Other docs                   ~5-10KB each
+
+Large files (will NOT be committed):
+  NVIDIA .tbz2 files           2.6GB total
+  Bootlin toolchain            138MB
+  Extracted sources            30GB+
+  Build output                 500MB+
+
+══════════════════════════════════════════════════════════════════
+
+SUMMARY:
+══════════════════════════════════════════════════════════════════
+
+Total committed: ~100KB of documentation and scripts
+Repository stays lightweight and easy to clone
+Users download large files separately on their Linux PC
+
+══════════════════════════════════════════════════════════════════

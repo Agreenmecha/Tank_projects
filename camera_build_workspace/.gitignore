@@ -1,0 +1,42 @@
+# Large binary files (download separately)
+*.tbz2
+*.tar.bz2
+*.tar.gz
+*.tgz
+
+# Extracted NVIDIA sources (generated during build)
+Linux_for_Tegra/
+aarch64--glibc--stable-2022.08-1/
+
+# Build artifacts
+sensor_driver/
+*.o
+*.ko
+*.mod
+*.mod.c
+*.symvers
+*.order
+.tmp_versions/
+
+# Output binaries (generated during build)
+jetson_binaries/
+
+# Build logs
+build.log
+*.log
+
+# Patch backups
+*.backup
+*.orig
+*.rej
+
+# Marker files from build script
+.module_patch_applied
+.dtb_patch_applied
+.oot_patch_applied
+
+# Temporary files
+/tmp/
+*.tmp
+.modified
+
