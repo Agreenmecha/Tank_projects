@@ -57,6 +57,7 @@ class ODriveInterfaceNode(Node):
                 ('publish_rate', 20.0),    # Hz
                 ('current_limit', 30.0),   # Amps
                 ('velocity_limit', 20.0),  # turns/s at motor
+                ('vel_ramp_rate', 10.0),   # turns/s^2 - acceleration ramp rate
                 ('enable_watchdog', True),
             ]
         )
@@ -75,6 +76,7 @@ class ODriveInterfaceNode(Node):
         self.publish_rate = self.get_parameter('publish_rate').value
         self.current_limit = self.get_parameter('current_limit').value
         self.velocity_limit = self.get_parameter('velocity_limit').value
+        self.vel_ramp_rate = self.get_parameter('vel_ramp_rate').value
         self.enable_watchdog = self.get_parameter('enable_watchdog').value
         
         # State variables
@@ -169,6 +171,11 @@ class ODriveInterfaceNode(Node):
             # Set velocity limits
             left_axis.controller.config.vel_limit = self.velocity_limit
             right_axis.controller.config.vel_limit = self.velocity_limit
+            
+            # Set velocity ramp rate for smooth acceleration
+            left_axis.controller.config.vel_ramp_rate = self.vel_ramp_rate
+            right_axis.controller.config.vel_ramp_rate = self.vel_ramp_rate
+            self.get_logger().info(f'Velocity ramp rate: {self.vel_ramp_rate} turns/s²')
             
             # Configure watchdog
             if self.enable_watchdog:
