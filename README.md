@@ -240,8 +240,8 @@ scripts/odrive/quick_odrive_test.py
 ### LiDAR Connection Issues
 ```bash
 # Check network
-ping 192.168.1.10  # Front LiDAR
-ping 192.168.1.11  # Rear LiDAR
+ping 192.168.2.62  # Front LiDAR
+ping 192.168.2.63  # Rear LiDAR
 
 # Reconfigure network
 scripts/sensors/setup_lidar_network.sh
