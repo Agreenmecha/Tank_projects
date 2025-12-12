@@ -91,6 +91,7 @@ cd scripts/odrive
 - **[ODrive Setup](docs/setup/ODRIVE_JETSON_QUICKSTART.md)** - Motor controller configuration
 - **[GNSS Setup](docs/setup/GNSS_SETUP.md)** - u-blox GPS configuration
 - **[LiDAR Setup](docs/setup/LIDAR_NETWORK_SETUP.md)** - Dual LiDAR network configuration
+- **[Router Setup](docs/setup/ROUTER_QUICKSTART.md)** - Xiaomi WiFi router as access point ⭐ NEW
 - **[Fresh Install](docs/setup/FRESH_INSTALL_COMPLETE.md)** - Complete system setup
 
 ### User Guides
