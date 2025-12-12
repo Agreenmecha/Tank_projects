@@ -46,6 +46,10 @@ class SafetyMonitorNode(Node):
                 ('cmd_vel_timeout', 0.5),
                 ('imu_timeout', 1.0),
                 ('odrive_timeout', 1.0),
+                # Battery voltage thresholds (48V e-bike battery)
+                ('battery_voltage_warning', 42.0),   # ~20% remaining
+                ('battery_voltage_critical', 39.0),  # ~10% remaining
+                ('battery_voltage_emergency', 36.0), # Way too low
             ]
         )
         
@@ -61,6 +65,9 @@ class SafetyMonitorNode(Node):
         self.cmd_vel_timeout = self.get_parameter('cmd_vel_timeout').value
         self.imu_timeout = self.get_parameter('imu_timeout').value
         self.odrive_timeout = self.get_parameter('odrive_timeout').value
+        self.battery_voltage_warning = self.get_parameter('battery_voltage_warning').value
+        self.battery_voltage_critical = self.get_parameter('battery_voltage_critical').value
+        self.battery_voltage_emergency = self.get_parameter('battery_voltage_emergency').value
         
         # State tracking
         self.last_cmd_vel_time = time.time()
@@ -70,6 +77,7 @@ class SafetyMonitorNode(Node):
         self.current_pitch = 0.0
         self.motor_temps = [0.0, 0.0]  # Placeholder - ODrive doesn't publish temp via USB easily
         self.motor_currents = [0.0, 0.0]
+        self.battery_voltage = 0.0  # Battery voltage (V)
         
         # Subscribers
         self.motor_status_sub = self.create_subscription(
@@ -98,6 +106,24 @@ class SafetyMonitorNode(Node):
         
         if len(msg.effort) >= 2:
             self.motor_currents = list(msg.effort)
+        
+        # Extract battery voltage from header.frame_id
+        # Format: "base_link;battery_voltage:XX.XX" or "battery_voltage:XX.XX"
+        try:
+            frame_id = msg.header.frame_id
+            if "battery_voltage:" in frame_id:
+                # Extract voltage from either format
+                if ";" in frame_id:
+                    # Format: "base_link;battery_voltage:XX.XX"
+                    voltage_part = frame_id.split(";")[1]
+                else:
+                    # Format: "battery_voltage:XX.XX"
+                    voltage_part = frame_id
+                voltage_str = voltage_part.split(":")[1]
+                self.battery_voltage = float(voltage_str)
+        except (ValueError, IndexError):
+            # If parsing fails, voltage stays at 0 (will trigger timeout warning)
+            pass
     
     def imu_callback(self, msg):
         """Extract pitch angle from IMU."""
@@ -157,6 +183,17 @@ class SafetyMonitorNode(Node):
         if current_time - self.last_imu_time > self.imu_timeout:
             warnings.append(f'WARNING: No IMU data for {current_time - self.last_imu_time:.1f}s')
         
+        # Check battery voltage
+        if self.battery_voltage > 0:  # Only check if we have valid voltage reading
+            if self.battery_voltage <= self.battery_voltage_emergency:
+                warnings.append(f'EMERGENCY: Battery voltage {self.battery_voltage:.1f}V - CRITICALLY LOW!')
+                emergency = True
+            elif self.battery_voltage <= self.battery_voltage_critical:
+                warnings.append(f'CRITICAL: Battery voltage {self.battery_voltage:.1f}V - Very low!')
+                emergency = True  # Critical battery should trigger emergency stop
+            elif self.battery_voltage <= self.battery_voltage_warning:
+                warnings.append(f'WARNING: Battery voltage {self.battery_voltage:.1f}V - Low battery')
+        
         # Publish warnings
         if warnings:
             warning_msg = String()
@@ -181,8 +218,9 @@ class SafetyMonitorNode(Node):
         
         # Publish status
         if not warnings:
+            voltage_str = f'{self.battery_voltage:.1f}V' if self.battery_voltage > 0 else 'N/A'
             status_msg = String()
-            status_msg.data = f'OK: Pitch={self.current_pitch:.1f}° | Motors: {self.motor_currents[0]:.1f}A, {self.motor_currents[1]:.1f}A'
+            status_msg.data = f'OK: Battery={voltage_str} | Pitch={self.current_pitch:.1f}° | Motors: {self.motor_currents[0]:.1f}A, {self.motor_currents[1]:.1f}A'
             self.status_pub.publish(status_msg)
 
 

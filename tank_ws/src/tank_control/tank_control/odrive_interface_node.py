@@ -356,6 +356,10 @@ class ODriveInterfaceNode(Node):
                 right_axis.encoder.pos_estimate
             ]
             
+            # Battery voltage (V) - encode in frame_id for safety monitor
+            # Format: "base_link;battery_voltage:XX.XX" to preserve TF frame
+            status_msg.header.frame_id = f"base_link;battery_voltage:{self.odrv.vbus_voltage:.2f}"
+            
             self.status_pub.publish(status_msg)
             
             # Compute and publish odometry

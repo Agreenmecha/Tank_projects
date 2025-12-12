@@ -19,6 +19,13 @@ safety_monitor_node:
     imu_timeout: 1.0        # seconds - no IMU data received
     odrive_timeout: 1.0     # seconds - no ODrive status received
     
+    # Battery voltage monitoring (48V e-bike battery)
+    battery_voltage_warning: 42.0   # Volts - low battery warning (~20% remaining)
+    battery_voltage_critical: 39.0  # Volts - critical low (~10% remaining, BMS may cut off)
+    battery_voltage_emergency: 36.0 # Volts - emergency stop (way too low)
+    battery_voltage_nominal: 48.0   # Volts - nominal battery voltage
+    battery_voltage_max: 54.6       # Volts - fully charged (13S * 4.2V)
+    
     # E-stop
     estop_gpio_pin: -1      # GPIO pin for hardware E-stop (-1 = disabled)
     estop_active_low: true  # true = E-stop triggered when pin is LOW
