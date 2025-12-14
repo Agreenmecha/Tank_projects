@@ -1,0 +1,976 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- This URDF was automatically created by SolidWorks to URDF Exporter! Originally created by Stephen Brawner (brawner@gmail.com) 
+     Commit Version:   Build Version: 1.6.9478.39397
+     For more information, please see http://wiki.ros.org/sw_urdf_exporter -->
+<robot
+  name="tankbot">
+  <!-- Base footprint frame at ground level -->
+  <link
+    name="base_footprint">
+  </link>
+  
+  <!-- Fixed joint from base_footprint to base_link -->
+  <!-- Adjust z value to move base_link down to ground level -->
+  <!-- If chassis height is 0.5m, set z to approximately 0.25m (half height) or full height if origin is at top -->
+  <joint
+    name="base_footprint_joint"
+    type="fixed">
+    <origin
+      xyz="0 0 0.5"
+      rpy="0 0 0" />
+    <parent
+      link="base_footprint" />
+    <child
+      link="base_link" />
+  </joint>
+  
+  <link
+    name="base_link">
+    <inertial>
+      <origin
+        xyz="0.00890886340632199 -2.12108746995961E-05 -0.249771762086449"
+        rpy="0 0 0" />
+      <mass
+        value="102.457212071935" />
+      <inertia
+        ixx="5.96593791507147"
+        ixy="-0.000168989927706109"
+        ixz="-0.221596004916151"
+        iyy="3.39204393062452"
+        iyz="0.000300406798158666"
+        izz="6.96204879141497" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://tankbot/meshes/base_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.76078431372549 0.4 0.180392156862745 0.3" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://tankbot/meshes/base_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <link
+    name="l_l1">
+    <inertial>
+      <origin
+        xyz="4.996E-16 -0.0719 2.7756E-17"
+        rpy="0 0 0" />
+      <mass
+        value="2.1385" />
+      <inertia
+        ixx="0.0062157"
+        ixy="1.2139E-17"
+        ixz="-2.0788E-18"
+        iyy="0.0050614"
+        iyz="2.0255E-18"
+        izz="0.0062157" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://tankbot/meshes/l_l1.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.38824 0.4 0.85882 0.3" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://tankbot/meshes/l_l1.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="j_l1"
+    type="continuous">
+    <origin
+      xyz="0.31373 0.3723 -0.33393"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="l_l1" />
+    <axis
+      xyz="0 1 0" />
+  </joint>
+  <link
+    name="l_l2">
+    <inertial>
+      <origin
+        xyz="-5.5511E-17 -0.0739 1.3878E-17"
+        rpy="0 0 0" />
+      <mass
+        value="0.89909" />
+      <inertia
+        ixx="0.0020719"
+        ixy="-4.7629E-19"
+        ixz="8.3461E-21"
+        iyy="0.00087046"
+        iyz="2.4619E-19"
+        izz="0.0020719" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://tankbot/meshes/l_l2.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.38824 0.85882 0.38824 0.3" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://tankbot/meshes/l_l2.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="j_l2"
+    type="continuous">
+    <origin
+      xyz="0.21333 0.3763 -0.45648"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="l_l2" />
+    <axis
+      xyz="0 1 0" />
+  </joint>
+  <link
+    name="l_l3">
+    <inertial>
+      <origin
+        xyz="-2.7756E-17 -0.0739 2.7756E-17"
+        rpy="0 0 0" />
+      <mass
+        value="0.89909" />
+      <inertia
+        ixx="0.0020719"
+        ixy="-3.3003E-19"
+        ixz="-8.3461E-21"
+        iyy="0.00087046"
+        iyz="2.5891E-19"
+        izz="0.0020719" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://tankbot/meshes/l_l3.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.38824 0.85882 0.38824 0.3" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://tankbot/meshes/l_l3.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="j_l3"
+    type="continuous">
+    <origin
+      xyz="0.11783 0.3723 -0.45648"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="l_l3" />
+    <axis
+      xyz="0 1 0" />
+  </joint>
+  <link
+    name="l_l4">
+    <inertial>
+      <origin
+        xyz="-1.3878E-17 -0.0739 1.3878E-17"
+        rpy="0 0 0" />
+      <mass
+        value="0.89909" />
+      <inertia
+        ixx="0.0020719"
+        ixy="-3.197E-19"
+        ixz="8.3461E-21"
+        iyy="0.00087046"
+        iyz="2.6924E-19"
+        izz="0.0020719" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://tankbot/meshes/l_l4.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.38824 0.85882 0.38824 0.3" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://tankbot/meshes/l_l4.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="j_l4"
+    type="continuous">
+    <origin
+      xyz="0.022322 0.3723 -0.45648"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="l_l4" />
+    <axis
+      xyz="0 1 0" />
+  </joint>
+  <link
+    name="l_l5">
+    <inertial>
+      <origin
+        xyz="-2.7756E-17 -0.0739 1.3878E-17"
+        rpy="0 0 0" />
+      <mass
+        value="0.89909" />
+      <inertia
+        ixx="0.0020719"
+        ixy="-3.3003E-19"
+        ixz="-8.3461E-21"
+        iyy="0.00087046"
+        iyz="2.9229E-19"
+        izz="0.0020719" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://tankbot/meshes/l_l5.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.38824 0.85882 0.38824 0.3" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://tankbot/meshes/l_l5.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="j_l5"
+    type="continuous">
+    <origin
+      xyz="-0.073182 0.3723 -0.45648"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="l_l5" />
+    <axis
+      xyz="0 1 0" />
+  </joint>
+  <link
+    name="l_l6">
+    <inertial>
+      <origin
+        xyz="0 -0.0739 1.3878E-17"
+        rpy="0 0 0" />
+      <mass
+        value="0.89909" />
+      <inertia
+        ixx="0.0020719"
+        ixy="-5.6218E-20"
+        ixz="7.5115E-20"
+        iyy="0.00087046"
+        iyz="2.3824E-19"
+        izz="0.0020719" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://tankbot/meshes/l_l6.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.38824 0.85882 0.38824 0.3" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://tankbot/meshes/l_l6.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="j_l6"
+    type="continuous">
+    <origin
+      xyz="-0.16868 0.3723 -0.45648"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="l_l6" />
+    <axis
+      xyz="0 1 0" />
+  </joint>
+  <link
+    name="l_l7">
+    <inertial>
+      <origin
+        xyz="4.4409E-16 -0.0719 3.8164E-17"
+        rpy="0 0 0" />
+      <mass
+        value="2.1385" />
+      <inertia
+        ixx="0.0062157"
+        ixy="1.2165E-17"
+        ixz="-2.0788E-18"
+        iyy="0.0050614"
+        iyz="2.0255E-18"
+        izz="0.0062157" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://tankbot/meshes/l_l7.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.38824 0.4 0.85882 0.3" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://tankbot/meshes/l_l7.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="j_l7"
+    type="continuous">
+    <origin
+      xyz="-0.25069 0.3723 -0.36114"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="l_l7" />
+    <axis
+      xyz="0 1 0" />
+  </joint>
+  <link
+    name="l_r1">
+    <inertial>
+      <origin
+        xyz="5.5511E-16 0.0719 -2.7756E-17"
+        rpy="0 0 0" />
+      <mass
+        value="2.1385" />
+      <inertia
+        ixx="0.0062157"
+        ixy="-4.048E-18"
+        ixz="-1.0394E-18"
+        iyy="0.0050614"
+        iyz="1.7325E-18"
+        izz="0.0062157" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://tankbot/meshes/l_r1.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.38824 0.4 0.85882 0.3" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://tankbot/meshes/l_r1.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="j_r1"
+    type="continuous">
+    <origin
+      xyz="0.31373 -0.3723 -0.33393"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="l_r1" />
+    <axis
+      xyz="0 1 0" />
+  </joint>
+  <link
+    name="l_r2">
+    <inertial>
+      <origin
+        xyz="0 0.0739 -1.3878E-17"
+        rpy="0 0 0" />
+      <mass
+        value="0.89909" />
+      <inertia
+        ixx="0.0020719"
+        ixy="-4.3052E-19"
+        ixz="7.5115E-20"
+        iyy="0.00087046"
+        iyz="2.8969E-19"
+        izz="0.0020719" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://tankbot/meshes/l_r2.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.38824 0.85882 0.38824 0.3" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://tankbot/meshes/l_r2.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="j_r2"
+    type="continuous">
+    <origin
+      xyz="0.21333 -0.3763 -0.45648"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="l_r2" />
+    <axis
+      xyz="0 1 0" />
+  </joint>
+  <link
+    name="l_r3">
+    <inertial>
+      <origin
+        xyz="0 0.0739 -1.3878E-17"
+        rpy="0 0 0" />
+      <mass
+        value="0.89909" />
+      <inertia
+        ixx="0.0020719"
+        ixy="-2.8427E-19"
+        ixz="-8.3461E-21"
+        iyy="0.00087046"
+        iyz="3.3579E-19"
+        izz="0.0020719" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://tankbot/meshes/l_r3.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.38824 0.85882 0.38824 0.3" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://tankbot/meshes/l_r3.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="j_r3"
+    type="continuous">
+    <origin
+      xyz="0.11783 -0.3723 -0.45648"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="l_r3" />
+    <axis
+      xyz="0 1 0" />
+  </joint>
+  <link
+    name="l_r4">
+    <inertial>
+      <origin
+        xyz="2.0817E-17 0.0739 -1.3878E-17"
+        rpy="0 0 0" />
+      <mass
+        value="0.89909" />
+      <inertia
+        ixx="0.0020719"
+        ixy="-3.0732E-19"
+        ixz="7.5115E-20"
+        iyy="0.00087046"
+        iyz="3.1274E-19"
+        izz="0.0020719" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://tankbot/meshes/l_r4.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.38824 0.85882 0.38824 0.3" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://tankbot/meshes/l_r4.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="j_r4"
+    type="continuous">
+    <origin
+      xyz="0.022322 -0.3723 -0.45648"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="l_r4" />
+    <axis
+      xyz="0 1 0" />
+  </joint>
+  <link
+    name="l_r5">
+    <inertial>
+      <origin
+        xyz="0 0.0739 -1.3878E-17"
+        rpy="0 0 0" />
+      <mass
+        value="0.89909" />
+      <inertia
+        ixx="0.0020719"
+        ixy="-2.9024E-19"
+        ixz="-8.3461E-21"
+        iyy="0.00087046"
+        iyz="3.3579E-19"
+        izz="0.0020719" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://tankbot/meshes/l_r5.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.38824 0.85882 0.38824 0.3" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://tankbot/meshes/l_r5.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="j_r5"
+    type="continuous">
+    <origin
+      xyz="-0.073182 -0.3723 -0.45648"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="l_r5" />
+    <axis
+      xyz="0 1 0" />
+  </joint>
+  <link
+    name="l_r6">
+    <inertial>
+      <origin
+        xyz="0 0.0739 -1.3878E-17"
+        rpy="0 0 0" />
+      <mass
+        value="0.89909" />
+      <inertia
+        ixx="0.0020719"
+        ixy="-7.124E-20"
+        ixz="1.085E-19"
+        iyy="0.00087046"
+        iyz="3.1513E-19"
+        izz="0.0020719" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://tankbot/meshes/l_r6.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.38824 0.85882 0.38824 0.3" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://tankbot/meshes/l_r6.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="j_r6"
+    type="continuous">
+    <origin
+      xyz="-0.16868 -0.3723 -0.45648"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="l_r6" />
+    <axis
+      xyz="0 1 0" />
+  </joint>
+  <link
+    name="l_r7">
+    <inertial>
+      <origin
+        xyz="4.996E-16 0.0719 -1.7347E-17"
+        rpy="0 0 0" />
+      <mass
+        value="2.1385" />
+      <inertia
+        ixx="0.0062157"
+        ixy="-4.048E-18"
+        ixz="-1.0394E-18"
+        iyy="0.0050614"
+        iyz="1.4727E-18"
+        izz="0.0062157" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://tankbot/meshes/l_r7.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.38824 0.4 0.85882 0.3" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://tankbot/meshes/l_r7.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="j_r7"
+    type="continuous">
+    <origin
+      xyz="-0.25069 -0.3723 -0.36114"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="l_r7" />
+    <axis
+      xyz="0 1 0" />
+  </joint>
+  <link
+    name="l_FL2">
+    <inertial>
+      <origin
+        xyz="8.2345E-05 9.7401E-16 -0.56913"
+        rpy="0 0 0" />
+      <mass
+        value="0.058407" />
+      <inertia
+        ixx="1.5913E-05"
+        ixy="-9.1307E-21"
+        ixz="-8.7184E-07"
+        iyy="1.6147E-05"
+        iyz="4.2082E-21"
+        izz="1.2893E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://tankbot/meshes/l_FL2.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://tankbot/meshes/l_FL2.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="j_FL2"
+    type="fixed">
+    <origin
+      xyz="-0.26408 0 -0.17156"
+      rpy="0 -1.5708 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="l_FL2" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+  <link
+    name="l_BL2">
+    <inertial>
+      <origin
+        xyz="0.0089089 -2.1211E-05 -0.24977"
+        rpy="0 0 0" />
+      <mass
+        value="102.46" />
+      <inertia
+        ixx="5.9659"
+        ixy="-0.00016899"
+        ixz="-0.2216"
+        iyy="3.392"
+        iyz="0.00030041"
+        izz="6.962" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://tankbot/meshes/l_BL2.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.76078 0.4 0.18039 0.3" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://tankbot/meshes/l_BL2.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="j_BL2"
+    type="fixed">
+    <origin
+      xyz="0.32674 0 -0.17729"
+      rpy="-1.5708 -1.309 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="l_BL2" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+
+  <!-- ============================================ -->
+  <!-- SENSOR FRAMES                                -->
+  <!-- ============================================ -->
+  <!-- Note: Adjust xyz and rpy values based on your CAD measurements -->
+  <!-- All positions are relative to base_link origin -->
+
+  <!-- Front LiDAR (Unitree L2) -->
+  <!-- Using l_FL2 position from SolidWorks export -->
+  <link name="lidar_front">
+    <inertial>
+      <mass value="0.5" />
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <inertia ixx="0.001" ixy="0.0" ixz="0.0"
+               iyy="0.001" iyz="0.0"
+               izz="0.001" />
+    </inertial>
+  </link>
+  <joint name="l_FL2_to_lidar_front" type="fixed">
+    <parent link="l_FL2" />
+    <child link="lidar_front" />
+    <!-- LiDAR center is at l_FL2 origin (0,0,0 relative to l_FL2) -->
+    <origin xyz="0 0 0" rpy="0 0 0" />
+  </joint>
+
+  <!-- Rear LiDAR (Unitree L2) -->
+  <!-- Using l_BL2 position from SolidWorks export -->
+  <link name="lidar_rear">
+    <inertial>
+      <mass value="0.5" />
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <inertia ixx="0.001" ixy="0.0" ixz="0.0"
+               iyy="0.001" iyz="0.0"
+               izz="0.001" />
+    </inertial>
+  </link>
+  <joint name="l_BL2_to_lidar_rear" type="fixed">
+    <parent link="l_BL2" />
+    <child link="lidar_rear" />
+    <!-- LiDAR center is at l_BL2 origin (0,0,0 relative to l_BL2) -->
+    <origin xyz="0 0 0" rpy="0 0 0" />
+  </joint>
+
+  <!-- GNSS Antenna (u-blox ZED-F9P) -->
+  <link name="gnss">
+    <inertial>
+      <mass value="0.05" />
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <inertia ixx="0.00001" ixy="0.0" ixz="0.0"
+               iyy="0.00001" iyz="0.0"
+               izz="0.00001" />
+    </inertial>
+  </link>
+  <joint name="base_to_gnss" type="fixed">
+    <parent link="base_link" />
+    <child link="gnss" />
+    <!-- Adjust xyz: typically at highest point for clear sky view -->
+    <!-- Usually centered or slightly forward, at top of robot -->
+    <origin xyz="0.0 0 0.25" rpy="0 0 0" />
+  </joint>
+
+</robot>
