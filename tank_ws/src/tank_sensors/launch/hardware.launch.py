@@ -34,7 +34,7 @@ def generate_launch_description():
     
     enable_camera_arg = DeclareLaunchArgument(
         'enable_camera',
-        default_value='true',
+        default_value='false',
         description='Enable camera'
     )
     
