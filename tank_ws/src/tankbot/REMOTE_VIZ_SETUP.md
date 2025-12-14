@@ -43,12 +43,25 @@ This launches:
 
 ### Step 3: Launch Visualization on Local Machine
 
+**Option A: Use the clean start script (recommended):**
+```bash
+# On your local machine
+cd ~/Tank_projects/tank_ws
+bash src/tankbot/scripts/clean_start_viz.sh
+```
+
+**Option B: Manual launch:**
 ```bash
 # On your local machine
 cd ~/Tank_projects/tank_ws
 source install/setup.bash
 ros2 launch tankbot remote_viz.launch.py
 ```
+
+**Note:** The clean start script will:
+- Kill any existing robot_state_publisher/joint_state_publisher processes
+- Verify the URDF is valid
+- Launch all required nodes cleanly
 
 ---
 
