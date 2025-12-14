@@ -40,7 +40,8 @@ def generate_launch_description():
         parameters=[{
             'lidar_ip': LaunchConfiguration('front_lidar_ip'),
             'port': LaunchConfiguration('port'),
-            'frame_id': 'lidar_front',
+            'cloud_frame': 'lidar_front',  # Changed from frame_id to cloud_frame
+            'imu_frame': 'lidar_front_imu',
             'cloud_topic': 'cloud',
             'imu_topic': 'imu',
         }],
@@ -60,7 +61,8 @@ def generate_launch_description():
         parameters=[{
             'lidar_ip': LaunchConfiguration('rear_lidar_ip'),
             'port': LaunchConfiguration('port'),
-            'frame_id': 'lidar_rear',
+            'cloud_frame': 'lidar_rear',  # Changed from frame_id to cloud_frame
+            'imu_frame': 'lidar_rear_imu',
             'cloud_topic': 'cloud',
             'imu_topic': 'imu',
         }],
