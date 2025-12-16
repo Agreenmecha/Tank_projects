@@ -100,7 +100,7 @@ def generate_launch_description():
     # The pointcloud_frame_fixer republishes clouds with l_FL2/l_BL2 frame_ids
     # This keeps the LiDAR visualization rigidly mounted to the URDF links
     # The driver's TF tree (l_FL2_imu, etc.) exists separately and is ignored for visualization
-
+    #d
     # Pointcloud frame fixer:
     # - Subscribes to /lidar_front/cloud_raw and /lidar_rear/cloud_raw (from driver)
     # - Republishes as /lidar_front/cloud and /lidar_rear/cloud
