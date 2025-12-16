@@ -48,6 +48,11 @@ def generate_launch_description():
             'lidar_port': 6101,
             'local_ip': LaunchConfiguration('local_ip'),
             'local_port': 6201,
+            # Frame IDs (driver will use these)
+            'cloud_frame': 'unilidar_lidar',  # Driver default frame
+            'imu_frame': 'unilidar_imu',      # Driver default frame
+            'cloud_topic': 'cloud',
+            'imu_topic': 'imu',
         }],
         remappings=[
             ('unilidar/cloud', '/lidar_front/cloud'),
@@ -73,6 +78,11 @@ def generate_launch_description():
             'lidar_port': 6101,
             'local_ip': LaunchConfiguration('local_ip'),
             'local_port': 6202,
+            # Frame IDs (driver will use these)
+            'cloud_frame': 'unilidar_lidar',  # Driver default frame
+            'imu_frame': 'unilidar_imu',      # Driver default frame
+            'cloud_topic': 'cloud',
+            'imu_topic': 'imu',
         }],
         remappings=[
             ('unilidar/cloud', '/lidar_rear/cloud'),
