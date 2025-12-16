@@ -75,7 +75,7 @@ def generate_launch_description():
             'local_port': LaunchConfiguration('front_local_port'),
             'cloud_frame': 'lidar_front_raw',  # Driver's own frame (with IMU motion)
             'imu_frame': 'lidar_front_imu',
-            'cloud_topic': 'cloud',
+            'cloud_topic': 'cloud_raw',  # Publish to cloud_raw (fixer will republish to cloud)
             'imu_topic': 'imu',
         }],
         remappings=[
@@ -104,7 +104,7 @@ def generate_launch_description():
             'local_port': LaunchConfiguration('rear_local_port'),
             'cloud_frame': 'lidar_rear_raw',  # Driver's own frame (with IMU motion)
             'imu_frame': 'lidar_rear_imu',
-            'cloud_topic': 'cloud',
+            'cloud_topic': 'cloud_raw',  # Publish to cloud_raw (fixer will republish to cloud)
             'imu_topic': 'imu',
         }],
         remappings=[
