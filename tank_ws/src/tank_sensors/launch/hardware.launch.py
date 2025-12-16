@@ -115,6 +115,17 @@ def generate_launch_description():
         arguments=['0.32674', '0', '-0.17729', '-3.1416', '1.309', '-3.1416', 'base_link', 'l_BL2_imu_initial'],
         output='screen'
     )
+
+    # Pointcloud frame fixer:
+    # - Subscribes to /lidar_front/cloud and /lidar_rear/cloud
+    # - Republishes as /lidar_front/cloud_fixed and /lidar_rear/cloud_fixed
+    #   with frame_id set to URDF link frames l_FL2 and l_BL2
+    pointcloud_frame_fixer = Node(
+        package='tank_sensors',
+        executable='pointcloud_frame_fixer.py',
+        name='pointcloud_frame_fixer',
+        output='screen'
+    )
     
     # Include GNSS launch
     gnss_launch = IncludeLaunchDescription(
@@ -164,6 +175,7 @@ def generate_launch_description():
         static_tf_world,
         static_tf_front_lidar,
         static_tf_rear_lidar,
+        pointcloud_frame_fixer,
         gnss_launch,
         lidar_launch,
         camera_launch,

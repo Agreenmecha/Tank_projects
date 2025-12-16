@@ -14,4 +14,9 @@ install(DIRECTORY
   DESTINATION share/${PROJECT_NAME}/
 )
 
+install(PROGRAMS
+  src/pointcloud_frame_fixer.py
+  DESTINATION lib/${PROJECT_NAME}
+)
+
 ament_package()
