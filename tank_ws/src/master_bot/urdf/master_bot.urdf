@@ -4,6 +4,23 @@
      For more information, please see http://wiki.ros.org/sw_urdf_exporter -->
 <robot
   name="master_bot">
+  <!-- Base footprint link at ground level -->
+  <link name="base_footprint">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.001 0.001 0.001" />
+      </geometry>
+    </visual>
+  </link>
+  
+  <!-- Joint connecting base_footprint to base_link -->
+  <joint name="base_footprint_joint" type="fixed">
+    <origin xyz="0 0 0.5" rpy="0 0 0" />
+    <parent link="base_footprint" />
+    <child link="base_link" />
+  </joint>
+  
   <link
     name="base_link">
     <inertial>
@@ -892,4 +909,91 @@
     <axis
       xyz="0 0 0" />
   </joint>
+
+  <!-- Front Unitree L2 LiDAR Sensor -->
+  <gazebo reference="l_FL2">
+    <sensor name="front_lidar" type="gpu_ray">
+      <pose>0 0 0 0 0 0</pose>
+      <visualize>true</visualize>
+      <update_rate>10</update_rate>
+      <ray>
+        <scan>
+          <horizontal>
+            <samples>1024</samples>
+            <resolution>1</resolution>
+            <min_angle>-3.14159</min_angle>
+            <max_angle>3.14159</max_angle>
+          </horizontal>
+          <vertical>
+            <samples>32</samples>
+            <resolution>1</resolution>
+            <min_angle>-0.84</min_angle>
+            <max_angle>0.84</max_angle>
+          </vertical>
+        </scan>
+        <range>
+          <min>0.05</min>
+          <max>30.0</max>
+          <resolution>0.02</resolution>
+        </range>
+        <noise>
+          <type>gaussian</type>
+          <mean>0.0</mean>
+          <stddev>0.01</stddev>
+        </noise>
+      </ray>
+      <plugin name="gazebo_ros_front_lidar" filename="libgazebo_ros_ray_sensor.so">
+        <ros>
+          <namespace>/</namespace>
+          <remapping>~/out:=lidar_front/pointcloud</remapping>
+        </ros>
+        <output_type>sensor_msgs/PointCloud2</output_type>
+        <frame_name>l_FL2</frame_name>
+      </plugin>
+    </sensor>
+  </gazebo>
+
+  <!-- Rear Unitree L2 LiDAR Sensor -->
+  <gazebo reference="l_BL2">
+    <sensor name="rear_lidar" type="gpu_ray">
+      <pose>0 0 0 0 0 0</pose>
+      <visualize>true</visualize>
+      <update_rate>10</update_rate>
+      <ray>
+        <scan>
+          <horizontal>
+            <samples>1024</samples>
+            <resolution>1</resolution>
+            <min_angle>-3.14159</min_angle>
+            <max_angle>3.14159</max_angle>
+          </horizontal>
+          <vertical>
+            <samples>32</samples>
+            <resolution>1</resolution>
+            <min_angle>-0.84</min_angle>
+            <max_angle>0.84</max_angle>
+          </vertical>
+        </scan>
+        <range>
+          <min>0.05</min>
+          <max>30.0</max>
+          <resolution>0.02</resolution>
+        </range>
+        <noise>
+          <type>gaussian</type>
+          <mean>0.0</mean>
+          <stddev>0.01</stddev>
+        </noise>
+      </ray>
+      <plugin name="gazebo_ros_rear_lidar" filename="libgazebo_ros_ray_sensor.so">
+        <ros>
+          <namespace>/</namespace>
+          <remapping>~/out:=lidar_rear/pointcloud</remapping>
+        </ros>
+        <output_type>sensor_msgs/PointCloud2</output_type>
+        <frame_name>l_BL2</frame_name>
+      </plugin>
+    </sensor>
+  </gazebo>
+
 </robot>
