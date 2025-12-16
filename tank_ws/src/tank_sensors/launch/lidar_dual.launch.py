@@ -50,7 +50,7 @@ def generate_launch_description():
             'local_port': 6201,
         }],
         remappings=[
-            ('unilidar/cloud', '/lidar_front/cloud_raw'),
+            ('unilidar/cloud', '/lidar_front/cloud'),
             ('unilidar/imu', '/lidar_front/imu'),
         ],
         namespace='lidar_front'
@@ -75,23 +75,24 @@ def generate_launch_description():
             'local_port': 6202,
         }],
         remappings=[
-            ('unilidar/cloud', '/lidar_rear/cloud_raw'),
+            ('unilidar/cloud', '/lidar_rear/cloud'),
             ('unilidar/imu', '/lidar_rear/imu'),
         ],
         namespace='lidar_rear'
     )
     
     # Frame fixer: republish clouds with URDF frame_ids
+    # Subscribes to driver output, republishes with URDF frames for RViz
     frame_fixer = Node(
         package='tank_sensors',
         executable='pointcloud_frame_fixer.py',
         name='pointcloud_frame_fixer',
         output='screen',
         parameters=[{
-            'front_input_topic': '/lidar_front/cloud_raw',
-            'rear_input_topic': '/lidar_rear/cloud_raw',
-            'front_output_topic': '/lidar_front/cloud',
-            'rear_output_topic': '/lidar_rear/cloud',
+            'front_input_topic': '/lidar_front/cloud',
+            'rear_input_topic': '/lidar_rear/cloud',
+            'front_output_topic': '/lidar_front/cloud_fixed',
+            'rear_output_topic': '/lidar_rear/cloud_fixed',
             'front_frame': 'l_FL2',
             'rear_frame': 'l_BL2',
         }]
