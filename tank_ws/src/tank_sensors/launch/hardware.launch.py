@@ -95,23 +95,24 @@ def generate_launch_description():
         output='screen'
     )
     
-    # Connect base_link directly to driver's IMU frame roots
-    # This bypasses the URDF l_FL2/l_BL2 links which conflict with driver frames
-    # Front: base_link → l_FL2_imu_initial (at front lidar position from URDF: -0.26408, 0, -0.17156, rpy 0 -1.5708 0)
+    # Connect URDF lidar mount frames to driver's IMU initial frames
+    # The URDF defines l_FL2/l_BL2 at the correct positions/orientations
+    # The driver publishes l_FL2_imu_initial → l_FL2_imu → l_FL2
+    # We connect URDF l_FL2 → driver l_FL2_imu_initial (identity transform, driver handles IMU offset)
     static_tf_front_lidar = Node(
         package='tf2_ros',
         executable='static_transform_publisher',
         name='front_lidar_mount',
-        arguments=['-0.26408', '0', '-0.17156', '0', '-1.5708', '0', 'base_link', 'l_FL2_imu_initial'],
+        arguments=['0', '0', '0', '0', '0', '0', 'l_FL2', 'l_FL2_imu_initial'],
         output='screen'
     )
     
-    # Rear: base_link → l_BL2_imu_initial (at rear lidar position from URDF: 0.32674, 0, -0.17729, rpy -3.1416 1.309 -3.1416)
+    # Rear: URDF l_BL2 → driver l_BL2_imu_initial
     static_tf_rear_lidar = Node(
         package='tf2_ros',
         executable='static_transform_publisher',
         name='rear_lidar_mount',
-        arguments=['0.32674', '0', '-0.17729', '-3.1416', '1.309', '-3.1416', 'base_link', 'l_BL2_imu_initial'],
+        arguments=['0', '0', '0', '0', '0', '0', 'l_BL2', 'l_BL2_imu_initial'],
         output='screen'
     )
     
