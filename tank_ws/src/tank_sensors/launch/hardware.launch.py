@@ -117,8 +117,8 @@ def generate_launch_description():
             'rear_input_topic': '/lidar_rear/cloud_raw',
             'front_output_topic': '/lidar_front/cloud',
             'rear_output_topic': '/lidar_rear/cloud',
-            'front_frame': 'l_FL2',
-            'rear_frame': 'l_BL2',
+            'front_frame': 'l_BL2',  # Swapped: front data goes to rear frame
+            'rear_frame': 'l_FL2',   # Swapped: rear data goes to front frame
         }]
     )
     
