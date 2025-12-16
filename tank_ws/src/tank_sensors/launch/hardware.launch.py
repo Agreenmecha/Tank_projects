@@ -84,6 +84,25 @@ def generate_launch_description():
         output='screen'
     )
     
+    # Connect URDF LiDAR mounts to driver's IMU frames
+    # Front: l_FL2 (URDF mount) → lidar_front_imu_initial (driver root)
+    static_tf_front_lidar = Node(
+        package='tf2_ros',
+        executable='static_transform_publisher',
+        name='front_lidar_mount',
+        arguments=['0', '0', '0', '0', '0', '0', 'l_FL2', 'lidar_front_imu_initial'],
+        output='screen'
+    )
+    
+    # Rear: l_BL2 (URDF mount) → lidar_rear_imu_initial (driver root)
+    static_tf_rear_lidar = Node(
+        package='tf2_ros',
+        executable='static_transform_publisher',
+        name='rear_lidar_mount',
+        arguments=['0', '0', '0', '0', '0', '0', 'l_BL2', 'lidar_rear_imu_initial'],
+        output='screen'
+    )
+    
     # Include GNSS launch
     gnss_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([
@@ -129,6 +148,8 @@ def generate_launch_description():
         enable_camera_arg,
         robot_state_publisher,
         static_tf_world,
+        static_tf_front_lidar,
+        static_tf_rear_lidar,
         gnss_launch,
         lidar_launch,
         camera_launch,

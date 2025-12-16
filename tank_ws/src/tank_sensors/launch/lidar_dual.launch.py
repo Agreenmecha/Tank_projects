@@ -72,8 +72,8 @@ def generate_launch_description():
             'lidar_port': LaunchConfiguration('front_lidar_port'),
             'local_ip': LaunchConfiguration('local_ip'),
             'local_port': LaunchConfiguration('front_local_port'),
-            'cloud_frame': 'l_FL2',  # Match URDF link name
-            'imu_frame': 'l_FL2_imu',
+            'cloud_frame': 'lidar_front',  # Use driver's own frame
+            'imu_frame': 'lidar_front_imu',
             'cloud_topic': 'cloud',
             'imu_topic': 'imu',
         }],
@@ -101,8 +101,8 @@ def generate_launch_description():
             'lidar_port': LaunchConfiguration('rear_lidar_port'),
             'local_ip': LaunchConfiguration('local_ip'),
             'local_port': LaunchConfiguration('rear_local_port'),
-            'cloud_frame': 'l_BL2',  # Match URDF link name
-            'imu_frame': 'l_BL2_imu',
+            'cloud_frame': 'lidar_rear',  # Use driver's own frame
+            'imu_frame': 'lidar_rear_imu',
             'cloud_topic': 'cloud',
             'imu_topic': 'imu',
         }],
