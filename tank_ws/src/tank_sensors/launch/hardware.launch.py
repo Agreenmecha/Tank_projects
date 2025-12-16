@@ -95,32 +95,9 @@ def generate_launch_description():
         output='screen'
     )
     
-    # No additional static transforms needed for LiDARs
+    # LiDAR driver publishes directly with URDF frame IDs (l_FL2, l_BL2)
     # The URDF defines base_link → l_FL2 and base_link → l_BL2 as static fixed joints
-    # The pointcloud_frame_fixer republishes clouds with l_FL2/l_BL2 frame_ids
-    # This keeps the LiDAR visualization rigidly mounted to the URDF links
-    # The driver's TF tree (l_FL2_imu, etc.) exists separately and is ignored for visualization
-    #d
-    # Pointcloud frame fixer:
-    # - Subscribes to /lidar_front/cloud_raw and /lidar_rear/cloud_raw (from driver)
-    # - Republishes as /lidar_front/cloud and /lidar_rear/cloud
-    #   with frame_id set to URDF link frames l_FL2 and l_BL2
-    # - This "freezes" the point clouds to the URDF mount points (no IMU motion)
-    # - IMU data remains on /lidar_front/imu and /lidar_rear/imu for localization
-    pointcloud_frame_fixer = Node(
-        package='tank_sensors',
-        executable='pointcloud_frame_fixer.py',
-        name='pointcloud_frame_fixer',
-        output='screen',
-        parameters=[{
-            'front_input_topic': '/lidar_front/cloud_raw',
-            'rear_input_topic': '/lidar_rear/cloud_raw',
-            'front_output_topic': '/lidar_front/cloud',
-            'rear_output_topic': '/lidar_rear/cloud',
-            'front_frame': 'l_BL2',  # Swapped: front data goes to rear frame
-            'rear_frame': 'l_FL2',   # Swapped: rear data goes to front frame
-        }]
-    )
+    # Point clouds are rigidly mounted to the robot model
     
     # Include GNSS launch
     gnss_launch = IncludeLaunchDescription(
@@ -168,7 +145,6 @@ def generate_launch_description():
         robot_state_publisher,
         joint_state_publisher,
         static_tf_world,
-        pointcloud_frame_fixer,
         gnss_launch,
         lidar_launch,
         camera_launch,

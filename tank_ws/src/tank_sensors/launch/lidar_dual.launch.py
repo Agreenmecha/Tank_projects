@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """
-Launch file for Dual Unitree L2 LiDARs
-- Front L2: Used for Point-LIO localization
-- Rear L2: Used for rear perception and costmap
+Launch file for Dual Unitree L2 LiDARs - SIMPLE VERSION
+- Front L2: Publishes with frame_id l_FL2 (URDF link)
+- Rear L2: Publishes with frame_id l_BL2 (URDF link)
+- No frame fixer needed - driver uses URDF frames directly
 """
 
 from launch import LaunchDescription
@@ -15,38 +16,14 @@ def generate_launch_description():
     # Declare arguments
     front_lidar_ip_arg = DeclareLaunchArgument(
         'front_lidar_ip',
-        default_value='192.168.123.124',  # Swapped: physical front LiDAR
+        default_value='192.168.123.124',
         description='IP address of front L2 LiDAR'
     )
     
     rear_lidar_ip_arg = DeclareLaunchArgument(
         'rear_lidar_ip',
-        default_value='192.168.123.123',  # Swapped: physical rear LiDAR
-        description='IP address of rear L2 LiDAR (change with Unitree host software)'
-    )
-    
-    front_lidar_port_arg = DeclareLaunchArgument(
-        'front_lidar_port',
-        default_value='6101',
-        description='UDP port on front L2 LiDAR (default: 6101)'
-    )
-    
-    rear_lidar_port_arg = DeclareLaunchArgument(
-        'rear_lidar_port',
-        default_value='6101',
-        description='UDP port on rear L2 LiDAR (default: 6101)'
-    )
-    
-    front_local_port_arg = DeclareLaunchArgument(
-        'front_local_port',
-        default_value='6201',
-        description='Local UDP port to receive data from front L2 (default: 6201)'
-    )
-    
-    rear_local_port_arg = DeclareLaunchArgument(
-        'rear_local_port',
-        default_value='6202',
-        description='Local UDP port to receive data from rear L2 (default: 6202, must be different from front)'
+        default_value='192.168.123.123',
+        description='IP address of rear L2 LiDAR'
     )
     
     local_ip_arg = DeclareLaunchArgument(
@@ -55,8 +32,7 @@ def generate_launch_description():
         description='Local IP address of this computer'
     )
     
-    # Front L2 node - Driver publishes in its own frame
-    # Point clouds will be republished to URDF frame by pointcloud_frame_fixer
+    # Front L2 node - publishes directly with URDF frame
     front_l2_node = Node(
         package='unitree_lidar_ros2',
         executable='unitree_lidar_ros2_node',
@@ -70,22 +46,22 @@ def generate_launch_description():
             'range_max': 30.0,
             'cloud_scan_num': 18,
             'lidar_ip': LaunchConfiguration('front_lidar_ip'),
-            'lidar_port': LaunchConfiguration('front_lidar_port'),
+            'lidar_port': 6101,
             'local_ip': LaunchConfiguration('local_ip'),
-            'local_port': LaunchConfiguration('front_local_port'),
-            'cloud_frame': 'lidar_front_raw',  # Driver's own frame (with IMU motion)
-            'imu_frame': 'lidar_front_imu',
-            'cloud_topic': 'cloud_raw',  # Publish to cloud_raw (fixer will republish to cloud)
+            'local_port': 6201,
+            'cloud_frame': 'l_FL2',  # URDF link frame
+            'imu_frame': 'l_FL2_imu',
+            'cloud_topic': 'cloud',
             'imu_topic': 'imu',
         }],
         remappings=[
-            ('unilidar/cloud', '/lidar_front/cloud_raw'),  # Raw cloud from driver
+            ('unilidar/cloud', '/lidar_front/cloud'),
             ('unilidar/imu', '/lidar_front/imu'),
         ],
         namespace='lidar_front'
     )
     
-    # Rear L2 node - Driver publishes in its own frame
+    # Rear L2 node - publishes directly with URDF frame
     rear_l2_node = Node(
         package='unitree_lidar_ros2',
         executable='unitree_lidar_ros2_node',
@@ -99,16 +75,16 @@ def generate_launch_description():
             'range_max': 30.0,
             'cloud_scan_num': 18,
             'lidar_ip': LaunchConfiguration('rear_lidar_ip'),
-            'lidar_port': LaunchConfiguration('rear_lidar_port'),
+            'lidar_port': 6101,
             'local_ip': LaunchConfiguration('local_ip'),
-            'local_port': LaunchConfiguration('rear_local_port'),
-            'cloud_frame': 'lidar_rear_raw',  # Driver's own frame (with IMU motion)
-            'imu_frame': 'lidar_rear_imu',
-            'cloud_topic': 'cloud_raw',  # Publish to cloud_raw (fixer will republish to cloud)
+            'local_port': 6202,
+            'cloud_frame': 'l_BL2',  # URDF link frame
+            'imu_frame': 'l_BL2_imu',
+            'cloud_topic': 'cloud',
             'imu_topic': 'imu',
         }],
         remappings=[
-            ('unilidar/cloud', '/lidar_rear/cloud_raw'),  # Raw cloud from driver
+            ('unilidar/cloud', '/lidar_rear/cloud'),
             ('unilidar/imu', '/lidar_rear/imu'),
         ],
         namespace='lidar_rear'
@@ -117,12 +93,7 @@ def generate_launch_description():
     return LaunchDescription([
         front_lidar_ip_arg,
         rear_lidar_ip_arg,
-        front_lidar_port_arg,
-        rear_lidar_port_arg,
-        front_local_port_arg,
-        rear_local_port_arg,
         local_ip_arg,
         front_l2_node,
         rear_l2_node,
     ])
-
