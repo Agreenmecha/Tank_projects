@@ -55,7 +55,8 @@ def generate_launch_description():
         description='Local IP address of this computer'
     )
     
-    # Front L2 node (for Point-LIO)
+    # Front L2 node - Driver publishes in its own frame
+    # Point clouds will be republished to URDF frame by pointcloud_frame_fixer
     front_l2_node = Node(
         package='unitree_lidar_ros2',
         executable='unitree_lidar_ros2_node',
@@ -72,19 +73,19 @@ def generate_launch_description():
             'lidar_port': LaunchConfiguration('front_lidar_port'),
             'local_ip': LaunchConfiguration('local_ip'),
             'local_port': LaunchConfiguration('front_local_port'),
-            'cloud_frame': 'lidar_front',  # Use driver's own frame
+            'cloud_frame': 'lidar_front_raw',  # Driver's own frame (with IMU motion)
             'imu_frame': 'lidar_front_imu',
             'cloud_topic': 'cloud',
             'imu_topic': 'imu',
         }],
         remappings=[
-            ('unilidar/cloud', '/lidar_front/pointcloud'),
+            ('unilidar/cloud', '/lidar_front/cloud_raw'),  # Raw cloud from driver
             ('unilidar/imu', '/lidar_front/imu'),
         ],
         namespace='lidar_front'
     )
     
-    # Rear L2 node (for rear perception)
+    # Rear L2 node - Driver publishes in its own frame
     rear_l2_node = Node(
         package='unitree_lidar_ros2',
         executable='unitree_lidar_ros2_node',
@@ -101,13 +102,13 @@ def generate_launch_description():
             'lidar_port': LaunchConfiguration('rear_lidar_port'),
             'local_ip': LaunchConfiguration('local_ip'),
             'local_port': LaunchConfiguration('rear_local_port'),
-            'cloud_frame': 'lidar_rear',  # Use driver's own frame
+            'cloud_frame': 'lidar_rear_raw',  # Driver's own frame (with IMU motion)
             'imu_frame': 'lidar_rear_imu',
             'cloud_topic': 'cloud',
             'imu_topic': 'imu',
         }],
         remappings=[
-            ('unilidar/cloud', '/lidar_rear/pointcloud'),
+            ('unilidar/cloud', '/lidar_rear/cloud_raw'),  # Raw cloud from driver
             ('unilidar/imu', '/lidar_rear/imu'),
         ],
         namespace='lidar_rear'

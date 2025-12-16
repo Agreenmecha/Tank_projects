@@ -102,14 +102,24 @@ def generate_launch_description():
     # The driver's TF tree (l_FL2_imu, etc.) exists separately and is ignored for visualization
 
     # Pointcloud frame fixer:
-    # - Subscribes to /lidar_front/cloud and /lidar_rear/cloud
-    # - Republishes as /lidar_front/cloud_fixed and /lidar_rear/cloud_fixed
+    # - Subscribes to /lidar_front/cloud_raw and /lidar_rear/cloud_raw (from driver)
+    # - Republishes as /lidar_front/cloud and /lidar_rear/cloud
     #   with frame_id set to URDF link frames l_FL2 and l_BL2
+    # - This "freezes" the point clouds to the URDF mount points (no IMU motion)
+    # - IMU data remains on /lidar_front/imu and /lidar_rear/imu for localization
     pointcloud_frame_fixer = Node(
         package='tank_sensors',
         executable='pointcloud_frame_fixer.py',
         name='pointcloud_frame_fixer',
-        output='screen'
+        output='screen',
+        parameters=[{
+            'front_input_topic': '/lidar_front/cloud_raw',
+            'rear_input_topic': '/lidar_rear/cloud_raw',
+            'front_output_topic': '/lidar_front/cloud',
+            'rear_output_topic': '/lidar_rear/cloud',
+            'front_frame': 'l_FL2',
+            'rear_frame': 'l_BL2',
+        }]
     )
     
     # Include GNSS launch
