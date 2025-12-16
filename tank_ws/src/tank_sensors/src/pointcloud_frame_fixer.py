@@ -19,6 +19,8 @@ Publications:
 
 import rclpy
 from rclpy.node import Node
+from rclpy.parameter import Parameter
+from rcl_interfaces.msg import SetParametersResult
 from sensor_msgs.msg import PointCloud2
 import sensor_msgs_py.point_cloud2 as pc2
 import numpy as np
@@ -48,9 +50,10 @@ class PointcloudFrameFixer(Node):
         
         # Rotation angle (counter-clockwise around Z)
         rotation_deg = self.get_parameter('rotation_degrees').get_parameter_value().double_value
-        self.rotation_rad = np.radians(rotation_deg)
-        self.cos_theta = np.cos(self.rotation_rad)
-        self.sin_theta = np.sin(self.rotation_rad)
+        self.update_rotation(rotation_deg)
+        
+        # Add parameter callback for dynamic reconfiguration
+        self.add_on_set_parameters_callback(self.parameter_callback)
 
         # Publishers
         self.front_pub = self.create_publisher(PointCloud2, front_out, 10)
@@ -73,8 +76,29 @@ class PointcloudFrameFixer(Node):
         self.get_logger().info(
             f'PointcloudFrameFixer running:\n'
             f'  front: {front_in} -> {front_out} (frame={self.front_frame}, rotation={rotation_deg}°)\n'
-            f'  rear:  {rear_in} -> {rear_out} (frame={self.rear_frame}, rotation={rotation_deg}°)'
+            f'  rear:  {rear_in} -> {rear_out} (frame={self.rear_frame}, rotation={rotation_deg}°)\n'
+            f'\nTo adjust rotation: ros2 param set /pointcloud_frame_fixer rotation_degrees <value>'
         )
+
+    def update_rotation(self, rotation_deg: float) -> None:
+        """Update rotation angle and precompute sin/cos."""
+        self.rotation_deg = rotation_deg
+        self.rotation_rad = np.radians(rotation_deg)
+        self.cos_theta = np.cos(self.rotation_rad)
+        self.sin_theta = np.sin(self.rotation_rad)
+        self.get_logger().info(f'Rotation updated to {rotation_deg}° CCW around Z-axis')
+
+    def parameter_callback(self, params) -> SetParametersResult:
+        """Handle dynamic parameter changes."""
+        for param in params:
+            if param.name == 'rotation_degrees':
+                if param.type_ == Parameter.Type.DOUBLE:
+                    self.update_rotation(param.value)
+                    return SetParametersResult(successful=True)
+                else:
+                    return SetParametersResult(successful=False, 
+                        reason='rotation_degrees must be a double')
+        return SetParametersResult(successful=True)
 
     def _rotate_and_publish(self, msg: PointCloud2, frame: str, pub) -> None:
         """Rotate point cloud and change frame_id."""
