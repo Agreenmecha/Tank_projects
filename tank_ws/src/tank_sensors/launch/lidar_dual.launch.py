@@ -93,6 +93,7 @@ def generate_launch_description():
     
     # Frame fixer: republish clouds with URDF frame_ids
     # Subscribes to driver output, republishes with URDF frames for RViz
+    # Note: URDF frames are swapped - physical front = l_BL2, physical rear = l_FL2
     frame_fixer = Node(
         package='tank_sensors',
         executable='pointcloud_frame_fixer.py',
@@ -103,8 +104,8 @@ def generate_launch_description():
             'rear_input_topic': '/lidar_rear/cloud',
             'front_output_topic': '/lidar_front/cloud_fixed',
             'rear_output_topic': '/lidar_rear/cloud_fixed',
-            'front_frame': 'l_FL2',
-            'rear_frame': 'l_BL2',
+            'front_frame': 'l_BL2',  # Front lidar → l_BL2 (swapped in URDF)
+            'rear_frame': 'l_FL2',   # Rear lidar → l_FL2 (swapped in URDF)
         }]
     )
     

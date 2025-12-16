@@ -804,7 +804,7 @@
       xyz="0 1 0" />
   </joint>
   <link
-    name="l_FL2">
+    name="l_BL2">
     <inertial>
       <origin
         xyz="8.2345E-05 9.7401E-16 -0.56913"
@@ -844,7 +844,7 @@
     </collision>
   </link>
   <joint
-    name="j_FL2"
+    name="j_BL2"
     type="fixed">
     <origin
       xyz="-0.26408 0 -0.17156"
@@ -852,12 +852,12 @@
     <parent
       link="base_link" />
     <child
-      link="l_FL2" />
+      link="l_BL2" />
     <axis
       xyz="0 0 0" />
   </joint>
   <link
-    name="l_BL2">
+    name="l_FL2">
     <inertial>
       <origin
         xyz="0.14157 -9.3649E-16 -0.55049"
@@ -897,7 +897,7 @@
     </collision>
   </link>
   <joint
-    name="j_BL2"
+    name="j_FL2"
     type="fixed">
     <origin
       xyz="0.32674 0 -0.17729"
@@ -905,13 +905,14 @@
     <parent
       link="base_link" />
     <child
-      link="l_BL2" />
+      link="l_FL2" />
     <axis
       xyz="0 0 0" />
   </joint>
 
   <!-- Front Unitree L2 LiDAR Sensor (Gazebo Fortress) -->
-  <gazebo reference="l_FL2">
+  <!-- Note: Physical front position now uses l_BL2 link name (swapped) -->
+  <gazebo reference="l_BL2">
     <sensor name="front_lidar" type="gpu_lidar">
       <pose>0 0 0 0 0 0</pose>
       <visualize>true</visualize>
@@ -943,12 +944,13 @@
           <stddev>0.01</stddev>
         </noise>
       </lidar>
-      <ignition_frame_id>l_FL2</ignition_frame_id>
+      <ignition_frame_id>l_BL2</ignition_frame_id>
     </sensor>
   </gazebo>
 
   <!-- Rear Unitree L2 LiDAR Sensor (Gazebo Fortress) -->
-  <gazebo reference="l_BL2">
+  <!-- Note: Physical rear position now uses l_FL2 link name (swapped) -->
+  <gazebo reference="l_FL2">
     <sensor name="rear_lidar" type="gpu_lidar">
       <pose>0 0 0 0 0 0</pose>
       <visualize>true</visualize>
@@ -980,7 +982,7 @@
           <stddev>0.01</stddev>
         </noise>
       </lidar>
-      <ignition_frame_id>l_BL2</ignition_frame_id>
+      <ignition_frame_id>l_FL2</ignition_frame_id>
     </sensor>
   </gazebo>
 
