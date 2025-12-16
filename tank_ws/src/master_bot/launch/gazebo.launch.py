@@ -15,9 +15,13 @@ def generate_launch_description():
     # Path to URDF file
     urdf_file = os.path.join(pkg_share, 'urdf', 'master_bot.urdf')
     
-    # Read the URDF file
+    # Read the URDF file and remove XML declaration to avoid spawn_entity encoding issues
     with open(urdf_file, 'r') as infp:
         robot_description = infp.read()
+    
+    # Remove XML declaration if present
+    if robot_description.startswith('<?xml'):
+        robot_description = robot_description.split('?>', 1)[1].strip()
     
     # Gazebo launch file
     gazebo_ros_pkg = get_package_share_directory('gazebo_ros')
@@ -39,13 +43,13 @@ def generate_launch_description():
         }]
     )
     
-    # Spawn the robot in Gazebo
+    # Spawn the robot in Gazebo using file instead of topic to avoid encoding issues
     spawn_entity = Node(
         package='gazebo_ros',
         executable='spawn_entity.py',
         arguments=[
             '-entity', 'master_bot',
-            '-topic', 'robot_description',
+            '-file', urdf_file,
             '-x', '0',
             '-y', '0',
             '-z', '0.5'
