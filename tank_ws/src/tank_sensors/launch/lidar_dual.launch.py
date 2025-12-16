@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 """
-Launch file for Dual Unitree L2 LiDARs - SIMPLE VERSION
-- Front L2: Publishes with frame_id l_FL2 (URDF link)
-- Rear L2: Publishes with frame_id l_BL2 (URDF link)
-- No frame fixer needed - driver uses URDF frames directly
+Launch file for Dual Unitree L2 LiDARs + Frame Fixer
+- Driver publishes with its own frames (lidar_front_raw, lidar_rear_raw)
+- Frame fixer republishes with URDF frames (l_FL2, l_BL2)
 """
 
 from launch import LaunchDescription
@@ -32,15 +31,15 @@ def generate_launch_description():
         description='Local IP address of this computer'
     )
     
-    # Front L2 node - publishes directly with URDF frame
+    # Front L2 node
     front_l2_node = Node(
         package='unitree_lidar_ros2',
         executable='unitree_lidar_ros2_node',
         name='lidar_front',
         output='screen',
         parameters=[{
-            'initialize_type': 2,  # UDP mode
-            'work_mode': 0,  # Normal mode
+            'initialize_type': 2,
+            'work_mode': 0,
             'use_system_timestamp': True,
             'range_min': 0.05,
             'range_max': 30.0,
@@ -49,27 +48,23 @@ def generate_launch_description():
             'lidar_port': 6101,
             'local_ip': LaunchConfiguration('local_ip'),
             'local_port': 6201,
-            'cloud_frame': 'l_FL2',  # URDF link frame
-            'imu_frame': 'l_FL2_imu',
-            'cloud_topic': 'cloud',
-            'imu_topic': 'imu',
         }],
         remappings=[
-            ('unilidar/cloud', '/lidar_front/cloud'),
+            ('unilidar/cloud', '/lidar_front/cloud_raw'),
             ('unilidar/imu', '/lidar_front/imu'),
         ],
         namespace='lidar_front'
     )
     
-    # Rear L2 node - publishes directly with URDF frame
+    # Rear L2 node
     rear_l2_node = Node(
         package='unitree_lidar_ros2',
         executable='unitree_lidar_ros2_node',
         name='lidar_rear',
         output='screen',
         parameters=[{
-            'initialize_type': 2,  # UDP mode
-            'work_mode': 0,  # Normal mode
+            'initialize_type': 2,
+            'work_mode': 0,
             'use_system_timestamp': True,
             'range_min': 0.05,
             'range_max': 30.0,
@@ -78,16 +73,28 @@ def generate_launch_description():
             'lidar_port': 6101,
             'local_ip': LaunchConfiguration('local_ip'),
             'local_port': 6202,
-            'cloud_frame': 'l_BL2',  # URDF link frame
-            'imu_frame': 'l_BL2_imu',
-            'cloud_topic': 'cloud',
-            'imu_topic': 'imu',
         }],
         remappings=[
-            ('unilidar/cloud', '/lidar_rear/cloud'),
+            ('unilidar/cloud', '/lidar_rear/cloud_raw'),
             ('unilidar/imu', '/lidar_rear/imu'),
         ],
         namespace='lidar_rear'
+    )
+    
+    # Frame fixer: republish clouds with URDF frame_ids
+    frame_fixer = Node(
+        package='tank_sensors',
+        executable='pointcloud_frame_fixer.py',
+        name='pointcloud_frame_fixer',
+        output='screen',
+        parameters=[{
+            'front_input_topic': '/lidar_front/cloud_raw',
+            'rear_input_topic': '/lidar_rear/cloud_raw',
+            'front_output_topic': '/lidar_front/cloud',
+            'rear_output_topic': '/lidar_rear/cloud',
+            'front_frame': 'l_FL2',
+            'rear_frame': 'l_BL2',
+        }]
     )
     
     return LaunchDescription([
@@ -96,4 +103,5 @@ def generate_launch_description():
         local_ip_arg,
         front_l2_node,
         rear_l2_node,
+        frame_fixer,
     ])
