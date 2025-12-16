@@ -108,8 +108,8 @@ def generate_launch_description():
             'rear_output_topic': '/lidar_rear/cloud_fixed',
             'front_frame': 'l_FL2',  # Front sensor data → l_FL2 URDF frame
             'rear_frame': 'l_BL2',   # Rear sensor data → l_BL2 URDF frame
-            'front_rotation_degrees': -115.0,  # Front: -115° (clockwise)
-            'rear_rotation_degrees': 90.0,     # Rear: 90° (counter-clockwise)
+            'front_rotation_degrees': -115.0,  # Front: -115° (optimal)
+            'rear_rotation_degrees': -25.0,    # Rear: -25° (optimal)
         }]
     )
     
