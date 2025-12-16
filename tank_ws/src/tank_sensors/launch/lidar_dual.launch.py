@@ -95,7 +95,7 @@ def generate_launch_description():
     # Subscribes to driver output, republishes with URDF frames for RViz
     # URDF link names: forward position = l_BL2, rear position = l_FL2
     # Driver topics: /lidar_front = forward sensor, /lidar_rear = rear sensor
-    # Rotates point cloud 115° counter-clockwise around Z to match physical orientation
+    # Separate rotation angles for front and rear lidars
     frame_fixer = Node(
         package='tank_sensors',
         executable='pointcloud_frame_fixer.py',
@@ -108,7 +108,8 @@ def generate_launch_description():
             'rear_output_topic': '/lidar_rear/cloud_fixed',
             'front_frame': 'l_FL2',  # Front sensor data → l_FL2 URDF frame
             'rear_frame': 'l_BL2',   # Rear sensor data → l_BL2 URDF frame
-            'rotation_degrees': -115.0,  # Clockwise around Z-axis (negative = CW)
+            'front_rotation_degrees': -115.0,  # Front: -115° (clockwise)
+            'rear_rotation_degrees': 90.0,     # Rear: 90° (counter-clockwise)
         }]
     )
     

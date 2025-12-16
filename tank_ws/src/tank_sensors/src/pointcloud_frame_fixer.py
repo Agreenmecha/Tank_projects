@@ -39,13 +39,14 @@ class PointcloudFrameFixer(Node):
         self.declare_parameter('front_frame', 'l_FL2')
         self.declare_parameter('rear_frame', 'l_BL2')
         
-        # Declare rotation_degrees as a dynamic parameter
+        # Declare rotation parameters as dynamic (separate for front and rear)
         from rcl_interfaces.msg import ParameterDescriptor, FloatingPointRange
         rotation_descriptor = ParameterDescriptor(
             description='Rotation angle in degrees (counter-clockwise around Z-axis)',
             floating_point_range=[FloatingPointRange(from_value=-180.0, to_value=180.0, step=0.1)]
         )
-        self.declare_parameter('rotation_degrees', 115.0, rotation_descriptor)
+        self.declare_parameter('front_rotation_degrees', -115.0, rotation_descriptor)
+        self.declare_parameter('rear_rotation_degrees', 90.0, rotation_descriptor)
 
         front_in = self.get_parameter('front_input_topic').get_parameter_value().string_value
         rear_in = self.get_parameter('rear_input_topic').get_parameter_value().string_value
@@ -55,9 +56,11 @@ class PointcloudFrameFixer(Node):
         self.front_frame = self.get_parameter('front_frame').get_parameter_value().string_value
         self.rear_frame = self.get_parameter('rear_frame').get_parameter_value().string_value
         
-        # Rotation angle (counter-clockwise around Z)
-        rotation_deg = self.get_parameter('rotation_degrees').get_parameter_value().double_value
-        self.update_rotation(rotation_deg)
+        # Rotation angles (counter-clockwise around Z) - separate for front and rear
+        front_rotation_deg = self.get_parameter('front_rotation_degrees').get_parameter_value().double_value
+        rear_rotation_deg = self.get_parameter('rear_rotation_degrees').get_parameter_value().double_value
+        self.update_front_rotation(front_rotation_deg)
+        self.update_rear_rotation(rear_rotation_deg)
         
         # Add parameter callback for dynamic reconfiguration
         self.add_on_set_parameters_callback(self.parameter_callback)
@@ -82,32 +85,49 @@ class PointcloudFrameFixer(Node):
 
         self.get_logger().info(
             f'PointcloudFrameFixer running:\n'
-            f'  front: {front_in} -> {front_out} (frame={self.front_frame}, rotation={rotation_deg}°)\n'
-            f'  rear:  {rear_in} -> {rear_out} (frame={self.rear_frame}, rotation={rotation_deg}°)\n'
-            f'\nTo adjust rotation: ros2 param set /pointcloud_frame_fixer rotation_degrees <value>'
+            f'  front: {front_in} -> {front_out} (frame={self.front_frame}, rotation={front_rotation_deg}°)\n'
+            f'  rear:  {rear_in} -> {rear_out} (frame={self.rear_frame}, rotation={rear_rotation_deg}°)\n'
+            f'\nTo adjust rotation:\n'
+            f'  ros2 param set /pointcloud_frame_fixer front_rotation_degrees <value>\n'
+            f'  ros2 param set /pointcloud_frame_fixer rear_rotation_degrees <value>'
         )
 
-    def update_rotation(self, rotation_deg: float) -> None:
-        """Update rotation angle and precompute sin/cos."""
-        self.rotation_deg = rotation_deg
-        self.rotation_rad = np.radians(rotation_deg)
-        self.cos_theta = np.cos(self.rotation_rad)
-        self.sin_theta = np.sin(self.rotation_rad)
-        self.get_logger().info(f'Rotation updated to {rotation_deg}° CCW around Z-axis')
+    def update_front_rotation(self, rotation_deg: float) -> None:
+        """Update front lidar rotation angle and precompute sin/cos."""
+        self.front_rotation_deg = rotation_deg
+        self.front_rotation_rad = np.radians(rotation_deg)
+        self.front_cos_theta = np.cos(self.front_rotation_rad)
+        self.front_sin_theta = np.sin(self.front_rotation_rad)
+        self.get_logger().info(f'Front rotation updated to {rotation_deg}° around Z-axis')
+
+    def update_rear_rotation(self, rotation_deg: float) -> None:
+        """Update rear lidar rotation angle and precompute sin/cos."""
+        self.rear_rotation_deg = rotation_deg
+        self.rear_rotation_rad = np.radians(rotation_deg)
+        self.rear_cos_theta = np.cos(self.rear_rotation_rad)
+        self.rear_sin_theta = np.sin(self.rear_rotation_rad)
+        self.get_logger().info(f'Rear rotation updated to {rotation_deg}° around Z-axis')
 
     def parameter_callback(self, params) -> SetParametersResult:
         """Handle dynamic parameter changes."""
         for param in params:
-            if param.name == 'rotation_degrees':
+            if param.name == 'front_rotation_degrees':
                 if param.type_ == Parameter.Type.DOUBLE:
-                    self.update_rotation(param.value)
+                    self.update_front_rotation(param.value)
                     return SetParametersResult(successful=True)
                 else:
                     return SetParametersResult(successful=False, 
-                        reason='rotation_degrees must be a double')
+                        reason='front_rotation_degrees must be a double')
+            elif param.name == 'rear_rotation_degrees':
+                if param.type_ == Parameter.Type.DOUBLE:
+                    self.update_rear_rotation(param.value)
+                    return SetParametersResult(successful=True)
+                else:
+                    return SetParametersResult(successful=False, 
+                        reason='rear_rotation_degrees must be a double')
         return SetParametersResult(successful=True)
 
-    def _rotate_and_publish(self, msg: PointCloud2, frame: str, pub) -> None:
+    def _rotate_and_publish(self, msg: PointCloud2, frame: str, pub, cos_theta: float, sin_theta: float) -> None:
         """Rotate point cloud and change frame_id."""
         try:
             # Read points from PointCloud2
@@ -127,8 +147,8 @@ class PointcloudFrameFixer(Node):
             # y' = x*sin(θ) + y*cos(θ)
             # z' = z (unchanged)
             
-            x_rot = x * self.cos_theta - y * self.sin_theta
-            y_rot = x * self.sin_theta + y * self.cos_theta
+            x_rot = x * cos_theta - y * sin_theta
+            y_rot = x * sin_theta + y * cos_theta
             z_rot = z
             
             # Create rotated points list
@@ -160,10 +180,12 @@ class PointcloudFrameFixer(Node):
             self.get_logger().error(f'Error transforming point cloud: {e}')
 
     def front_cb(self, msg: PointCloud2) -> None:
-        self._rotate_and_publish(msg, self.front_frame, self.front_pub)
+        self._rotate_and_publish(msg, self.front_frame, self.front_pub, 
+                                self.front_cos_theta, self.front_sin_theta)
 
     def rear_cb(self, msg: PointCloud2) -> None:
-        self._rotate_and_publish(msg, self.rear_frame, self.rear_pub)
+        self._rotate_and_publish(msg, self.rear_frame, self.rear_pub,
+                                self.rear_cos_theta, self.rear_sin_theta)
 
 
 def main(args=None) -> None:
