@@ -15,13 +15,13 @@ def generate_launch_description():
     # Declare arguments
     front_lidar_ip_arg = DeclareLaunchArgument(
         'front_lidar_ip',
-        default_value='192.168.123.123',
+        default_value='192.168.123.124',  # Swapped: physical front LiDAR
         description='IP address of front L2 LiDAR'
     )
     
     rear_lidar_ip_arg = DeclareLaunchArgument(
         'rear_lidar_ip',
-        default_value='192.168.123.124',
+        default_value='192.168.123.123',  # Swapped: physical rear LiDAR
         description='IP address of rear L2 LiDAR (change with Unitree host software)'
     )
     
