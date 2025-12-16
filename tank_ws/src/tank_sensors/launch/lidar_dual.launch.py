@@ -71,7 +71,7 @@ def generate_launch_description():
             'initialize_type': 2,
             'work_mode': 0,
             'use_system_timestamp': True,
-            'range_min': 0.05,
+            'range_min': 0.3,  # Increased to filter out robot body (was 0.05)
             'range_max': 30.0,
             'cloud_scan_num': 18,
             'lidar_ip': LaunchConfiguration('rear_lidar_ip'),
