@@ -86,16 +86,15 @@ class PointcloudFrameFixer(Node):
                 self.get_logger().warn('Received empty point cloud')
                 return
             
-            # Convert to numpy array for efficient rotation
-            points = np.array(points_list, dtype=np.float32)
+            # Extract x, y, z values from point tuples
+            x = np.array([p[0] for p in points_list], dtype=np.float32)
+            y = np.array([p[1] for p in points_list], dtype=np.float32)
+            z = np.array([p[2] for p in points_list], dtype=np.float32)
             
             # Rotate around Z-axis (counter-clockwise)
             # x' = x*cos(θ) - y*sin(θ)
             # y' = x*sin(θ) + y*cos(θ)
             # z' = z (unchanged)
-            x = points[:, 0]
-            y = points[:, 1]
-            z = points[:, 2]
             
             x_rot = x * self.cos_theta - y * self.sin_theta
             y_rot = x * self.sin_theta + y * self.cos_theta
