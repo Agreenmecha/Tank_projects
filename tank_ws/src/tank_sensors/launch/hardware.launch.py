@@ -22,10 +22,27 @@ def generate_launch_description():
     tank_sensors_share = FindPackageShare('tank_sensors')
     
     # URDF file path - read at launch time
-    pkg_share = get_package_share_directory('tankbot')
-    urdf_path = os.path.join(pkg_share, 'urdf', 'tankbot.urdf')
-    with open(urdf_path, 'r') as infp:
-        robot_desc = infp.read()
+    # Try to use master_bot URDF, or create minimal description if not available
+    try:
+        pkg_share = get_package_share_directory('master_bot')
+        urdf_path = os.path.join(pkg_share, 'urdf', 'master_bot.urdf')
+        with open(urdf_path, 'r') as infp:
+            robot_desc = infp.read()
+    except:
+        # Minimal URDF if package not found
+        robot_desc = '''<?xml version="1.0"?>
+<robot name="tank">
+  <link name="base_footprint"/>
+  <link name="base_link">
+    <visual>
+      <geometry><box size="0.5 0.6 0.229"/></geometry>
+    </visual>
+  </link>
+  <joint name="base_footprint_joint" type="fixed">
+    <parent link="base_footprint"/>
+    <child link="base_link"/>
+  </joint>
+</robot>'''
     
     # Declare arguments
     enable_gnss_arg = DeclareLaunchArgument(
