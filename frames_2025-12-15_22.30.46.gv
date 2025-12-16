@@ -1,0 +1,28 @@
+digraph G {
+"base_link" -> "l_l1"[label=" Broadcaster: default_authority\nAverage rate: 10.209\nBuffer length: 4.898\nMost recent transform: 1765866646.689104\nOldest transform: 1765866641.791242\n"];
+"base_footprint" -> "base_link"[label=" Broadcaster: default_authority\nAverage rate: 10000.0\nBuffer length: 0.0\nMost recent transform: 0.0\nOldest transform: 0.0\n"];
+"base_link" -> "l_l2"[label=" Broadcaster: default_authority\nAverage rate: 10.209\nBuffer length: 4.898\nMost recent transform: 1765866646.689104\nOldest transform: 1765866641.791242\n"];
+"base_link" -> "l_l3"[label=" Broadcaster: default_authority\nAverage rate: 10.209\nBuffer length: 4.898\nMost recent transform: 1765866646.689104\nOldest transform: 1765866641.791242\n"];
+"base_link" -> "l_l4"[label=" Broadcaster: default_authority\nAverage rate: 10.209\nBuffer length: 4.898\nMost recent transform: 1765866646.689104\nOldest transform: 1765866641.791242\n"];
+"base_link" -> "l_l5"[label=" Broadcaster: default_authority\nAverage rate: 10.209\nBuffer length: 4.898\nMost recent transform: 1765866646.689104\nOldest transform: 1765866641.791242\n"];
+"base_link" -> "l_l6"[label=" Broadcaster: default_authority\nAverage rate: 10.209\nBuffer length: 4.898\nMost recent transform: 1765866646.689104\nOldest transform: 1765866641.791242\n"];
+"base_link" -> "l_l7"[label=" Broadcaster: default_authority\nAverage rate: 10.209\nBuffer length: 4.898\nMost recent transform: 1765866646.689104\nOldest transform: 1765866641.791242\n"];
+"base_link" -> "l_r1"[label=" Broadcaster: default_authority\nAverage rate: 10.209\nBuffer length: 4.898\nMost recent transform: 1765866646.689104\nOldest transform: 1765866641.791242\n"];
+"base_link" -> "l_r2"[label=" Broadcaster: default_authority\nAverage rate: 10.209\nBuffer length: 4.898\nMost recent transform: 1765866646.689104\nOldest transform: 1765866641.791242\n"];
+"base_link" -> "l_r3"[label=" Broadcaster: default_authority\nAverage rate: 10.209\nBuffer length: 4.898\nMost recent transform: 1765866646.689104\nOldest transform: 1765866641.791242\n"];
+"base_link" -> "l_r4"[label=" Broadcaster: default_authority\nAverage rate: 10.209\nBuffer length: 4.898\nMost recent transform: 1765866646.689104\nOldest transform: 1765866641.791242\n"];
+"base_link" -> "l_r5"[label=" Broadcaster: default_authority\nAverage rate: 10.209\nBuffer length: 4.898\nMost recent transform: 1765866646.689104\nOldest transform: 1765866641.791242\n"];
+"base_link" -> "l_r6"[label=" Broadcaster: default_authority\nAverage rate: 10.209\nBuffer length: 4.898\nMost recent transform: 1765866646.689104\nOldest transform: 1765866641.791242\n"];
+"base_link" -> "l_r7"[label=" Broadcaster: default_authority\nAverage rate: 10.209\nBuffer length: 4.898\nMost recent transform: 1765866646.689104\nOldest transform: 1765866641.791242\n"];
+"l_FL2" -> "lidar_front_imu_initial"[label=" Broadcaster: default_authority\nAverage rate: 10000.0\nBuffer length: 0.0\nMost recent transform: 0.0\nOldest transform: 0.0\n"];
+"l_FL2_imu" -> "l_FL2"[label=" Broadcaster: default_authority\nAverage rate: 816.654\nBuffer length: 4.954\nMost recent transform: 1765866646.785773\nOldest transform: 1765866641.831413\n"];
+"l_BL2" -> "lidar_rear_imu_initial"[label=" Broadcaster: default_authority\nAverage rate: 10000.0\nBuffer length: 0.0\nMost recent transform: 0.0\nOldest transform: 0.0\n"];
+"l_BL2_imu" -> "l_BL2"[label=" Broadcaster: default_authority\nAverage rate: 813.987\nBuffer length: 4.952\nMost recent transform: 1765866646.786508\nOldest transform: 1765866641.834339\n"];
+"world" -> "base_footprint"[label=" Broadcaster: default_authority\nAverage rate: 10000.0\nBuffer length: 0.0\nMost recent transform: 0.0\nOldest transform: 0.0\n"];
+"l_FL2_imu_initial" -> "l_FL2_imu"[label=" Broadcaster: default_authority\nAverage rate: 816.654\nBuffer length: 4.954\nMost recent transform: 1765866646.785773\nOldest transform: 1765866641.831413\n"];
+"l_BL2_imu_initial" -> "l_BL2_imu"[label=" Broadcaster: default_authority\nAverage rate: 818.741\nBuffer length: 4.922\nMost recent transform: 1765866646.786508\nOldest transform: 1765866641.864318\n"];
+edge [style=invis];
+ subgraph cluster_legend { style=bold; color=black; label ="view_frames Result";
+"Recorded at time: 1765866646.6992655"[ shape=plaintext ] ;
+}->"l_BL2_imu_initial";
+}
