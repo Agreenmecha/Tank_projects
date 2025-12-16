@@ -38,7 +38,14 @@ class PointcloudFrameFixer(Node):
         self.declare_parameter('rear_output_topic', '/lidar_rear/cloud_fixed')
         self.declare_parameter('front_frame', 'l_FL2')
         self.declare_parameter('rear_frame', 'l_BL2')
-        self.declare_parameter('rotation_degrees', 115.0)  # Counter-clockwise around Z
+        
+        # Declare rotation_degrees as a dynamic parameter
+        from rcl_interfaces.msg import ParameterDescriptor, FloatingPointRange
+        rotation_descriptor = ParameterDescriptor(
+            description='Rotation angle in degrees (counter-clockwise around Z-axis)',
+            floating_point_range=[FloatingPointRange(from_value=-180.0, to_value=180.0, step=0.1)]
+        )
+        self.declare_parameter('rotation_degrees', 115.0, rotation_descriptor)
 
         front_in = self.get_parameter('front_input_topic').get_parameter_value().string_value
         rear_in = self.get_parameter('rear_input_topic').get_parameter_value().string_value
