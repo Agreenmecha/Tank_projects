@@ -95,26 +95,11 @@ def generate_launch_description():
         output='screen'
     )
     
-    # Connect base_link directly to driver's IMU initial frames
-    # Using URDF positions: front at (-0.26408, 0, -0.17156) with rpy (0, -1.5708, 0)
-    # Rear at (0.32674, 0, -0.17729) with rpy (-3.1416, 1.309, -3.1416)
-    # The driver publishes l_FL2_imu_initial → l_FL2_imu → l_FL2 (pointcloud frame)
-    static_tf_front_lidar = Node(
-        package='tf2_ros',
-        executable='static_transform_publisher',
-        name='front_lidar_mount',
-        arguments=['-0.26408', '0', '-0.17156', '0', '-1.5708', '0', 'base_link', 'l_FL2_imu_initial'],
-        output='screen'
-    )
-    
-    # Rear: base_link → l_BL2_imu_initial (at rear lidar position from URDF)
-    static_tf_rear_lidar = Node(
-        package='tf2_ros',
-        executable='static_transform_publisher',
-        name='rear_lidar_mount',
-        arguments=['0.32674', '0', '-0.17729', '-3.1416', '1.309', '-3.1416', 'base_link', 'l_BL2_imu_initial'],
-        output='screen'
-    )
+    # No additional static transforms needed for LiDARs
+    # The URDF defines base_link → l_FL2 and base_link → l_BL2 as static fixed joints
+    # The pointcloud_frame_fixer republishes clouds with l_FL2/l_BL2 frame_ids
+    # This keeps the LiDAR visualization rigidly mounted to the URDF links
+    # The driver's TF tree (l_FL2_imu, etc.) exists separately and is ignored for visualization
 
     # Pointcloud frame fixer:
     # - Subscribes to /lidar_front/cloud and /lidar_rear/cloud
@@ -173,8 +158,6 @@ def generate_launch_description():
         robot_state_publisher,
         joint_state_publisher,
         static_tf_world,
-        static_tf_front_lidar,
-        static_tf_rear_lidar,
         pointcloud_frame_fixer,
         gnss_launch,
         lidar_launch,
