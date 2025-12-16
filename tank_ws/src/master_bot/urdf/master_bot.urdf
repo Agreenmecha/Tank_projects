@@ -910,13 +910,14 @@
       xyz="0 0 0" />
   </joint>
 
-  <!-- Front Unitree L2 LiDAR Sensor -->
+  <!-- Front Unitree L2 LiDAR Sensor (Gazebo Fortress) -->
   <gazebo reference="l_FL2">
-    <sensor name="front_lidar" type="gpu_ray">
+    <sensor name="front_lidar" type="gpu_lidar">
       <pose>0 0 0 0 0 0</pose>
       <visualize>true</visualize>
       <update_rate>10</update_rate>
-      <ray>
+      <topic>lidar_front/pointcloud</topic>
+      <lidar>
         <scan>
           <horizontal>
             <samples>1024</samples>
@@ -941,25 +942,19 @@
           <mean>0.0</mean>
           <stddev>0.01</stddev>
         </noise>
-      </ray>
-      <plugin name="gazebo_ros_front_lidar" filename="libgazebo_ros_ray_sensor.so">
-        <ros>
-          <namespace>/</namespace>
-          <remapping>~/out:=lidar_front/pointcloud</remapping>
-        </ros>
-        <output_type>sensor_msgs/PointCloud2</output_type>
-        <frame_name>l_FL2</frame_name>
-      </plugin>
+      </lidar>
+      <ignition_frame_id>l_FL2</ignition_frame_id>
     </sensor>
   </gazebo>
 
-  <!-- Rear Unitree L2 LiDAR Sensor -->
+  <!-- Rear Unitree L2 LiDAR Sensor (Gazebo Fortress) -->
   <gazebo reference="l_BL2">
-    <sensor name="rear_lidar" type="gpu_ray">
+    <sensor name="rear_lidar" type="gpu_lidar">
       <pose>0 0 0 0 0 0</pose>
       <visualize>true</visualize>
       <update_rate>10</update_rate>
-      <ray>
+      <topic>lidar_rear/pointcloud</topic>
+      <lidar>
         <scan>
           <horizontal>
             <samples>1024</samples>
@@ -984,15 +979,8 @@
           <mean>0.0</mean>
           <stddev>0.01</stddev>
         </noise>
-      </ray>
-      <plugin name="gazebo_ros_rear_lidar" filename="libgazebo_ros_ray_sensor.so">
-        <ros>
-          <namespace>/</namespace>
-          <remapping>~/out:=lidar_rear/pointcloud</remapping>
-        </ros>
-        <output_type>sensor_msgs/PointCloud2</output_type>
-        <frame_name>l_BL2</frame_name>
-      </plugin>
+      </lidar>
+      <ignition_frame_id>l_BL2</ignition_frame_id>
     </sensor>
   </gazebo>
 

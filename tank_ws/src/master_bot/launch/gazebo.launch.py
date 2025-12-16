@@ -1,6 +1,6 @@
 import os
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, ExecuteProcess
+from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, SetEnvironmentVariable
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
 from launch_ros.actions import Node
@@ -12,23 +12,28 @@ def generate_launch_description():
     # Get the package directory
     pkg_share = FindPackageShare('master_bot').find('master_bot')
     
+    # Set Gazebo resource path so it can find package:// URIs
+    gz_resource_path = SetEnvironmentVariable(
+        name='IGN_GAZEBO_RESOURCE_PATH',
+        value=os.path.join(pkg_share, '..')  # Parent directory containing package
+    )
+    
     # Path to URDF file
     urdf_file = os.path.join(pkg_share, 'urdf', 'master_bot.urdf')
     
-    # Read the URDF file and remove XML declaration to avoid spawn_entity encoding issues
+    # Read the URDF file
     with open(urdf_file, 'r') as infp:
         robot_description = infp.read()
     
-    # Remove XML declaration if present
-    if robot_description.startswith('<?xml'):
-        robot_description = robot_description.split('?>', 1)[1].strip()
-    
-    # Gazebo launch file
-    gazebo_ros_pkg = get_package_share_directory('gazebo_ros')
+    # Gazebo Fortress (gz sim) launch file
+    gz_sim_pkg = get_package_share_directory('ros_gz_sim')
     gazebo = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
-            os.path.join(gazebo_ros_pkg, 'launch', 'gazebo.launch.py')
-        )
+            os.path.join(gz_sim_pkg, 'launch', 'gz_sim.launch.py')
+        ),
+        launch_arguments={
+            'gz_args': '-r empty.sdf'
+        }.items()
     )
     
     # Robot State Publisher node
@@ -43,12 +48,12 @@ def generate_launch_description():
         }]
     )
     
-    # Spawn the robot in Gazebo using file instead of topic to avoid encoding issues
+    # Spawn the robot in Gazebo Fortress
     spawn_entity = Node(
-        package='gazebo_ros',
-        executable='spawn_entity.py',
+        package='ros_gz_sim',
+        executable='create',
         arguments=[
-            '-entity', 'master_bot',
+            '-name', 'master_bot',
             '-file', urdf_file,
             '-x', '0',
             '-y', '0',
@@ -57,18 +62,31 @@ def generate_launch_description():
         output='screen'
     )
     
-    # Static transform publisher for base_footprint (if needed)
-    static_tf_node = Node(
-        package='tf2_ros',
-        executable='static_transform_publisher',
-        name='tf_footprint_base',
-        arguments=['0', '0', '0', '0', '0', '0', 'base_link', 'base_footprint']
+    # Bridge to convert Gazebo topics to ROS 2 topics
+    bridge_front_lidar = Node(
+        package='ros_gz_bridge',
+        executable='parameter_bridge',
+        arguments=[
+            '/lidar_front/pointcloud@sensor_msgs/msg/PointCloud2[ignition.msgs.PointCloudPacked'
+        ],
+        output='screen'
+    )
+    
+    bridge_rear_lidar = Node(
+        package='ros_gz_bridge',
+        executable='parameter_bridge',
+        arguments=[
+            '/lidar_rear/pointcloud@sensor_msgs/msg/PointCloud2[ignition.msgs.PointCloudPacked'
+        ],
+        output='screen'
     )
     
     return LaunchDescription([
+        gz_resource_path,
         gazebo,
         robot_state_publisher_node,
         spawn_entity,
-        static_tf_node
+        bridge_front_lidar,
+        bridge_rear_lidar
     ])
 

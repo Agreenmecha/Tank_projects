@@ -1,0 +1,12 @@
+digraph G {
+"base_footprint" -> "base_link"[label=" Broadcaster: default_authority\nAverage rate: 10000.0\nBuffer length: 0.0\nMost recent transform: 0.0\nOldest transform: 0.0\n"];
+"world" -> "base_footprint"[label=" Broadcaster: default_authority\nAverage rate: 10000.0\nBuffer length: 0.0\nMost recent transform: 0.0\nOldest transform: 0.0\n"];
+"lidar_rear_imu_initial" -> "lidar_rear_imu"[label=" Broadcaster: default_authority\nAverage rate: 390.811\nBuffer length: 5.0\nMost recent transform: 1765864238.079127\nOldest transform: 1765864233.079264\n"];
+"lidar_rear_imu" -> "lidar_rear"[label=" Broadcaster: default_authority\nAverage rate: 390.811\nBuffer length: 5.0\nMost recent transform: 1765864238.079127\nOldest transform: 1765864233.079264\n"];
+"lidar_front_imu_initial" -> "lidar_front_imu"[label=" Broadcaster: default_authority\nAverage rate: 416.721\nBuffer length: 4.999\nMost recent transform: 1765864238.076001\nOldest transform: 1765864233.07745\n"];
+"lidar_front_imu" -> "lidar_front"[label=" Broadcaster: default_authority\nAverage rate: 416.721\nBuffer length: 4.999\nMost recent transform: 1765864238.076001\nOldest transform: 1765864233.07745\n"];
+edge [style=invis];
+ subgraph cluster_legend { style=bold; color=black; label ="view_frames Result";
+"Recorded at time: 1765864238.0149915"[ shape=plaintext ] ;
+}->"lidar_front_imu_initial";
+}
