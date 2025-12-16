@@ -75,6 +75,17 @@ def generate_launch_description():
         }]
     )
     
+    # Joint state publisher (publishes joint states for continuous joints)
+    joint_state_publisher = Node(
+        package='joint_state_publisher',
+        executable='joint_state_publisher',
+        name='joint_state_publisher',
+        output='screen',
+        parameters=[{
+            'robot_description': robot_desc,
+        }]
+    )
+    
     # Static transform from world to base_footprint (RViz needs a root frame)
     static_tf_world = Node(
         package='tf2_ros',
@@ -147,6 +158,7 @@ def generate_launch_description():
         enable_lidars_arg,
         enable_camera_arg,
         robot_state_publisher,
+        joint_state_publisher,
         static_tf_world,
         static_tf_front_lidar,
         static_tf_rear_lidar,
