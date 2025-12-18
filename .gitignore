@@ -58,3 +58,4 @@ log/
 *.pem
 *.key
 credentials/
+scripts/rover_config.json
