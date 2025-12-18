@@ -341,6 +341,7 @@ def main():
     # Legacy commands
     exec_cmd = subparsers.add_parser('exec', help='Execute command')
     exec_cmd.add_argument('cmd', help='Command to execute')
+    exec_cmd.add_argument('--timeout', '-t', type=int, default=30, help='Command timeout')
     
     args = parser.parse_args()
     
@@ -419,7 +420,7 @@ def main():
             print(f"Uptime:      {stats.get('uptime', 'N/A')}")
         
         elif args.command == 'exec':
-            exit_code, stdout, stderr = bridge.run_command(args.cmd)
+            exit_code, stdout, stderr = bridge.run_command(args.cmd, timeout=args.timeout)
             print(stdout, end='')
             if stderr:
                 print(stderr, end='', file=sys.stderr)
