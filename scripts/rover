@@ -1,0 +1,13 @@
+#!/bin/bash
+# Main rover SSH bridge command - uses V2
+# Quick alias: just type "rover" to interact with your rover
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PYTHON_SCRIPT="$SCRIPT_DIR/rover_ssh_bridge_v2.py"
+
+# Make sure the Python script is executable
+chmod +x "$PYTHON_SCRIPT"
+
+# Pass all arguments to the V2 Python script
+python3 "$PYTHON_SCRIPT" "$@"
+
