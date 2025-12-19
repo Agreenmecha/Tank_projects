@@ -269,10 +269,13 @@ class ODriveInterfaceNode(Node):
         vel_left = linear_vel - (angular_vel * self.track_width / 2.0)
         vel_right = linear_vel + (angular_vel * self.track_width / 2.0)
         
-        # Convert m/s to turns/s (motor velocity)
-        # turns/s = (m/s) / (2 * pi * wheel_radius)
-        self.target_vel_left = vel_left / (2.0 * math.pi * self.wheel_radius)
-        self.target_vel_right = vel_right / (2.0 * math.pi * self.wheel_radius)
+        # Convert to motor velocity (turns/s)
+        # Wheel: turns/s = (m/s) / (2 * pi * wheel_radius)
+        # Motor: wheel_turns/s * gear_ratio (motor spins faster than wheel)
+        wheel_vel_left = vel_left / (2.0 * math.pi * self.wheel_radius)
+        wheel_vel_right = vel_right / (2.0 * math.pi * self.wheel_radius)
+        self.target_vel_left = wheel_vel_left * self.gear_ratio
+        self.target_vel_right = wheel_vel_right * self.gear_ratio
         
         self.last_cmd_time = time.time()
     
@@ -385,13 +388,17 @@ class ODriveInterfaceNode(Node):
         left_pos = left_axis.encoder.pos_estimate
         right_pos = right_axis.encoder.pos_estimate
         
-        # Compute delta positions (turns)
+        # Compute delta positions (turns at motor)
         delta_left = left_pos - self.last_left_pos
         delta_right = right_pos - self.last_right_pos
         
-        # Convert to linear distances (meters)
-        dist_left = delta_left * 2.0 * math.pi * self.wheel_radius
-        dist_right = delta_right * 2.0 * math.pi * self.wheel_radius
+        # Convert motor turns to wheel turns (divide by gear ratio)
+        wheel_delta_left = delta_left / self.gear_ratio
+        wheel_delta_right = delta_right / self.gear_ratio
+        
+        # Convert wheel turns to linear distance (meters)
+        dist_left = wheel_delta_left * 2.0 * math.pi * self.wheel_radius
+        dist_right = wheel_delta_right * 2.0 * math.pi * self.wheel_radius
         
         # Differential drive odometry
         dist_center = (dist_left + dist_right) / 2.0
