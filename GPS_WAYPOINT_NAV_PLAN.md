@@ -24,21 +24,30 @@ LiDAR (front/rear) ────> Costmap ──────┘
 
 ## 🔧 Components to Build
 
-### Phase 1: GPS + IMU Setup (No Sensor Fusion Needed)
-**Simple and Robust for Tank Tracks**
+### Phase 1: GPS + Dual IMU Fusion ✅ REQUIRED
+**GPS for Position, IMU for Heading**
 
 **Inputs:**
 - `/gnss/fix` - GPS position (sensor_msgs/NavSatFix) from ZED-F9P
   - Provides: latitude, longitude, altitude
   - RTK capable for cm-level accuracy
+  - 5 Hz update rate
   
-- `/imu/data` (optional) - Orientation from LiDAR IMU or magnetometer
-  - Provides: heading (yaw)
-  - Fallback: Calculate heading from GPS movement
+- `/lidar_front/imu` - IMU from front LiDAR (sensor_msgs/Imu)
+  - Provides: orientation (roll, pitch, yaw), angular velocity
+  
+- `/lidar_rear/imu` - IMU from rear LiDAR (sensor_msgs/Imu)
+  - Provides: orientation (roll, pitch, yaw), angular velocity
+
+**IMU Fusion:**
+- Fuse front + rear IMU for better accuracy
+- Average quaternions or use complementary filter
+- Provides stable heading even when stationary
+- Essential for knowing which direction tank is facing
 
 **Output:**
-- Direct GPS coordinates used for navigation
-- No sensor fusion required (simpler, more reliable)
+- `/imu/fused` - Combined IMU data
+- GPS position + IMU heading → waypoint navigation
 
 ---
 
@@ -78,14 +87,27 @@ LiDAR (front/rear) ────> Costmap ──────┘
 
 ## 🚀 Implementation Steps
 
-### Step 1: GPS Waypoint Follower ✅ (Next)
-**Simple GPS-only navigation (no sensor fusion needed)**
+### Step 1: IMU Fusion Node ✅ (First!)
+**Fuse dual IMUs for accurate heading**
+
+1. Create: `tank_localization/tank_localization/imu_fusion_node.py`
+2. Implement:
+   - Subscribe to `/lidar_front/imu`
+   - Subscribe to `/lidar_rear/imu`
+   - Fuse orientation (average quaternions with SLERP)
+   - Publish to `/imu/fused`
+3. Test: Verify stable heading output
+
+### Step 2: GPS Waypoint Follower ✅ (Next)
+**Navigate using GPS + IMU**
 
 1. Create: `tank_navigation/tank_navigation/gps_waypoint_follower.py`
 2. Implement:
    - Subscribe to `/gnss/fix` (GPS position)
-   - Subscribe to `/imu/data` (orientation) or calculate from GPS
+   - Subscribe to `/imu/fused` (orientation - REQUIRED)
    - Calculate distance and bearing to waypoint
+   - Compare current heading (from IMU) with target bearing
+   - Rotate to align, then drive forward
    - Publish velocity commands to `/cmd_vel`
 3. Add services:
    - `/set_waypoint` - Set target GPS coordinate
@@ -120,10 +142,12 @@ LiDAR (front/rear) ────> Costmap ──────┘
   - RTK: cm-level accuracy with NTRIP corrections
   - Standard: ~2m accuracy
 
-- ⚠️ **IMU:** Available from LiDAR
+- ✅ **Dual IMUs:** From both LiDARs (CRITICAL for heading)
   - Topics: `/lidar_front/imu`, `/lidar_rear/imu`
-  - Provides orientation (roll, pitch, yaw)
-  - Alternative: Calculate heading from GPS movement
+  - Provides: orientation (roll, pitch, yaw), angular velocity
+  - Fused for better accuracy and redundancy
+  - **Essential:** Tank needs heading even when stationary
+  - **Why not GPS heading:** Only works when moving ≥0.5 m/s
 
 - ✅ **LiDAR:** Dual Unitree L2 (front + rear)
   - Topics: `/lidar_front/cloud`, `/lidar_rear/cloud`
@@ -164,10 +188,35 @@ LiDAR (front/rear) ────> Costmap ──────┘
    - If obstacle detected: Stop, avoid, recalculate
    - If distance < tolerance: Waypoint reached
 
-### 2. Heading Control
-**Two options:**
-- **Option A (with IMU):** Compare IMU heading with target bearing, PID control
-- **Option B (GPS-only):** Calculate heading from GPS position changes (requires movement)
+### 2. Heading Control (IMU-Based)
+**Required for tank navigation:**
+
+1. **Get current heading from IMU:**
+   ```python
+   # Extract yaw from fused IMU quaternion
+   current_yaw = quaternion_to_euler(imu_orientation)[2]  # radians
+   ```
+
+2. **Calculate heading error:**
+   ```python
+   # Target bearing from GPS calculations
+   heading_error = normalize_angle(target_bearing - current_yaw)
+   ```
+
+3. **PID control for rotation:**
+   ```python
+   # Rotate in place until aligned
+   angular_vel = pid_controller.update(heading_error)
+   cmd_vel.angular.z = angular_vel
+   cmd_vel.linear.x = 0.0  # No forward motion while aligning
+   ```
+
+4. **Drive forward when aligned:**
+   ```python
+   if abs(heading_error) < threshold:
+       cmd_vel.linear.x = forward_speed
+       cmd_vel.angular.z = 0.0
+   ```
 
 ### 3. Obstacle Avoidance
 - Monitor LiDAR for obstacles in path
@@ -218,13 +267,21 @@ LiDAR (front/rear) ────> Costmap ──────┘
 
 ## 🛠️ Next Immediate Actions
 
-1. ✅ Create `gps_waypoint_follower_node.py` in `tank_navigation`
-2. ✅ Implement GPS position parsing and coordinate transforms
-3. ✅ Implement bearing/distance calculations (Haversine)
-4. ✅ Add heading control (PID for rotation)
-5. ✅ Add forward drive control
-6. ✅ Create service interface for setting waypoints
-7. ✅ Test: Drive to first GPS waypoint!
+### Phase 1: IMU Fusion
+1. ✅ Create `imu_fusion_node.py` in `tank_localization`
+2. ✅ Subscribe to both LiDAR IMUs
+3. ✅ Implement SLERP quaternion averaging
+4. ✅ Publish fused IMU to `/imu/fused`
+5. ✅ Test: Verify stable heading in RViz
+
+### Phase 2: GPS Waypoint Navigation  
+6. ✅ Create `gps_waypoint_follower_node.py` in `tank_navigation`
+7. ✅ Subscribe to `/gnss/fix` and `/imu/fused`
+8. ✅ Implement Haversine distance/bearing calculations
+9. ✅ Add PID heading control (rotate to face waypoint)
+10. ✅ Add forward drive when aligned
+11. ✅ Create service interface for setting waypoints
+12. ✅ Test: Drive to first GPS waypoint!
 
 **Advantages of GPS-Only Approach:**
 - ✅ Simpler (no sensor fusion complexity)
