@@ -22,6 +22,7 @@ setup(
         'console_scripts': [
             'odrive_interface_node = tank_control.odrive_interface_node:main',
             'safety_monitor_node = tank_control.safety_monitor_node:main',
+            'teleop_gamepad_node = tank_control.teleop_gamepad_node:main',
         ],
     },
 )
