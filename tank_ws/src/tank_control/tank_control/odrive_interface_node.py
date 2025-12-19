@@ -276,13 +276,6 @@ class ODriveInterfaceNode(Node):
             return
         
         try:
-            # Check for command timeout (watchdog)
-            if self.enable_watchdog:
-                if time.time() - self.last_cmd_time > self.watchdog_timeout:
-                    # Command timeout - stop motors
-                    self.target_vel_left = 0.0
-                    self.target_vel_right = 0.0
-            
             # Get axis objects
             left_axis = self.odrv.axis0 if self.axis_left == 0 else self.odrv.axis1
             right_axis = self.odrv.axis0 if self.axis_right == 0 else self.odrv.axis1
@@ -300,9 +293,10 @@ class ODriveInterfaceNode(Node):
             left_axis.controller.input_vel = self.target_vel_left
             right_axis.controller.input_vel = self.target_vel_right
             
-            # Feed watchdog
-            if self.enable_watchdog:
+            # Feed watchdog if enabled in ODrive config
+            if left_axis.config.enable_watchdog:
                 left_axis.watchdog_feed()
+            if right_axis.config.enable_watchdog:
                 right_axis.watchdog_feed()
             
         except Exception as e:
