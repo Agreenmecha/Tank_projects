@@ -93,9 +93,9 @@ class ODriveInterfaceNode(Node):
         self.target_vel_left = 0.0
         self.target_vel_right = 0.0
         
-        # Direction transition state
-        self.last_linear_vel = 0.0
-        self.last_angular_vel = 0.0
+        # Direction transition state (track individual wheel velocities)
+        self.last_wheel_vel_left = 0.0
+        self.last_wheel_vel_right = 0.0
         self.transitioning = False
         self.transition_start_time = 0.0
         
@@ -256,46 +256,51 @@ class ODriveInterfaceNode(Node):
         linear_vel = max(-self.max_vel, min(self.max_vel, linear_vel))
         angular_vel = max(-self.max_angular_vel, min(self.max_angular_vel, angular_vel))
         
-        # Check for direction change in linear velocity
-        linear_direction_change = (self.last_linear_vel * linear_vel < 0) and (abs(self.last_linear_vel) > 0.1)
+        # Calculate target wheel velocities (m/s) before checking transitions
+        vel_left = linear_vel - (angular_vel * self.track_width / 2.0)
+        vel_right = linear_vel + (angular_vel * self.track_width / 2.0)
+        
+        # Check for direction change in EITHER wheel
+        left_direction_change = (self.last_wheel_vel_left * vel_left < 0) and (abs(self.last_wheel_vel_left) > 0.05)
+        right_direction_change = (self.last_wheel_vel_right * vel_right < 0) and (abs(self.last_wheel_vel_right) > 0.05)
+        any_wheel_direction_change = left_direction_change or right_direction_change
         
         # Check for high angular velocity (turning on dime) after forward motion
+        was_moving_forward = (self.last_wheel_vel_left > 0.1) or (self.last_wheel_vel_right > 0.1)
         high_angular = abs(angular_vel) > 1.0 and abs(linear_vel) < 0.1
-        was_moving = abs(self.last_linear_vel) > 0.1
-        sharp_turn = high_angular and was_moving
+        sharp_turn = high_angular and was_moving_forward
         
         # If transitioning, force stop until complete
         if self.transitioning:
             current_time = time.time()
             elapsed = current_time - self.transition_start_time
             
-            # Wait for stop (0.5 seconds should be enough)
+            # Wait for stop (0.5 seconds should be enough for both wheels to stop)
             if elapsed < 0.5:
-                linear_vel = 0.0
-                angular_vel = 0.0
+                vel_left = 0.0
+                vel_right = 0.0
             else:
                 self.transitioning = False
         
         # Start new transition if direction changed or sharp turn detected
-        elif linear_direction_change or sharp_turn:
+        elif any_wheel_direction_change or sharp_turn:
             self.transitioning = True
             self.transition_start_time = time.time()
-            linear_vel = 0.0
-            angular_vel = 0.0
-            if linear_direction_change:
-                self.get_logger().info('Direction change detected - stopping before reversing')
+            vel_left = 0.0
+            vel_right = 0.0
+            if any_wheel_direction_change:
+                if left_direction_change and right_direction_change:
+                    self.get_logger().info('Both wheels changing direction - stopping before reversing')
+                elif left_direction_change:
+                    self.get_logger().info('Left wheel changing direction - stopping both wheels')
+                else:
+                    self.get_logger().info('Right wheel changing direction - stopping both wheels')
             else:
                 self.get_logger().info('Sharp turn detected - slowing down first')
         
-        # Store current velocities for next iteration
-        self.last_linear_vel = linear_vel
-        self.last_angular_vel = angular_vel
-        
-        # Differential drive kinematics
-        # v_left = v - (w * track_width / 2)
-        # v_right = v + (w * track_width / 2)
-        vel_left = linear_vel - (angular_vel * self.track_width / 2.0)
-        vel_right = linear_vel + (angular_vel * self.track_width / 2.0)
+        # Store current wheel velocities for next iteration
+        self.last_wheel_vel_left = vel_left
+        self.last_wheel_vel_right = vel_right
         
         # Convert to motor velocity (turns/s)
         # Wheel: turns/s = (m/s) / (2 * pi * wheel_radius)
