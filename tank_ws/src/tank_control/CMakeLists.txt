@@ -17,6 +17,7 @@ ament_python_install_package(${PROJECT_NAME})
 install(PROGRAMS
   tank_control/odrive_interface_node.py
   tank_control/safety_monitor_node.py
+  tank_control/teleop_gamepad_node.py
   DESTINATION lib/${PROJECT_NAME}
 )
 
