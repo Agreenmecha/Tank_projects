@@ -93,9 +93,9 @@ class ODriveInterfaceNode(Node):
         self.target_vel_left = 0.0
         self.target_vel_right = 0.0
         
-        # Direction transition state (track actual wheel velocities from encoders)
-        self.actual_wheel_vel_left = 0.0   # From encoder feedback
-        self.actual_wheel_vel_right = 0.0  # From encoder feedback
+        # Direction transition state (track commanded wheel velocities)
+        self.last_cmd_wheel_vel_left = 0.0   # Last commanded velocity
+        self.last_cmd_wheel_vel_right = 0.0  # Last commanded velocity
         self.transitioning = False
         self.transition_start_time = 0.0
         self.last_transition_end_time = 0.0  # Cooldown between transitions
@@ -261,15 +261,15 @@ class ODriveInterfaceNode(Node):
         vel_left = linear_vel - (angular_vel * self.track_width / 2.0)
         vel_right = linear_vel + (angular_vel * self.track_width / 2.0)
         
-        # Check for direction change in EITHER wheel (using ACTUAL encoder velocities)
-        # Use higher threshold (0.15 m/s) to avoid false positives from encoder noise
-        VELOCITY_THRESHOLD = 0.15  # m/s - must be moving at least this fast to detect change
-        left_direction_change = (self.actual_wheel_vel_left * vel_left < 0) and (abs(self.actual_wheel_vel_left) > VELOCITY_THRESHOLD)
-        right_direction_change = (self.actual_wheel_vel_right * vel_right < 0) and (abs(self.actual_wheel_vel_right) > VELOCITY_THRESHOLD)
+        # Check for direction change in EITHER wheel (using COMMANDED velocities)
+        # Use higher threshold (0.15 m/s) to filter out small commands
+        VELOCITY_THRESHOLD = 0.15  # m/s - must be commanding at least this fast to detect change
+        left_direction_change = (self.last_cmd_wheel_vel_left * vel_left < 0) and (abs(self.last_cmd_wheel_vel_left) > VELOCITY_THRESHOLD)
+        right_direction_change = (self.last_cmd_wheel_vel_right * vel_right < 0) and (abs(self.last_cmd_wheel_vel_right) > VELOCITY_THRESHOLD)
         any_wheel_direction_change = left_direction_change or right_direction_change
         
         # Check for high angular velocity (turning on dime) after forward motion
-        was_moving_forward = (self.actual_wheel_vel_left > VELOCITY_THRESHOLD) or (self.actual_wheel_vel_right > VELOCITY_THRESHOLD)
+        was_moving_forward = (self.last_cmd_wheel_vel_left > VELOCITY_THRESHOLD) or (self.last_cmd_wheel_vel_right > VELOCITY_THRESHOLD)
         high_angular = abs(angular_vel) > 1.0 and abs(linear_vel) < 0.1
         sharp_turn = high_angular and was_moving_forward
         
@@ -278,24 +278,18 @@ class ODriveInterfaceNode(Node):
         time_since_last_transition = current_time - self.last_transition_end_time
         in_cooldown = time_since_last_transition < 0.5  # 0.5s cooldown between transitions
         
-        # If transitioning, force stop until wheels actually stop
+        # If transitioning, force stop for fixed duration
         if self.transitioning:
             elapsed = current_time - self.transition_start_time
             
-            # Force zero velocity command
+            # Force zero velocity command during transition
             vel_left = 0.0
             vel_right = 0.0
             
-            # Check if wheels have actually stopped (based on encoder feedback)
-            left_stopped = abs(self.actual_wheel_vel_left) < 0.05
-            right_stopped = abs(self.actual_wheel_vel_right) < 0.05
-            both_stopped = left_stopped and right_stopped
-            
-            # End transition if both wheels stopped OR timeout after 1.0s (safety)
-            if (both_stopped and elapsed > 0.2) or elapsed > 1.0:
+            # End transition after 0.5s
+            if elapsed >= 0.5:
                 self.transitioning = False
                 self.last_transition_end_time = current_time
-                self.get_logger().info(f'Transition complete after {elapsed:.2f}s')
         
         # Start new transition if direction changed or sharp turn detected (and not in cooldown)
         elif (any_wheel_direction_change or sharp_turn) and not in_cooldown:
@@ -312,6 +306,11 @@ class ODriveInterfaceNode(Node):
                     self.get_logger().info('Right wheel changing direction - stopping both wheels')
             else:
                 self.get_logger().info('Sharp turn detected - slowing down first')
+        
+        # Store commanded wheel velocities for next iteration
+        if not self.transitioning:
+            self.last_cmd_wheel_vel_left = vel_left
+            self.last_cmd_wheel_vel_right = vel_right
         
         # Convert to motor velocity (turns/s)
         # Wheel: turns/s = (m/s) / (2 * pi * wheel_radius)
@@ -439,10 +438,6 @@ class ODriveInterfaceNode(Node):
         # Convert wheel turns to linear distance (meters)
         dist_left = wheel_delta_left * 2.0 * math.pi * self.wheel_radius
         dist_right = wheel_delta_right * 2.0 * math.pi * self.wheel_radius
-        
-        # Calculate actual wheel velocities (m/s) from encoder feedback
-        self.actual_wheel_vel_left = dist_left / dt
-        self.actual_wheel_vel_right = dist_right / dt
         
         # Differential drive odometry
         dist_center = (dist_left + dist_right) / 2.0
