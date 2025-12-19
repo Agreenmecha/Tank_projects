@@ -986,4 +986,37 @@
     </sensor>
   </gazebo>
 
+  <!-- GNSS Antenna Link (ZED-F9P) -->
+  <link name="gnss_link">
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <mass value="0.05" />
+      <inertia
+        ixx="0.00001" ixy="0" ixz="0"
+        iyy="0.00001" iyz="0"
+        izz="0.00001" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.025" length="0.01" />
+      </geometry>
+      <material name="">
+        <color rgba="1.0 0.5 0.0 1.0" /> <!-- Orange -->
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.025" length="0.01" />
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="gnss_joint" type="fixed">
+    <origin xyz="0 0.1 0" rpy="0 0 0" /> <!-- 10cm to the left of base_link -->
+    <parent link="base_link" />
+    <child link="gnss_link" />
+  </joint>
+
 </robot>
