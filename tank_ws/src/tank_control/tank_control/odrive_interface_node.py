@@ -98,6 +98,7 @@ class ODriveInterfaceNode(Node):
         self.actual_wheel_vel_right = 0.0  # From encoder feedback
         self.transitioning = False
         self.transition_start_time = 0.0
+        self.last_transition_end_time = 0.0  # Cooldown between transitions
         
         # Odometry state
         self.odom_x = 0.0
@@ -261,18 +262,24 @@ class ODriveInterfaceNode(Node):
         vel_right = linear_vel + (angular_vel * self.track_width / 2.0)
         
         # Check for direction change in EITHER wheel (using ACTUAL encoder velocities)
-        left_direction_change = (self.actual_wheel_vel_left * vel_left < 0) and (abs(self.actual_wheel_vel_left) > 0.05)
-        right_direction_change = (self.actual_wheel_vel_right * vel_right < 0) and (abs(self.actual_wheel_vel_right) > 0.05)
+        # Use higher threshold (0.15 m/s) to avoid false positives from encoder noise
+        VELOCITY_THRESHOLD = 0.15  # m/s - must be moving at least this fast to detect change
+        left_direction_change = (self.actual_wheel_vel_left * vel_left < 0) and (abs(self.actual_wheel_vel_left) > VELOCITY_THRESHOLD)
+        right_direction_change = (self.actual_wheel_vel_right * vel_right < 0) and (abs(self.actual_wheel_vel_right) > VELOCITY_THRESHOLD)
         any_wheel_direction_change = left_direction_change or right_direction_change
         
         # Check for high angular velocity (turning on dime) after forward motion
-        was_moving_forward = (self.actual_wheel_vel_left > 0.1) or (self.actual_wheel_vel_right > 0.1)
+        was_moving_forward = (self.actual_wheel_vel_left > VELOCITY_THRESHOLD) or (self.actual_wheel_vel_right > VELOCITY_THRESHOLD)
         high_angular = abs(angular_vel) > 1.0 and abs(linear_vel) < 0.1
         sharp_turn = high_angular and was_moving_forward
         
+        # Cooldown: Don't allow new transitions too soon after previous one
+        current_time = time.time()
+        time_since_last_transition = current_time - self.last_transition_end_time
+        in_cooldown = time_since_last_transition < 0.5  # 0.5s cooldown between transitions
+        
         # If transitioning, force stop until complete
         if self.transitioning:
-            current_time = time.time()
             elapsed = current_time - self.transition_start_time
             
             # Wait for stop (0.5 seconds should be enough for both wheels to stop)
@@ -281,9 +288,10 @@ class ODriveInterfaceNode(Node):
                 vel_right = 0.0
             else:
                 self.transitioning = False
+                self.last_transition_end_time = current_time
         
-        # Start new transition if direction changed or sharp turn detected
-        elif any_wheel_direction_change or sharp_turn:
+        # Start new transition if direction changed or sharp turn detected (and not in cooldown)
+        elif (any_wheel_direction_change or sharp_turn) and not in_cooldown:
             self.transitioning = True
             self.transition_start_time = time.time()
             vel_left = 0.0
