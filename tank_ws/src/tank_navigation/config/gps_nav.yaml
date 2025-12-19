@@ -1,0 +1,28 @@
+gps_waypoint_follower:
+  ros__parameters:
+    # Waypoint parameters
+    waypoint_tolerance_m: 2.0      # Stop when within this distance (meters)
+    slow_distance_m: 5.0           # Start slowing down when this close (meters)
+
+    # Speeds
+    max_linear_vel: 1.0            # m/s forward speed
+    max_angular_vel: 1.0           # rad/s turn speed
+
+    # Heading control
+    heading_align_threshold_deg: 10.0   # Align to within this before driving
+    pid_kp: 1.2
+    pid_ki: 0.0
+    pid_kd: 0.2
+
+    # GPS quality gating
+    min_gps_speed_mps: 0.5         # Require this speed for GPS heading calc
+    min_gps_fix_status: 1          # 0=no fix,1=fix,2=DGPS,3=RTK float,4=RTK fixed
+
+    # Drift correction from GPS heading (IMU + GPS complementary filter)
+    drift_correction_gain: 0.05    # 5% correction per update when moving
+    drift_correction_threshold_deg: 10.0
+
+    # Frames
+    base_frame_id: base_link
+    map_frame_id: map
+
