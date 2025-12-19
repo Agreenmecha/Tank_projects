@@ -47,9 +47,10 @@ class ODriveInterfaceNode(Node):
                 ('odrive_serial', ''),  # Empty = auto-find first ODrive
                 ('axis_left', 0),       # ODrive axis for left motor
                 ('axis_right', 1),      # ODrive axis for right motor
-                ('wheel_radius', 0.10),  # meters
-                ('track_width', 0.60),   # meters (600mm)
-                ('encoder_cpr', 2048),   # Counts per revolution (actual from ODrive)
+                ('wheel_radius', 0.058),  # meters (58mm actual wheel radius)
+                ('track_width', 0.60),   # meters (600mm track width)
+                ('encoder_cpr', 2048),   # Counts per revolution at motor (actual from ODrive)
+                ('gear_ratio', 12.0),    # 12:1 gearbox reduction (motor:wheel)
                 ('max_vel', 1.5),        # m/s
                 ('max_angular_vel', 2.0), # rad/s
                 ('watchdog_timeout', 0.2), # seconds
@@ -69,6 +70,7 @@ class ODriveInterfaceNode(Node):
         self.wheel_radius = self.get_parameter('wheel_radius').value
         self.track_width = self.get_parameter('track_width').value
         self.encoder_cpr = self.get_parameter('encoder_cpr').value
+        self.gear_ratio = self.get_parameter('gear_ratio').value
         self.max_vel = self.get_parameter('max_vel').value
         self.max_angular_vel = self.get_parameter('max_angular_vel').value
         self.watchdog_timeout = self.get_parameter('watchdog_timeout').value
