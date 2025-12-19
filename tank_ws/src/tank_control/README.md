@@ -55,41 +55,41 @@ odrivetool
 # In odrivetool:
 
 # Set encoder mode (incremental)
-odrv0.axis0.encoder.config.mode = ENCODER_MODE_INCREMENTAL
-odrv0.axis1.encoder.config.mode = ENCODER_MODE_INCREMENTAL
+dev0.axis0.encoder.config.mode = ENCODER_MODE_INCREMENTAL
+dev0.axis1.encoder.config.mode = ENCODER_MODE_INCREMENTAL
 
 # Set encoder CPR (counts per revolution)
-odrv0.axis0.encoder.config.cpr = 2048  # Verified with hardware
-odrv0.axis1.encoder.config.cpr = 2048
+dev0.axis0.encoder.config.cpr = 2048  # Verified with hardware
+dev0.axis1.encoder.config.cpr = 2048
 
 # Set motor pole pairs (adjust for your motor)
-odrv0.axis0.motor.config.pole_pairs = 7  # Adjust for your motor
-odrv0.axis1.motor.config.pole_pairs = 7
+dev0.axis0.motor.config.pole_pairs = 7  # Adjust for your motor
+dev0.axis1.motor.config.pole_pairs = 7
 
 # Set current limits (Amps)
-odrv0.axis0.motor.config.current_lim = 30
-odrv0.axis1.motor.config.current_lim = 30
+dev0.axis0.motor.config.current_lim = 30
+dev0.axis1.motor.config.current_lim = 30
 
 # Set velocity limits (turns/s)
-odrv0.axis0.controller.config.vel_limit = 20
-odrv0.axis1.controller.config.vel_limit = 20
+dev0.axis0.controller.config.vel_limit = 20
+dev0.axis1.controller.config.vel_limit = 20
 
 # Set control mode to velocity control
-odrv0.axis0.controller.config.control_mode = CONTROL_MODE_VELOCITY_CONTROL
-odrv0.axis1.controller.config.control_mode = CONTROL_MODE_VELOCITY_CONTROL
+dev0.axis0.controller.config.control_mode = CONTROL_MODE_VELOCITY_CONTROL
+dev0.axis1.controller.config.control_mode = CONTROL_MODE_VELOCITY_CONTROL
 
 # Run motor calibration
-odrv0.axis0.requested_state = AXIS_STATE_FULL_CALIBRATION_SEQUENCE
-odrv0.axis1.requested_state = AXIS_STATE_FULL_CALIBRATION_SEQUENCE
+dev0.axis0.requested_state = AXIS_STATE_FULL_CALIBRATION_SEQUENCE
+dev0.axis1.requested_state = AXIS_STATE_FULL_CALIBRATION_SEQUENCE
 # Wait for calibration to complete...
 
 # Set to closed loop control
-odrv0.axis0.requested_state = AXIS_STATE_CLOSED_LOOP_CONTROL
-odrv0.axis1.requested_state = AXIS_STATE_CLOSED_LOOP_CONTROL
+dev0.axis0.requested_state = AXIS_STATE_CLOSED_LOOP_CONTROL
+dev0.axis1.requested_state = AXIS_STATE_CLOSED_LOOP_CONTROL
 
 # Save configuration
-odrv0.save_configuration()
-odrv0.reboot()
+dev0.save_configuration()
+dev0.reboot()
 ```
 
 ## Configuration
@@ -250,11 +250,11 @@ dev0.axis1.current_state
 
 ```bash
 # Check encoder configuration in odrivetool
-odrv0.axis0.encoder.config.cpr  # Should match your encoder
-odrv0.axis0.encoder.is_ready    # Should be True
+dev0.axis0.encoder.config.cpr  # Should match your encoder
+dev0.axis0.encoder.is_ready    # Should be True
 
 # Check encoder count is changing
-odrv0.axis0.encoder.pos_estimate  # Manually spin motor, this should change
+dev0.axis0.encoder.pos_estimate  # Manually spin motor, this should change
 ```
 
 ### Connection Drops
