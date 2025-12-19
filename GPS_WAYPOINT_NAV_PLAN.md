@@ -142,10 +142,13 @@ LiDAR (front/rear) ────> Costmap ──────┘
   - RTK: cm-level accuracy with NTRIP corrections
   - Standard: ~2m accuracy
 
-- ✅ **Dual IMUs:** From both LiDARs (CRITICAL for heading)
+- ✅ **Dual 6DOF IMUs:** From both LiDARs (CRITICAL for heading)
+  - **Hardware:** 6DOF = 3-axis gyro + 3-axis accel (NO magnetometer)
   - Topics: `/lidar_front/imu`, `/lidar_rear/imu`
-  - Provides: orientation (roll, pitch, yaw), angular velocity
+  - Provides: orientation (roll, pitch, yaw), angular velocity, linear accel
   - Fused for better accuracy and redundancy
+  - **Limitation:** Yaw drifts over time (no absolute north reference)
+  - **Solution:** Correct yaw drift using GPS heading when moving
   - **Essential:** Tank needs heading even when stationary
   - **Why not GPS heading:** Only works when moving ≥0.5 m/s
 
