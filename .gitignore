@@ -59,3 +59,6 @@ log/
 *.key
 credentials/
 scripts/rover_config.json
+
+# External repos (cloned, not owned)
+tank_ws/src/point_lio/
