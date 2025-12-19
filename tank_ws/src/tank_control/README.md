@@ -242,8 +242,8 @@ ros2 service call /odrive/clear_errors std_srvs/srv/Trigger
 
 # Check if motors are in closed loop control
 # Via odrivetool:
-odrv0.axis0.current_state  # Should be AXIS_STATE_CLOSED_LOOP_CONTROL (8)
-odrv0.axis1.current_state
+dev0.axis0.current_state  # Should be AXIS_STATE_CLOSED_LOOP_CONTROL (8)
+dev0.axis1.current_state
 ```
 
 ### Encoder Not Working
