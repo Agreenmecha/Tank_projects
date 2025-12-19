@@ -195,9 +195,9 @@ class ODriveInterfaceNode(Node):
             left_axis.controller.config.control_mode = CONTROL_MODE_VELOCITY_CONTROL
             right_axis.controller.config.control_mode = CONTROL_MODE_VELOCITY_CONTROL
             
-            # Set input mode to passthrough (direct velocity commands)
-            left_axis.controller.config.input_mode = INPUT_MODE_PASSTHROUGH
-            right_axis.controller.config.input_mode = INPUT_MODE_PASSTHROUGH
+            # Set input mode to velocity ramp (enables smooth ramping)
+            left_axis.controller.config.input_mode = INPUT_MODE_VEL_RAMP
+            right_axis.controller.config.input_mode = INPUT_MODE_VEL_RAMP
             
             self.get_logger().info('ODrive configuration complete')
             
