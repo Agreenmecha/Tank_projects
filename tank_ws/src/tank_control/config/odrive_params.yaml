@@ -1,34 +1,72 @@
+################################################################################
+# ODrive Motor Control Configuration
+# 
+# This is the PRIMARY configuration file for the ODrive interface.
+# Edit these values to match your hardware - they override Python defaults.
+#
+# NOTE: These parameters are READ from ODrive, NOT written to it.
+# Configure your ODrive separately via odrivetool, then set these to match.
+################################################################################
+
 odrive_interface_node:
   ros__parameters:
-    # ODrive connection
-    odrive_serial: ""  # Empty string = auto-find first ODrive, or specify serial number
     
-    # Axis configuration
-    axis_left: 0   # ODrive axis 0 for left motor
-    axis_right: 1  # ODrive axis 1 for right motor
-    invert_left: true   # Reverse left motor direction (set to true if motor spins backwards)
-    invert_right: false  # Reverse right motor direction
+    # ============================================================================
+    # ODrive Connection
+    # ============================================================================
+    odrive_serial: ""  # Empty = auto-find first ODrive
+                       # Or specify: "207C37783548" for specific ODrive
     
-    # Physical parameters (verified from hardware)
-    wheel_radius: 0.058   # meters (58mm actual wheel radius)
-    track_width: 0.60     # meters (600mm track width between wheel centers)
-    encoder_cpr: 2048     # Encoder counts per revolution at motor (verified from ODrive)
-    gear_ratio: 12.0      # 12:1 gearbox reduction ratio (motor turns 12x for 1 wheel turn)
+    # ============================================================================
+    # Motor/Axis Configuration
+    # ============================================================================
+    axis_left: 0        # ODrive axis number for left motor (0 or 1)
+    axis_right: 1       # ODrive axis number for right motor (0 or 1)
+    invert_left: true   # Reverse left motor direction (true/false)
+    invert_right: false # Reverse right motor direction (true/false)
     
-    # Velocity limits
-    max_vel: 1.5          # Maximum linear velocity (m/s)
-    max_angular_vel: 2.0  # Maximum angular velocity (rad/s)
+    # ============================================================================
+    # Physical Robot Parameters
+    # ============================================================================
+    wheel_radius: 0.058   # meters - Measured wheel radius (58mm)
+    track_width: 0.60     # meters - Distance between wheel centers (600mm)
+    encoder_cpr: 2048     # Encoder counts per revolution (at motor shaft)
+    gear_ratio: 12.0      # Gearbox reduction ratio (motor:wheel = 12:1)
+                          # Motor spins 12x for 1 wheel rotation
     
-    # ODrive motor limits (from actual ODrive config)
-    current_limit: 12.0   # Motor current limit (Amps) - actual ODrive setting
-    velocity_limit: 100.0 # Motor velocity limit (turns/s) - actual ODrive setting
-    vel_ramp_rate: 50.0   # Velocity ramp rate (turns/s^2) - actual ODrive setting
+    # ============================================================================
+    # Velocity Limits (ROS-side, for safety)
+    # ============================================================================
+    max_vel: 1.5          # m/s - Maximum linear velocity
+    max_angular_vel: 2.0  # rad/s - Maximum angular velocity (turning speed)
     
-    # Safety
-    enable_watchdog: true
-    watchdog_timeout: 1.0  # seconds - stop motors if no command for this long (increased for startup reliability)
+    # ============================================================================
+    # ODrive Motor Limits (Should match your ODrive config!)
+    # ============================================================================
+    # NOTE: Node reads these from ODrive but doesn't write them.
+    # Set these to match what's actually configured in your ODrive.
     
-    # Control timing
-    control_rate: 50.0    # Hz - velocity command rate
-    publish_rate: 20.0    # Hz - status/odometry publish rate
+    current_limit: 12.0    # Amps - Motor current limit
+    velocity_limit: 100.0  # turns/s - Motor velocity limit (at motor shaft)
+                           # Example: 100 turns/s = 6000 RPM with 13:1 gearbox
+    vel_ramp_rate: 50.0    # turns/s² - Velocity ramp rate (acceleration)
+                           # Recommended: 3-15 for smooth, 20-50 for responsive
+    
+    # ============================================================================
+    # Safety (Watchdog)
+    # ============================================================================
+    # Watchdog automatically stops motors if no commands received within timeout.
+    # The node checks if watchdog is enabled in ODrive and feeds it if needed.
+    
+    enable_watchdog: true     # Enable watchdog checking
+    watchdog_timeout: 1.0     # seconds - Timeout period (if watchdog enabled)
+    
+    # ============================================================================
+    # Control Loop Timing
+    # ============================================================================
+    control_rate: 50.0    # Hz - How often to send velocity commands to ODrive
+                          # Recommended: 20-100 Hz
+    
+    publish_rate: 20.0    # Hz - How often to publish odometry/status
+                          # Recommended: 10-50 Hz
 
