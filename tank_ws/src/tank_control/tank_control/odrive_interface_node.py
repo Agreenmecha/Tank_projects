@@ -93,6 +93,12 @@ class ODriveInterfaceNode(Node):
         self.target_vel_left = 0.0
         self.target_vel_right = 0.0
         
+        # Direction transition state
+        self.last_linear_vel = 0.0
+        self.last_angular_vel = 0.0
+        self.transitioning = False
+        self.transition_start_time = 0.0
+        
         # Odometry state
         self.odom_x = 0.0
         self.odom_y = 0.0
@@ -238,7 +244,7 @@ class ODriveInterfaceNode(Node):
             return True
     
     def cmd_vel_callback(self, msg):
-        """Handle incoming velocity commands."""
+        """Handle incoming velocity commands with smooth direction transitions."""
         if not self.connected or self.e_stop:
             return
         
@@ -249,6 +255,41 @@ class ODriveInterfaceNode(Node):
         # Clamp velocities
         linear_vel = max(-self.max_vel, min(self.max_vel, linear_vel))
         angular_vel = max(-self.max_angular_vel, min(self.max_angular_vel, angular_vel))
+        
+        # Check for direction change in linear velocity
+        linear_direction_change = (self.last_linear_vel * linear_vel < 0) and (abs(self.last_linear_vel) > 0.1)
+        
+        # Check for high angular velocity (turning on dime) after forward motion
+        high_angular = abs(angular_vel) > 1.0 and abs(linear_vel) < 0.1
+        was_moving = abs(self.last_linear_vel) > 0.1
+        sharp_turn = high_angular and was_moving
+        
+        # If transitioning, force stop until complete
+        if self.transitioning:
+            current_time = time.time()
+            elapsed = current_time - self.transition_start_time
+            
+            # Wait for stop (0.5 seconds should be enough)
+            if elapsed < 0.5:
+                linear_vel = 0.0
+                angular_vel = 0.0
+            else:
+                self.transitioning = False
+        
+        # Start new transition if direction changed or sharp turn detected
+        elif linear_direction_change or sharp_turn:
+            self.transitioning = True
+            self.transition_start_time = time.time()
+            linear_vel = 0.0
+            angular_vel = 0.0
+            if linear_direction_change:
+                self.get_logger().info('Direction change detected - stopping before reversing')
+            else:
+                self.get_logger().info('Sharp turn detected - slowing down first')
+        
+        # Store current velocities for next iteration
+        self.last_linear_vel = linear_vel
+        self.last_angular_vel = angular_vel
         
         # Differential drive kinematics
         # v_left = v - (w * track_width / 2)
