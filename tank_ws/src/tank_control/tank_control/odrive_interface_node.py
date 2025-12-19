@@ -49,15 +49,15 @@ class ODriveInterfaceNode(Node):
                 ('axis_right', 1),      # ODrive axis for right motor
                 ('wheel_radius', 0.10),  # meters
                 ('track_width', 0.60),   # meters (600mm)
-                ('encoder_cpr', 8192),   # Counts per revolution
+                ('encoder_cpr', 2048),   # Counts per revolution (actual from ODrive)
                 ('max_vel', 1.5),        # m/s
                 ('max_angular_vel', 2.0), # rad/s
                 ('watchdog_timeout', 0.2), # seconds
                 ('control_rate', 50.0),    # Hz
                 ('publish_rate', 20.0),    # Hz
-                ('current_limit', 30.0),   # Amps
-                ('velocity_limit', 20.0),  # turns/s at motor
-                ('vel_ramp_rate', 10.0),   # turns/s^2 - acceleration ramp rate
+                ('current_limit', 12.0),   # Amps (actual from ODrive)
+                ('velocity_limit', 100.0), # turns/s at motor (actual from ODrive)
+                ('vel_ramp_rate', 50.0),   # turns/s^2 - acceleration ramp rate (actual from ODrive)
                 ('enable_watchdog', True),
             ]
         )

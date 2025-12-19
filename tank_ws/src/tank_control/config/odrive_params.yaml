@@ -10,16 +10,16 @@ odrive_interface_node:
     # Physical parameters
     wheel_radius: 0.10    # meters (adjust to your actual wheel diameter)
     track_width: 0.60     # meters (600mm per your tank specs)
-    encoder_cpr: 2048     # Encoder counts per revolution (detected from ODrive)
+    encoder_cpr: 2048     # Encoder counts per revolution (verified from ODrive hardware)
     
     # Velocity limits
     max_vel: 1.5          # Maximum linear velocity (m/s)
     max_angular_vel: 2.0  # Maximum angular velocity (rad/s)
     
-    # ODrive motor limits
-    current_limit: 30.0   # Motor current limit (Amps)
-    velocity_limit: 100.0 # Motor velocity limit (turns/s) - 6000 RPM with 13:1 gearbox
-    vel_ramp_rate: 10.0   # Velocity ramp rate (turns/s^2) - 3-15 recommended
+    # ODrive motor limits (from actual ODrive config)
+    current_limit: 12.0   # Motor current limit (Amps) - actual ODrive setting
+    velocity_limit: 100.0 # Motor velocity limit (turns/s) - actual ODrive setting
+    vel_ramp_rate: 50.0   # Velocity ramp rate (turns/s^2) - actual ODrive setting
     
     # Safety
     enable_watchdog: true
