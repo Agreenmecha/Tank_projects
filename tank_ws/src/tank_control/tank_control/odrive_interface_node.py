@@ -149,63 +149,46 @@ class ODriveInterfaceNode(Node):
             self.get_logger().info(f'Connected to ODrive: {self.odrv.serial_number}')
             self.get_logger().info(f'Firmware version: {self.odrv.fw_version_major}.{self.odrv.fw_version_minor}.{self.odrv.fw_version_revision}')
             
-            # Configure ODrive
-            self.configure_odrive()
+            # Use existing ODrive configuration (do not modify)
+            self.get_logger().info('Using existing ODrive configuration')
+            self.log_odrive_config()
             self.connected = True
             
         except Exception as e:
             self.get_logger().error(f'Failed to connect to ODrive: {e}')
             self.connected = False
     
-    def configure_odrive(self):
-        """Configure ODrive for velocity control with safety limits."""
-        self.get_logger().info('Configuring ODrive...')
-        
+    def log_odrive_config(self):
+        """Log existing ODrive configuration (read-only)."""
         try:
             # Get axis objects
             left_axis = self.odrv.axis0 if self.axis_left == 0 else self.odrv.axis1
             right_axis = self.odrv.axis0 if self.axis_right == 0 else self.odrv.axis1
             
-            # Set current limits
-            left_axis.motor.config.current_lim = self.current_limit
-            right_axis.motor.config.current_lim = self.current_limit
+            self.get_logger().info('=== ODrive Configuration (Read-Only) ===')
+            self.get_logger().info(f'Left Axis (axis{self.axis_left}):')
+            self.get_logger().info(f'  Current limit: {left_axis.motor.config.current_lim}A')
+            self.get_logger().info(f'  Velocity limit: {left_axis.controller.config.vel_limit} turns/s')
+            self.get_logger().info(f'  Vel ramp rate: {left_axis.controller.config.vel_ramp_rate} turns/s²')
+            self.get_logger().info(f'  Control mode: {left_axis.controller.config.control_mode}')
+            self.get_logger().info(f'  Input mode: {left_axis.controller.config.input_mode}')
+            self.get_logger().info(f'  Watchdog enabled: {left_axis.config.enable_watchdog}')
+            self.get_logger().info(f'  Watchdog timeout: {left_axis.config.watchdog_timeout}s')
             
-            # Set velocity limits
-            left_axis.controller.config.vel_limit = self.velocity_limit
-            right_axis.controller.config.vel_limit = self.velocity_limit
-            
-            # Set velocity ramp rate for smooth acceleration
-            left_axis.controller.config.vel_ramp_rate = self.vel_ramp_rate
-            right_axis.controller.config.vel_ramp_rate = self.vel_ramp_rate
-            self.get_logger().info(f'Velocity ramp rate: {self.vel_ramp_rate} turns/s²')
-            
-            # Configure watchdog
-            if self.enable_watchdog:
-                left_axis.config.watchdog_timeout = self.watchdog_timeout
-                right_axis.config.watchdog_timeout = self.watchdog_timeout
-                left_axis.config.enable_watchdog = True
-                right_axis.config.enable_watchdog = True
-                self.get_logger().info(f'Watchdog enabled: {self.watchdog_timeout}s timeout')
-            else:
-                left_axis.config.enable_watchdog = False
-                right_axis.config.enable_watchdog = False
-                self.get_logger().warn('Watchdog disabled - USE WITH CAUTION')
-            
-            # Set control mode to velocity control
-            left_axis.controller.config.control_mode = CONTROL_MODE_VELOCITY_CONTROL
-            right_axis.controller.config.control_mode = CONTROL_MODE_VELOCITY_CONTROL
-            
-            # Set input mode to velocity ramp (enables smooth ramping)
-            left_axis.controller.config.input_mode = INPUT_MODE_VEL_RAMP
-            right_axis.controller.config.input_mode = INPUT_MODE_VEL_RAMP
-            
-            self.get_logger().info('ODrive configuration complete')
+            self.get_logger().info(f'Right Axis (axis{self.axis_right}):')
+            self.get_logger().info(f'  Current limit: {right_axis.motor.config.current_lim}A')
+            self.get_logger().info(f'  Velocity limit: {right_axis.controller.config.vel_limit} turns/s')
+            self.get_logger().info(f'  Vel ramp rate: {right_axis.controller.config.vel_ramp_rate} turns/s²')
+            self.get_logger().info(f'  Control mode: {right_axis.controller.config.control_mode}')
+            self.get_logger().info(f'  Input mode: {right_axis.controller.config.input_mode}')
+            self.get_logger().info(f'  Watchdog enabled: {right_axis.config.enable_watchdog}')
+            self.get_logger().info(f'  Watchdog timeout: {right_axis.config.watchdog_timeout}s')
             
             # Check for errors
             self.check_errors()
             
         except Exception as e:
-            self.get_logger().error(f'Failed to configure ODrive: {e}')
+            self.get_logger().error(f'Failed to read ODrive config: {e}')
     
     def check_errors(self):
         """Check for ODrive errors and publish status."""
