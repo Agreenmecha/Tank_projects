@@ -1,0 +1,57 @@
+# Nav2 Parameters for GPS Waypoint Navigation (No RTK)
+# Optimized for standard GPS accuracy (~2-5 meters)
+# 
+# Use this config for GPS waypoint missions
+# Use regular nav2_params.yaml for LiDAR-only precision navigation
+
+# Include base nav2_params and override GPS-specific settings
+
+controller_server:
+  ros__parameters:
+    use_sim_time: false
+    controller_frequency: 10.0  # Slower update for GPS (vs 20 Hz for LiDAR)
+    
+    general_goal_checker:
+      stateful: true
+      plugin: "nav2_controller::SimpleGoalChecker"
+      xy_goal_tolerance: 2.5  # 2.5m for standard GPS (vs 0.25m for RTK)
+      yaw_goal_tolerance: 0.5  # Relaxed heading tolerance
+    
+    progress_checker:
+      plugin: "nav2_controller::SimpleProgressChecker"
+      required_movement_radius: 1.0  # Increased from 0.5m
+      movement_time_allowance: 15.0  # More time for GPS drift
+    
+    FollowPath:
+      plugin: "dwb_core::DWBLocalPlanner"
+      # Relaxed parameters for GPS navigation
+      xy_goal_tolerance: 2.5
+      PathAlign.scale: 16.0  # Less strict path following
+      GoalAlign.scale: 12.0  # Less strict goal alignment
+      PathDist.scale: 16.0
+      GoalDist.scale: 20.0  # Higher priority on reaching goal area
+
+planner_server:
+  ros__parameters:
+    use_sim_time: false
+    GridBased:
+      plugin: "nav2_navfn_planner/NavfnPlanner"
+      tolerance: 2.0  # 2m planning tolerance for GPS
+
+behavior_server:
+  ros__parameters:
+    # More lenient recovery for GPS waypoint navigation
+    simulate_ahead_time: 3.0  # Look ahead more
+    max_rotational_vel: 0.8  # Slightly slower turns
+
+waypoint_follower:
+  ros__parameters:
+    use_sim_time: false
+    loop_rate: 10  # Slower update rate
+    stop_on_failure: true  # Stop if waypoint can't be reached
+    waypoint_task_executor_plugin: "wait_at_waypoint"
+    wait_at_waypoint:
+      plugin: "nav2_waypoint_follower::WaitAtWaypoint"
+      enabled: true
+      waypoint_pause_duration: 500  # Pause 5s at each waypoint
+

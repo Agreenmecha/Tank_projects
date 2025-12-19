@@ -1,0 +1,56 @@
+# Navsat Transform Configuration
+# Converts GPS (lat/lon) to map coordinates (x/y)
+# Required for GPS waypoint navigation
+
+navsat_transform_node:
+  ros__parameters:
+    # Frame IDs
+    map_frame: map
+    odom_frame: odom
+    base_link_frame: base_link
+    world_frame: map  # Use 'map' for outdoor navigation
+    
+    # Input topics
+    imu_topic: /lidar_front/imu
+    gps_topic: /ubx_nav_hp_pos_llh  # Your u-blox GPS topic
+    odometry_topic: /Odometry  # Point-LIO odometry
+    
+    # Output topic
+    # Publishes: /odometry/gps (GPS converted to odometry)
+    
+    # GPS datum (origin point)
+    # Set this to your operating area's approximate center
+    # Will be automatically set on first GPS fix if zero
+    datum: [0.0, 0.0, 0.0]  # [latitude, longitude, altitude]
+    
+    # Automatically set datum from first GPS fix
+    wait_for_datum: false  # Set true if you want to manually set datum
+    
+    # GPS covariance
+    # Increase if GPS is less accurate
+    yaw_offset: 0.0  # Heading offset in radians
+    
+    # Magnetic declination (degrees)
+    # Set based on your location: https://www.ngdc.noaa.gov/geomag/calculators/magcalc.shtml
+    magnetic_declination_radians: 0.0  # Update for your location
+    
+    # Zero altitude (use 2D navigation, ignore altitude)
+    zero_altitude: false  # Set true for pure 2D navigation
+    
+    # Broadcast transforms
+    broadcast_utm_transform: true
+    broadcast_utm_transform_as_parent_frame: false
+    
+    # Publish filtered GPS
+    publish_filtered_gps: true
+    
+    # Use odometry yaw
+    use_odometry_yaw: false  # We'll use Point-LIO's heading
+    
+    # Frequency
+    frequency: 10.0  # Hz
+    delay: 0.0  # Sensor delay in seconds
+    
+    # Transform timeout
+    transform_timeout: 0.0
+

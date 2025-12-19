@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tank GPS Waypoint Planner</title>
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            height: 100vh;
+        }
+        
+        #map {
+            flex: 1;
+            height: 100vh;
+        }
+        
+        #sidebar {
+            width: 350px;
+            background: #2c3e50;
+            color: white;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        
+        h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #ecf0f1;
+        }
+        
+        .section {
+            margin-bottom: 25px;
+        }
+        
+        h2 {
+            font-size: 18px;
+            margin-bottom: 10px;
+            color: #3498db;
+        }
+        
+        input, button, select {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        
+        button {
+            background: #3498db;
+            color: white;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        button:hover {
+            background: #2980b9;
+        }
+        
+        button.danger {
+            background: #e74c3c;
+        }
+        
+        button.danger:hover {
+            background: #c0392b;
+        }
+        
+        button.success {
+            background: #27ae60;
+        }
+        
+        button.success:hover {
+            background: #229954;
+        }
+        
+        #waypointList {
+            list-style: none;
+            margin-top: 10px;
+        }
+        
+        .waypoint-item {
+            background: #34495e;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .waypoint-info {
+            flex: 1;
+        }
+        
+        .waypoint-name {
+            font-weight: bold;
+            margin-bottom: 3px;
+        }
+        
+        .waypoint-coords {
+            font-size: 12px;
+            color: #95a5a6;
+        }
+        
+        .waypoint-remove {
+            background: #e74c3c;
+            border: none;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            width: auto;
+        }
+        
+        #status {
+            padding: 10px;
+            background: #34495e;
+            border-radius: 5px;
+            font-size: 12px;
+            margin-top: 10px;
+        }
+        
+        .ros-status {
+            display: flex;
+            align-items: center;
+            margin: 5px 0;
+        }
+        
+        .status-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        .connected {
+            background: #27ae60;
+        }
+        
+        .disconnected {
+            background: #e74c3c;
+        }
+        
+        .info-box {
+            background: #1abc9c;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+    <div id="map"></div>
+    
+    <div id="sidebar">
+        <h1>🗺️ GPS Waypoint Planner</h1>
+        
+        <div class="section">
+            <h2>Map Controls</h2>
+            <select id="mapType">
+                <option value="osm">OpenStreetMap</option>
+                <option value="satellite">Satellite (Esri)</option>
+                <option value="terrain">Terrain</option>
+            </select>
+            <button onclick="centerOnRobot()">📍 Center on Robot</button>
+            <button onclick="clearWaypoints()" class="danger">🗑️ Clear All Waypoints</button>
+        </div>
+        
+        <div class="section">
+            <h2>ROS Connection</h2>
+            <input type="text" id="rosbridge_url" value="ws://localhost:9090" placeholder="ROSBridge URL">
+            <button onclick="connectROS()">Connect to ROS</button>
+            <div id="status">
+                <div class="ros-status">
+                    <div class="status-indicator disconnected" id="rosIndicator"></div>
+                    <span>Disconnected</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2>Waypoints (<span id="waypointCount">0</span>)</h2>
+            <div class="info-box">
+                💡 Click on map to add waypoints
+            </div>
+            <ul id="waypointList"></ul>
+            <button onclick="sendWaypoints()" class="success">🚀 Send Mission to Robot</button>
+            <button onclick="exportWaypoints()">💾 Export Waypoints</button>
+        </div>
+        
+        <div class="section">
+            <h2>Robot Status</h2>
+            <div id="robotStatus">
+                <div>Lat: <span id="robotLat">--</span></div>
+                <div>Lon: <span id="robotLon">--</span></div>
+                <div>GPS Fix: <span id="gpsFix">--</span></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <!-- ROSLib JS -->
+    <script src="https://cdn.jsdelivr.net/npm/roslib@1/build/roslib.min.js"></script>
+    
+    <script>
+        // Initialize map
+        let map = L.map('map').setView([37.7749, -122.4194], 18); // Default: San Francisco
+        
+        // Map layers
+        const mapLayers = {
+            osm: L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 22,
+                attribution: '© OpenStreetMap'
+            }),
+            satellite: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+                maxZoom: 22,
+                attribution: '© Esri'
+            }),
+            terrain: L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+                maxZoom: 17,
+                attribution: '© OpenTopoMap'
+            })
+        };
+        
+        mapLayers.satellite.addTo(map);
+        
+        // Change map type
+        document.getElementById('mapType').addEventListener('change', (e) => {
+            map.eachLayer(layer => {
+                if (layer instanceof L.TileLayer) {
+                    map.removeLayer(layer);
+                }
+            });
+            mapLayers[e.target.value].addTo(map);
+        });
+        
+        // Waypoint management
+        let waypoints = [];
+        let waypointMarkers = [];
+        let robotMarker = null;
+        let ros = null;
+        
+        // Robot position
+        let robotPosition = {lat: null, lon: null};
+        
+        // Add waypoint on map click
+        map.on('click', (e) => {
+            addWaypoint(e.latlng.lat, e.latlng.lng);
+        });
+        
+        function addWaypoint(lat, lon) {
+            const waypoint = {
+                lat: lat,
+                lon: lon,
+                name: `Waypoint ${waypoints.length + 1}`
+            };
+            
+            waypoints.push(waypoint);
+            
+            // Add marker
+            const marker = L.marker([lat, lon], {
+                icon: L.divIcon({
+                    className: 'waypoint-marker',
+                    html: `<div style="background: #3498db; color: white; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border: 3px solid white; font-weight: bold;">${waypoints.length}</div>`,
+                    iconSize: [30, 30]
+                })
+            }).addTo(map);
+            
+            marker.bindPopup(`${waypoint.name}<br>Lat: ${lat.toFixed(6)}<br>Lon: ${lon.toFixed(6)}`);
+            waypointMarkers.push(marker);
+            
+            // Draw path
+            if (waypoints.length > 1) {
+                const lastWp = waypoints[waypoints.length - 2];
+                L.polyline([[lastWp.lat, lastWp.lon], [lat, lon]], {
+                    color: '#3498db',
+                    weight: 3,
+                    opacity: 0.7
+                }).addTo(map);
+            }
+            
+            updateWaypointList();
+        }
+        
+        function removeWaypoint(index) {
+            waypoints.splice(index, 1);
+            
+            // Remove all markers and redraw
+            waypointMarkers.forEach(m => map.removeLayer(m));
+            waypointMarkers = [];
+            
+            map.eachLayer(layer => {
+                if (layer instanceof L.Polyline) {
+                    map.removeLayer(layer);
+                }
+            });
+            
+            // Redraw all waypoints
+            waypoints.forEach((wp, i) => {
+                const marker = L.marker([wp.lat, wp.lon], {
+                    icon: L.divIcon({
+                        className: 'waypoint-marker',
+                        html: `<div style="background: #3498db; color: white; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border: 3px solid white; font-weight: bold;">${i+1}</div>`,
+                        iconSize: [30, 30]
+                    })
+                }).addTo(map);
+                waypointMarkers.push(marker);
+                
+                if (i > 0) {
+                    const lastWp = waypoints[i - 1];
+                    L.polyline([[lastWp.lat, lastWp.lon], [wp.lat, wp.lon]], {
+                        color: '#3498db',
+                        weight: 3,
+                        opacity: 0.7
+                    }).addTo(map);
+                }
+            });
+            
+            updateWaypointList();
+        }
+        
+        function clearWaypoints() {
+            if (confirm('Clear all waypoints?')) {
+                waypoints = [];
+                waypointMarkers.forEach(m => map.removeLayer(m));
+                waypointMarkers = [];
+                map.eachLayer(layer => {
+                    if (layer instanceof L.Polyline) {
+                        map.removeLayer(layer);
+                    }
+                });
+                updateWaypointList();
+            }
+        }
+        
+        function updateWaypointList() {
+            const list = document.getElementById('waypointList');
+            const count = document.getElementById('waypointCount');
+            
+            list.innerHTML = '';
+            count.textContent = waypoints.length;
+            
+            waypoints.forEach((wp, i) => {
+                const li = document.createElement('li');
+                li.className = 'waypoint-item';
+                li.innerHTML = `
+                    <div class="waypoint-info">
+                        <div class="waypoint-name">${wp.name}</div>
+                        <div class="waypoint-coords">
+                            ${wp.lat.toFixed(6)}, ${wp.lon.toFixed(6)}
+                        </div>
+                    </div>
+                    <button class="waypoint-remove" onclick="removeWaypoint(${i})">✕</button>
+                `;
+                list.appendChild(li);
+            });
+        }
+        
+        // ROS Connection
+        function connectROS() {
+            const url = document.getElementById('rosbridge_url').value;
+            
+            ros = new ROSLIB.Ros({
+                url: url
+            });
+            
+            ros.on('connection', () => {
+                document.getElementById('rosIndicator').className = 'status-indicator connected';
+                document.querySelector('#status span').textContent = 'Connected';
+                alert('Connected to ROS!');
+                subscribeToGPS();
+            });
+            
+            ros.on('error', (error) => {
+                document.getElementById('rosIndicator').className = 'status-indicator disconnected';
+                document.querySelector('#status span').textContent = 'Error';
+                console.error('ROS connection error:', error);
+            });
+            
+            ros.on('close', () => {
+                document.getElementById('rosIndicator').className = 'status-indicator disconnected';
+                document.querySelector('#status span').textContent = 'Disconnected';
+            });
+        }
+        
+        // Subscribe to GPS
+        function subscribeToGPS() {
+            const gpsListener = new ROSLIB.Topic({
+                ros: ros,
+                name: '/ubx_nav_hp_pos_llh',
+                messageType: 'sensor_msgs/NavSatFix'
+            });
+            
+            gpsListener.subscribe((message) => {
+                robotPosition.lat = message.latitude;
+                robotPosition.lon = message.longitude;
+                
+                document.getElementById('robotLat').textContent = message.latitude.toFixed(6);
+                document.getElementById('robotLon').textContent = message.longitude.toFixed(6);
+                document.getElementById('gpsFix').textContent = message.status.status >= 0 ? 'Good' : 'No Fix';
+                
+                // Update robot marker
+                if (!robotMarker) {
+                    robotMarker = L.marker([message.latitude, message.longitude], {
+                        icon: L.divIcon({
+                            className: 'robot-marker',
+                            html: '<div style="background: #27ae60; width: 20px; height: 20px; border-radius: 50%; border: 3px solid white;"></div>',
+                            iconSize: [20, 20]
+                        })
+                    }).addTo(map);
+                    robotMarker.bindPopup('Robot Position');
+                    
+                    // Center map on robot first time
+                    map.setView([message.latitude, message.longitude], 18);
+                } else {
+                    robotMarker.setLatLng([message.latitude, message.longitude]);
+                }
+            });
+        }
+        
+        function centerOnRobot() {
+            if (robotPosition.lat && robotPosition.lon) {
+                map.setView([robotPosition.lat, robotPosition.lon], 18);
+            } else {
+                alert('No robot GPS position available');
+            }
+        }
+        
+        // Send waypoints to ROS
+        function sendWaypoints() {
+            if (!ros || !ros.isConnected) {
+                alert('Not connected to ROS! Click "Connect to ROS" first.');
+                return;
+            }
+            
+            if (waypoints.length === 0) {
+                alert('No waypoints to send!');
+                return;
+            }
+            
+            const waypointTopic = new ROSLIB.Topic({
+                ros: ros,
+                name: '/gps_waypoints',
+                messageType: 'std_msgs/String'
+            });
+            
+            const message = new ROSLIB.Message({
+                data: JSON.stringify({waypoints: waypoints})
+            });
+            
+            waypointTopic.publish(message);
+            
+            alert(`Sent ${waypoints.length} waypoints to robot!`);
+        }
+        
+        // Export waypoints
+        function exportWaypoints() {
+            const dataStr = JSON.stringify({waypoints: waypoints}, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.download = 'waypoints.json';
+            link.href = url;
+            link.click();
+        }
+    </script>
+</body>
+</html>
+

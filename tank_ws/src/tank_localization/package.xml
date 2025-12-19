@@ -13,6 +13,10 @@
   <depend>sensor_msgs</depend>
   <depend>nav_msgs</depend>
   <depend>tank_msgs</depend>
+  
+  <!-- External packages -->
+  <exec_depend>point_lio</exec_depend>
+  <exec_depend>tank_sensors</exec_depend>
   <export>
     <build_type>ament_cmake</build_type>
   </export>

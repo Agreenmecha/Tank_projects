@@ -14,13 +14,14 @@ find_package(std_msgs REQUIRED)
 
 # Install directories
 install(DIRECTORY
-  launch config
+  launch config rviz web
   DESTINATION share/${PROJECT_NAME}/
 )
 
 # Install Python executables
 install(PROGRAMS
   tank_navigation/gps_waypoint_follower.py
+  tank_navigation/gps_waypoint_manager.py
   DESTINATION lib/${PROJECT_NAME}
 )
 
