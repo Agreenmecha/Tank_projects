@@ -6,6 +6,8 @@ odrive_interface_node:
     # Axis configuration
     axis_left: 0   # ODrive axis 0 for left motor
     axis_right: 1  # ODrive axis 1 for right motor
+    invert_left: true   # Reverse left motor direction (set to true if motor spins backwards)
+    invert_right: false  # Reverse right motor direction
     
     # Physical parameters (verified from hardware)
     wheel_radius: 0.058   # meters (58mm actual wheel radius)

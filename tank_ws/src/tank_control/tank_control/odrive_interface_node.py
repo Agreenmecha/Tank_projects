@@ -47,6 +47,8 @@ class ODriveInterfaceNode(Node):
                 ('odrive_serial', ''),  # Empty = auto-find first ODrive
                 ('axis_left', 0),       # ODrive axis for left motor
                 ('axis_right', 1),      # ODrive axis for right motor
+                ('invert_left', False), # Invert left motor direction
+                ('invert_right', False), # Invert right motor direction
                 ('wheel_radius', 0.058),  # meters (58mm actual wheel radius)
                 ('track_width', 0.60),   # meters (600mm track width)
                 ('encoder_cpr', 2048),   # Counts per revolution at motor (actual from ODrive)
@@ -67,6 +69,8 @@ class ODriveInterfaceNode(Node):
         self.odrive_serial = self.get_parameter('odrive_serial').value
         self.axis_left = self.get_parameter('axis_left').value
         self.axis_right = self.get_parameter('axis_right').value
+        self.invert_left = self.get_parameter('invert_left').value
+        self.invert_right = self.get_parameter('invert_right').value
         self.wheel_radius = self.get_parameter('wheel_radius').value
         self.track_width = self.get_parameter('track_width').value
         self.encoder_cpr = self.get_parameter('encoder_cpr').value
@@ -289,9 +293,11 @@ class ODriveInterfaceNode(Node):
                 self.get_logger().warn('Right axis not in closed loop control - requesting')
                 right_axis.requested_state = AXIS_STATE_CLOSED_LOOP_CONTROL
             
-            # Send velocity commands
-            left_axis.controller.input_vel = self.target_vel_left
-            right_axis.controller.input_vel = self.target_vel_right
+            # Send velocity commands (apply inversion if configured)
+            left_vel = -self.target_vel_left if self.invert_left else self.target_vel_left
+            right_vel = -self.target_vel_right if self.invert_right else self.target_vel_right
+            left_axis.controller.input_vel = left_vel
+            right_axis.controller.input_vel = right_vel
             
             # Feed watchdog if enabled in ODrive config
             if left_axis.config.enable_watchdog:
