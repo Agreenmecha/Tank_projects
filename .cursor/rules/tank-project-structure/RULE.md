@@ -87,7 +87,7 @@ Tank_projects/
 - **Type:** e-CAM25_CUONX (AR0234 sensor)
 - **Features:** Global shutter, MIPI CSI-2
 - **Driver:** e-con Systems custom (see ecam-25docs/)
-- **Status:** Available but typically disabled
+- **Status:** Not Available and currently disabled
 
 ### Motor Control
 - **Type:** ODrive S1 (quantity TBD)
