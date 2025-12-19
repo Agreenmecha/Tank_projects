@@ -53,7 +53,7 @@ class ODriveInterfaceNode(Node):
                 ('gear_ratio', 12.0),    # 12:1 gearbox reduction (motor:wheel)
                 ('max_vel', 1.5),        # m/s
                 ('max_angular_vel', 2.0), # rad/s
-                ('watchdog_timeout', 0.2), # seconds
+                ('watchdog_timeout', 1.0), # seconds
                 ('control_rate', 50.0),    # Hz
                 ('publish_rate', 20.0),    # Hz
                 ('current_limit', 12.0),   # Amps (actual from ODrive)

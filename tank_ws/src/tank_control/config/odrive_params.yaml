@@ -24,7 +24,7 @@ odrive_interface_node:
     
     # Safety
     enable_watchdog: true
-    watchdog_timeout: 0.2  # seconds - stop motors if no command for this long
+    watchdog_timeout: 1.0  # seconds - stop motors if no command for this long (increased for startup reliability)
     
     # Control timing
     control_rate: 50.0    # Hz - velocity command rate
