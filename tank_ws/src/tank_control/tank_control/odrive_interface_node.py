@@ -278,17 +278,24 @@ class ODriveInterfaceNode(Node):
         time_since_last_transition = current_time - self.last_transition_end_time
         in_cooldown = time_since_last_transition < 0.5  # 0.5s cooldown between transitions
         
-        # If transitioning, force stop until complete
+        # If transitioning, force stop until wheels actually stop
         if self.transitioning:
             elapsed = current_time - self.transition_start_time
             
-            # Wait for stop (0.5 seconds should be enough for both wheels to stop)
-            if elapsed < 0.5:
-                vel_left = 0.0
-                vel_right = 0.0
-            else:
+            # Force zero velocity command
+            vel_left = 0.0
+            vel_right = 0.0
+            
+            # Check if wheels have actually stopped (based on encoder feedback)
+            left_stopped = abs(self.actual_wheel_vel_left) < 0.05
+            right_stopped = abs(self.actual_wheel_vel_right) < 0.05
+            both_stopped = left_stopped and right_stopped
+            
+            # End transition if both wheels stopped OR timeout after 1.0s (safety)
+            if (both_stopped and elapsed > 0.2) or elapsed > 1.0:
                 self.transitioning = False
                 self.last_transition_end_time = current_time
+                self.get_logger().info(f'Transition complete after {elapsed:.2f}s')
         
         # Start new transition if direction changed or sharp turn detected (and not in cooldown)
         elif (any_wheel_direction_change or sharp_turn) and not in_cooldown:
