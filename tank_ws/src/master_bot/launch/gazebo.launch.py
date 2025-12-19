@@ -25,6 +25,9 @@ def generate_launch_description():
     with open(urdf_file, 'r') as infp:
         robot_description = infp.read()
     
+    # World file with ground plane
+    world_file = os.path.join(pkg_share, 'worlds', 'test_world.sdf')
+    
     # Gazebo Fortress (gz sim) launch file
     gz_sim_pkg = get_package_share_directory('ros_gz_sim')
     gazebo = IncludeLaunchDescription(
@@ -32,7 +35,7 @@ def generate_launch_description():
             os.path.join(gz_sim_pkg, 'launch', 'gz_sim.launch.py')
         ),
         launch_arguments={
-            'gz_args': '-r empty.sdf'
+            'gz_args': f'-r {world_file}'
         }.items()
     )
     
@@ -48,7 +51,7 @@ def generate_launch_description():
         }]
     )
     
-    # Spawn the robot in Gazebo Fortress
+    # Spawn the robot in Gazebo Fortress (base_footprint at ground)
     spawn_entity = Node(
         package='ros_gz_sim',
         executable='create',
@@ -57,7 +60,7 @@ def generate_launch_description():
             '-file', urdf_file,
             '-x', '0',
             '-y', '0',
-            '-z', '0.5'
+            '-z', '0.0'
         ],
         output='screen'
     )
