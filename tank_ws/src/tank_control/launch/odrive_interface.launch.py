@@ -25,7 +25,7 @@ def generate_launch_description():
     # ODrive interface node
     odrive_node = Node(
         package='tank_control',
-        executable='odrive_interface_node',
+        executable='odrive_interface_node.py',
         name='odrive_interface_node',
         output='screen',
         parameters=[LaunchConfiguration('config_file')],
