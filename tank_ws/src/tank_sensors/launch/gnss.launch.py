@@ -15,7 +15,7 @@ def generate_launch_description():
     # Declare arguments
     device_arg = DeclareLaunchArgument(
         'device',
-        default_value='/dev/ttyACM0',
+        default_value='/dev/ttyACM1',
         description='GNSS serial device'
     )
     
@@ -35,7 +35,10 @@ def generate_launch_description():
         executable='ublox_dgnss_node',
         name='gnss_node',
         output='screen',
-        parameters=[LaunchConfiguration('config_file')],
+        parameters=[
+            LaunchConfiguration('config_file'),
+            {'device': LaunchConfiguration('device')}
+        ],
         remappings=[
             ('fix', '/gnss/fix'),
             ('navpvt', '/gnss/navpvt'),

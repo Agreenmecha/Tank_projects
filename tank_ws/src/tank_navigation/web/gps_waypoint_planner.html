@@ -403,25 +403,21 @@
         function subscribeToGPS() {
             const gpsListener = new ROSLIB.Topic({
                 ros: ros,
-                name: '/ubx_nav_hp_pos_llh',
-                messageType: 'ublox_ubx_msgs/UBXNavHPPosLLH'
+                name: '/fix',
+                messageType: 'sensor_msgs/NavSatFix'
             });
             
             gpsListener.subscribe((message) => {
-                // Convert ublox format: lat/lon are in deg * 1e-7, with hp in deg * 1e-9
-                const lat = (message.lat + message.lat_hp * 0.01) * 1e-7;
-                const lon = (message.lon + message.lon_hp * 0.01) * 1e-7;
+                robotPosition.lat = message.latitude;
+                robotPosition.lon = message.longitude;
                 
-                robotPosition.lat = lat;
-                robotPosition.lon = lon;
-                
-                document.getElementById('robotLat').textContent = lat.toFixed(6);
-                document.getElementById('robotLon').textContent = lon.toFixed(6);
-                document.getElementById('gpsFix').textContent = (!message.invalid_lat && !message.invalid_lon) ? 'Good' : 'No Fix';
+                document.getElementById('robotLat').textContent = message.latitude.toFixed(6);
+                document.getElementById('robotLon').textContent = message.longitude.toFixed(6);
+                document.getElementById('gpsFix').textContent = message.status.status >= 0 ? 'Good' : 'No Fix';
                 
                 // Update robot marker
                 if (!robotMarker) {
-                    robotMarker = L.marker([lat, lon], {
+                    robotMarker = L.marker([message.latitude, message.longitude], {
                         icon: L.divIcon({
                             className: 'robot-marker',
                             html: '<div style="background: #27ae60; width: 20px; height: 20px; border-radius: 50%; border: 3px solid white;"></div>',
@@ -431,9 +427,9 @@
                     robotMarker.bindPopup('Robot Position');
                     
                     // Center map on robot first time
-                    map.setView([lat, lon], 18);
+                    map.setView([message.latitude, message.longitude], 18);
                 } else {
-                    robotMarker.setLatLng([lat, lon]);
+                    robotMarker.setLatLng([message.latitude, message.longitude]);
                 }
             });
         }

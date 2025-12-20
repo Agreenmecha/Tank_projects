@@ -10,7 +10,6 @@ from rclpy.action import ActionClient
 from geometry_msgs.msg import PoseStamped
 from geographic_msgs.msg import GeoPoint
 from sensor_msgs.msg import NavSatFix
-from ublox_ubx_msgs.msg import UBXNavHPPosLLH
 from nav2_msgs.action import NavigateToPose, FollowWaypoints
 from std_msgs.msg import String
 import json
@@ -40,14 +39,12 @@ class GPSWaypointManager(Node):
         self.datum_set = False
         
         # Current GPS position
-        self.current_lat = 0.0
-        self.current_lon = 0.0
-        self.gps_valid = False
+        self.current_gps = None
         
         # Subscribers
         self.gps_sub = self.create_subscription(
-            UBXNavHPPosLLH,
-            '/ubx_nav_hp_pos_llh',
+            NavSatFix,
+            '/fix',
             self.gps_callback,
             10
         )
@@ -83,25 +80,19 @@ class GPSWaypointManager(Node):
         self.get_logger().info('GPS Waypoint Manager started')
         self.get_logger().info('Waiting for GPS fix to set datum...')
     
-    def gps_callback(self, msg: UBXNavHPPosLLH):
+    def gps_callback(self, msg: NavSatFix):
         """Store current GPS position and set datum if needed"""
-        # Convert ublox format: lat/lon in deg * 1e-7, hp in deg * 1e-9
-        if not msg.invalid_lat and not msg.invalid_lon:
-            self.current_lat = (msg.lat + msg.lat_hp * 0.01) * 1e-7
-            self.current_lon = (msg.lon + msg.lon_hp * 0.01) * 1e-7
-            self.gps_valid = True
-            
-            # Set datum from first GPS fix if not already set
-            if not self.datum_set:
-                self.datum_lat = self.current_lat
-                self.datum_lon = self.current_lon
-                self.datum_set = True
-                self.get_logger().info(
-                    f'GPS Datum set: lat={self.datum_lat:.8f}, '
-                    f'lon={self.datum_lon:.8f}'
-                )
-        else:
-            self.gps_valid = False
+        self.current_gps = msg
+        
+        # Set datum from first GPS fix if not already set
+        if not self.datum_set and msg.status.status >= 0:  # Valid GPS fix
+            self.datum_lat = msg.latitude
+            self.datum_lon = msg.longitude
+            self.datum_set = True
+            self.get_logger().info(
+                f'GPS Datum set: lat={self.datum_lat:.8f}, '
+                f'lon={self.datum_lon:.8f}'
+            )
     
     def gps_to_map(self, lat: float, lon: float) -> Tuple[float, float]:
         """

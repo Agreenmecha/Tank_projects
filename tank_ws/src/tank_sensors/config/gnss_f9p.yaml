@@ -4,6 +4,10 @@
 
 ublox_dgnss_node:
   ros__parameters:
+    # Serial device
+    device: "/dev/ttyACM1"
+    baudrate: 115200  # Standard for F9P USB
+    
     # Device identification
     DEVICE_FAMILY: "F9P"
     FRAME_ID: "gnss"
@@ -68,8 +72,8 @@ ublox_dgnss_node:
     # Fix mode: 0 = 2D/3D auto
     CFG_NAVSPG_FIXMODE: 0
     
-    # Disable NMEA output on USB (we use UBX only)
-    CFG_USBOUTPROT_NMEA: 0
+    # USB protocol output (enable both for compatibility)
+    CFG_USBOUTPROT_NMEA: 1
     CFG_USBOUTPROT_UBX: 1
     
     # Disable info messages

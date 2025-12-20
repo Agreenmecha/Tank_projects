@@ -1,0 +1,36 @@
+ublox_gps_node:
+  ros__parameters:
+    debug: 1                    # 0-4 (1 shows config messages)
+    device: /dev/ttyACM1        # Tank's GPS device
+    frame_id: gnss
+    uart1:
+      baudrate: 115200          # Standard for USB (460800 is for UART)
+    
+    # GNSS Constellations (enable all for best accuracy)
+    gnss:
+      gps: true                 # GPS (USA)
+      glonass: true             # GLONASS (Russia)
+      galileo: true             # Galileo (Europe)
+      beidou: true              # BeiDou (China)
+      qzss: true                # QZSS (Japan/Asia-Pacific)
+      imes: false               # Indoor positioning (not needed)
+    
+    # TMODE3 Config - Rover mode (not base station)
+    tmode3: 0                   # 0 = Disabled (Rover mode)
+    
+    # Info messages (helpful for debugging)
+    inf:
+      all: true                 # Display all INF messages
+    
+    # Publish settings
+    publish:
+      all: false
+      nav:
+        all: true               # Publish all NAV messages
+        pvt: true               # Position/Velocity/Time (most important)
+        posllh: true            # Lat/Lon/Height
+        posecef: true           # ECEF position
+        status: true            # Fix status
+        sat: true               # Satellite info
+        dop: true               # Dilution of Precision
+
