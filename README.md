@@ -271,22 +271,27 @@ scripts/sensors/setup_lidar_network.sh
 ### ✅ Completed
 - [x] Jetson Orin Nano setup
 - [x] ROS2 Humble installation
-- [x] ODrive USB communication
-- [x] Motor velocity control
-- [x] ROS2 motor interface node
-- [x] Dual LiDAR network setup
-- [x] GNSS driver configuration
-- [x] Workspace structure
+- [x] ODrive motor control (USB interface)
+- [x] Differential drive velocity control
+- [x] Dual LiDAR network setup (Unitree L2)
+- [x] GNSS driver with accurate RTK positioning (u-blox ZED-F9P)
+- [x] Point-LIO SLAM localization
+- [x] URDF robot model
+- [x] Nav2 navigation stack configuration
+- [x] GPS waypoint web application (mission planner UI)
+- [x] Sensor fusion & TF tree
 
 ### ⏳ In Progress
-- [ ] Nav2 autonomous navigation
-- [ ] GPS waypoint navigation
-- [ ] Camera integration
+- [ ] Nav2 waypoint following (see Known Issues)
+- [ ] Camera integration (e-CAM25)
 
-### ✅ Recently Completed
-- [x] Point-LIO sensor fusion
-- [x] URDF robot model
-- [x] Nav2 configuration
+### 🐛 Known Issues
+
+**Nav2 Waypoint Navigation Bug:**  
+Nav2 reports successful waypoint-to-waypoint progress, but the rover exhibits incorrect behavior:
+- Robot turns in place instead of driving forward
+- Occasional forward dashes, then returns to spinning
+- Likely cause: cmd_vel → wheel velocity conversion or odometry feedback mismatch
 
 ---
 

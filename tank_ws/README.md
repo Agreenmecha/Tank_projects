@@ -184,54 +184,30 @@ ros2 launch tank_bringup tank_full.launch.py
 
 ## Development Status
 
-### Phase 0: Setup ✅
-- [x] Workspace structure created
-- [x] Custom messages defined (5 msgs, 2 srvs)
-- [x] 10 ROS2 packages created
+### Phase 1: Sensors & Localization ✅
+- [x] Dual L2 LiDAR drivers (Unitree)
+- [x] GNSS with RTK positioning (u-blox ZED-F9P)
+- [x] Point-LIO SLAM localization
+- [x] Sensor fusion & TF configuration
+- [x] ODrive motor control (USB)
 
-### Phase 1: Sensors & Localization (IN PROGRESS)
-- [x] External packages cloned (Point-LIO, unilidar_sdk2, ublox_dgnss, Isaac ROS)
-- [x] GNSS config & launch files (ZED-F9P)
-- [x] Dual L2 LiDAR launch files
-- [x] Camera integration (e-CAM25 with gscam + nvarguscamerasrc)
-- [x] Point-LIO configuration for L2
-- [x] Master sensors_localization launch file
-- [x] Isaac ROS packages cloned (common, dnn_inference, image_pipeline)
-- [ ] Test on Jetson hardware (pending JetPack 6.2.1 + camera drivers)
-- [ ] ODrive CAN control
-- [ ] Encoder odometry
-- [ ] Safety monitoring node
+### Phase 2: Navigation (IN PROGRESS)
+- [x] Nav2 stack configuration
+- [x] GPS waypoint web application
+- [x] Waypoint mission planner UI
+- [ ] **Fix:** cmd_vel to wheel velocity (robot spins instead of driving)
+- [ ] Camera integration (e-CAM25)
 
-### Phase 2: Perception & Navigation (TODO)
-- [ ] Ground extraction (Patchwork++)
-- [ ] Isaac ROS TensorRT model preparation (SegFormer-B0)
-- [ ] Camera segmentation inference node
-- [ ] LiDAR+Camera costmap fusion
-- [ ] DWA planner (tracked vehicle kinematics)
-- [ ] Basic waypoint following
+### Phase 3: Advanced Features (TODO)
+- [ ] Obstacle avoidance tuning
+- [ ] Recovery behaviors
+- [ ] Camera-based perception
 
-### Phase 3: Advanced Behavior (TODO)
-- [ ] Reverse mode
-- [ ] Recovery behaviors (stuck, tip detection)
-- [ ] Pitch-based speed control
-- [ ] 30° slope validation
+## Known Issues
 
-### Phase 4: Field Testing & Iteration (TODO)
-- [ ] T1/T2/T3 test scenarios
-- [ ] KPI collection
-- [ ] Nvblox 3D reconstruction (LiDAR+Camera)
-- [ ] Isaac Sim integration for offline testing
+**Waypoint Navigation:** Nav2 believes robot is progressing between waypoints, but physical behavior shows spinning in place with occasional forward dashes. Investigating cmd_vel → motor command chain.
 
 ## Documentation
 
-- **Planning docs:** `../` (tank_plan.txt, workspace_structure.md)
-- **Field reference:** `../QUICK_REFERENCE.md`
-- **Project status:** `../PROJECT_STATUS.md`
-
-## Contributing
-
-See implementation phases in `../workspace_structure.md`.
-
-**Current Phase:** Phase 0 - Workspace Setup ✅
-**Next Phase:** Phase 1 - Core Localization & Control
+See `../docs/` for setup guides and `../archive/dev_notes/` for development history.
 
