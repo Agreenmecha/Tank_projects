@@ -3,7 +3,7 @@
 **Platform:** Jetson Orin Nano  
 **ROS2:** Humble  
 **Control:** ODrive v3.6 (Firmware v0.5.6)  
-**Sensors:** Dual LiDAR (L2), u-blox GNSS, e-CAM25  
+**Sensors:** Dual LiDAR (L2), u-blox GNSS zedF9p ,  
 
 ---
 
@@ -110,10 +110,10 @@ cd scripts/odrive
 
 ### Motors
 - **Controller:** ODrive v3.6 (Firmware v0.5.6)
-- **Gearbox:** 13:1 ratio
+- **Gearbox:** 12:1 ratio
 - **Max Speed:** 6000 RPM (100 turns/s at motor)
 - **Current Limit:** 30A
-- **Velocity Ramp:** 10 turns/s² (configurable 3-15)
+- **Velocity Ramp:** 60 turns/s² (configurable 3-15)
 - **Encoders:** 2048 CPR, incremental
 
 ### Sensors
@@ -312,7 +312,9 @@ This is a personal project, but feel free to:
 
 ## 📧 Contact
 
-[Add your contact info here]
+Aaron Green
+asgreen@csuchico.edu
+asgreenmecha@gmail.com
 
 ---
 
