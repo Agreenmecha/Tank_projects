@@ -27,6 +27,7 @@ setup(
             'odrive_interface_node.py = tank_control.odrive_interface_node:main',
             'safety_monitor_node.py = tank_control.safety_monitor_node:main',
             'teleop_gamepad_node.py = tank_control.teleop_gamepad_node:main',
+            'shutdown_handler_node.py = tank_control.shutdown_handler_node:main',
         ],
     },
 )

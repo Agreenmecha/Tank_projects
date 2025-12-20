@@ -246,6 +246,14 @@ def generate_launch_description():
         condition=IfCondition(LaunchConfiguration('enable_gps_waypoints'))
     )
     
+    # Shutdown handler (always enabled for emergency stop)
+    shutdown_handler = Node(
+        package='tank_control',
+        executable='shutdown_handler_node.py',
+        name='shutdown_handler',
+        output='screen',
+    )
+    
     # =================================================================
     # 7. VISUALIZATION (RViz)
     # =================================================================
@@ -309,6 +317,7 @@ def generate_launch_description():
         navsat_transform,
         gps_waypoint_manager,
         rosbridge,
+        shutdown_handler,
         
         # 7. Visualization
         LogInfo(msg='[7/7] Starting Visualization (RViz)...'),

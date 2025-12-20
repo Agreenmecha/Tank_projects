@@ -525,6 +525,54 @@
             alert('🛑 MISSION STOPPED! Robot should halt.');
         }
         
+        // Shutdown entire system - kills all ROS nodes
+        function shutdownSystem() {
+            if (!ros || !ros.isConnected) {
+                alert('Not connected to ROS!');
+                return;
+            }
+            
+            if (!confirm('⚠️ WARNING: This will SHUTDOWN ALL ROS NODES and STOP THE ROBOT COMPLETELY.\n\nAre you sure?')) {
+                return;
+            }
+            
+            // Send zero velocity first
+            const cmdVelTopic = new ROSLIB.Topic({
+                ros: ros,
+                name: '/cmd_vel',
+                messageType: 'geometry_msgs/Twist'
+            });
+            
+            const stopCmd = new ROSLIB.Message({
+                linear: {x: 0.0, y: 0.0, z: 0.0},
+                angular: {x: 0.0, y: 0.0, z: 0.0}
+            });
+            
+            cmdVelTopic.publish(stopCmd);
+            
+            // Send shutdown command
+            const shutdownTopic = new ROSLIB.Topic({
+                ros: ros,
+                name: '/system/shutdown',
+                messageType: 'std_msgs/Bool'
+            });
+            
+            const shutdownMsg = new ROSLIB.Message({
+                data: true
+            });
+            
+            shutdownTopic.publish(shutdownMsg);
+            
+            alert('⚠️ SHUTDOWN COMMAND SENT! All ROS nodes will terminate.');
+            
+            // Disconnect after a delay
+            setTimeout(() => {
+                if (ros) {
+                    ros.close();
+                }
+            }, 2000);
+        }
+        
         // Export waypoints
         function exportWaypoints() {
             const dataStr = JSON.stringify({waypoints: waypoints}, null, 2);
