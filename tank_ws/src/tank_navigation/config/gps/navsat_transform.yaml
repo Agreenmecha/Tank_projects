@@ -12,7 +12,7 @@ navsat_transform_node:
     
     # Input topics
     imu_topic: /lidar_front/imu
-    gps_topic: /ubx_nav_hp_pos_llh  # Your u-blox GPS topic
+    gps_topic: /fix  # gokulp01 driver publishes to /fix
     odometry_topic: /Odometry  # Point-LIO odometry
     
     # Output topic

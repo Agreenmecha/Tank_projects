@@ -16,6 +16,7 @@ install(DIRECTORY
 
 install(PROGRAMS
   src/pointcloud_frame_fixer.py
+  tank_sensors/ubx_to_navsat_fix.py
   DESTINATION lib/${PROJECT_NAME}
 )
 

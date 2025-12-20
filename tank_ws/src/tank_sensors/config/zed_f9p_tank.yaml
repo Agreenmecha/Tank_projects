@@ -3,8 +3,10 @@ ublox_gps_node:
     debug: 1                    # 0-4 (1 shows config messages)
     device: /dev/ttyACM1        # Tank's GPS device
     frame_id: gnss
+    
+    # Required even for USB - set to default
     uart1:
-      baudrate: 115200          # Standard for USB (460800 is for UART)
+      baudrate: 9600            # Driver will auto-detect actual USB speed
     
     # GNSS Constellations (enable all for best accuracy)
     gnss:

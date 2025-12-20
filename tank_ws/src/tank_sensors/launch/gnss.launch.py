@@ -9,9 +9,15 @@ from launch.actions import DeclareLaunchArgument
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
 from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
+from ament_index_python.packages import get_package_share_directory
+import os
 
 
 def generate_launch_description():
+    # Get tank_sensors config path
+    tank_sensors_dir = get_package_share_directory('tank_sensors')
+    config_file = os.path.join(tank_sensors_dir, 'config', 'gnss_f9p.yaml')
+    
     # Declare arguments
     device_arg = DeclareLaunchArgument(
         'device',
@@ -19,36 +25,30 @@ def generate_launch_description():
         description='GNSS serial device'
     )
     
-    config_file_arg = DeclareLaunchArgument(
-        'config_file',
-        default_value=PathJoinSubstitution([
-            FindPackageShare('tank_sensors'),
-            'config',
-            'gnss_f9p.yaml'
-        ]),
-        description='Path to GNSS config file'
-    )
-    
-    # GNSS node
+    # GNSS node (aussierobots driver)
     gnss_node = Node(
         package='ublox_dgnss_node',
         executable='ublox_dgnss_node',
         name='gnss_node',
         output='screen',
         parameters=[
-            LaunchConfiguration('config_file'),
+            config_file,
             {'device': LaunchConfiguration('device')}
         ],
-        remappings=[
-            ('fix', '/gnss/fix'),
-            ('navpvt', '/gnss/navpvt'),
-            ('dop', '/gnss/dop'),
-        ]
+    )
+    
+    # NavSatFix converter (UBX → /fix topic)
+    # Requires: /ubx_nav_hp_pos_llh, /ubx_nav_cov, /ubx_nav_status
+    navsatfix_node = Node(
+        package='ublox_nav_sat_fix_hp_node',
+        executable='ublox_nav_sat_fix_hp',
+        name='ublox_nav_sat_fix_hp',
+        output='screen',
     )
     
     return LaunchDescription([
         device_arg,
-        config_file_arg,
         gnss_node,
+        navsatfix_node,
     ])
 
