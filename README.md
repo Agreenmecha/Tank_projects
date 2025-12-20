@@ -7,7 +7,7 @@
 
 ---
 
-## 🎯 Project Overview
+##  Project Overview
 
 Autonomous tank rover capable of:
 - Outdoor navigation (roads, sidewalks)
@@ -18,7 +18,7 @@ Autonomous tank rover capable of:
 
 ---
 
-## 📁 Repository Structure
+##  Repository Structure
 
 ```
 Tank_projects/
@@ -51,7 +51,7 @@ Tank_projects/
 
 ---
 
-## 🚀 Quick Start
+##  Quick Start
 
 ### 1. Prerequisites
 - Jetson Orin Nano with JetPack 6.x
@@ -85,7 +85,7 @@ cd scripts/odrive
 
 ---
 
-## 📚 Documentation
+##  Documentation
 
 ### Setup Guides
 - **[ODrive Setup](docs/setup/ODRIVE_JETSON_QUICKSTART.md)** - Motor controller configuration
@@ -129,7 +129,7 @@ cd scripts/odrive
 
 ---
 
-## 🎮 Control Modes
+##  Control Modes
 
 ### Manual Control
 ```bash
@@ -157,7 +157,7 @@ dev0.axis1.controller.input_vel = 10
 
 ---
 
-## 📊 ROS2 Topics
+##  ROS2 Topics
 
 ### Subscribed
 | Topic | Type | Description |
@@ -181,7 +181,7 @@ dev0.axis1.controller.input_vel = 10
 
 ---
 
-## 🔧 Useful Scripts
+##  Useful Scripts
 
 ### ODrive Control
 ```bash
@@ -212,7 +212,7 @@ scripts/sensors/test_dual_lidar.sh
 
 ---
 
-## 🐛 Troubleshooting
+##  Troubleshooting
 
 ### ODrive Not Found
 ```bash
@@ -250,7 +250,7 @@ scripts/sensors/setup_lidar_network.sh
 
 ---
 
-## 🔄 Development Workflow
+##  Development Workflow
 
 ### Simulation First
 1. Create/import URDF model
@@ -266,9 +266,9 @@ scripts/sensors/setup_lidar_network.sh
 
 ---
 
-## 📈 Project Status
+##  Project Status
 
-### ✅ Completed
+###  Completed
 - [x] Jetson Orin Nano setup
 - [x] ROS2 Humble installation
 - [x] ODrive motor control (USB interface)
@@ -281,11 +281,11 @@ scripts/sensors/setup_lidar_network.sh
 - [x] GPS waypoint web application (mission planner UI)
 - [x] Sensor fusion & TF tree
 
-### ⏳ In Progress
+###  In Progress
 - [ ] Nav2 waypoint following (see Known Issues)
 - [ ] Camera integration (e-CAM25)
 
-### 🐛 Known Issues
+###  Known Issues
 
 **Nav2 Waypoint Navigation Bug:**  
 Nav2 reports successful waypoint-to-waypoint progress, but the rover exhibits incorrect behavior:
@@ -295,7 +295,7 @@ Nav2 reports successful waypoint-to-waypoint progress, but the rover exhibits in
 
 ---
 
-## 🤝 Contributing
+##  Contributing
 
 This is a personal project, but feel free to:
 - Report issues
@@ -304,13 +304,13 @@ This is a personal project, but feel free to:
 
 ---
 
-## 📝 License
+##  License
 
 [Add your license here]
 
 ---
 
-## 📧 Contact
+##  Contact
 
 Aaron Green
 asgreen@csuchico.edu
@@ -318,7 +318,7 @@ asgreenmecha@gmail.com
 
 ---
 
-## 🔗 References
+##  References
 
 - **ROS2 Humble:** https://docs.ros.org/en/humble/
 - **Nav2:** https://navigation.ros.org/
