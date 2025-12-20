@@ -218,7 +218,7 @@ def generate_launch_description():
             'navsat_transform.yaml'
         ])],
         remappings=[
-            ('gps/fix', '/gnss/fix'),  # From ublox_dgnss
+            ('gps/fix', '/fix'),  # From ublox_nav_sat_fix_hp converter
             ('imu/data', '/lidar_front/imu'),
             ('odometry/filtered', '/Odometry')  # From Point-LIO
         ],

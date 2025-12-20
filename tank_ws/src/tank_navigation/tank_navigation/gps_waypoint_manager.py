@@ -10,6 +10,7 @@ from rclpy.action import ActionClient
 from geometry_msgs.msg import PoseStamped
 from geographic_msgs.msg import GeoPoint
 from ublox_ubx_msgs.msg import UBXNavHPPosLLH
+from nav_msgs.msg import Odometry
 from nav2_msgs.action import NavigateToPose, FollowWaypoints
 from std_msgs.msg import String
 import json
@@ -28,26 +29,35 @@ class GPSWaypointManager(Node):
     def __init__(self):
         super().__init__('gps_waypoint_manager')
         
-        # Parameters
-        self.declare_parameter('datum_lat', 0.0)  # Will be set from first GPS fix
-        self.declare_parameter('datum_lon', 0.0)
-        self.declare_parameter('datum_alt', 0.0)
-        
-        # GPS datum (origin point in GPS coordinates)
-        self.datum_lat = None
-        self.datum_lon = None
-        self.datum_set = False
-        
         # Current GPS position
         self.current_lat = 0.0
         self.current_lon = 0.0
         self.gps_valid = False
+        
+        # Current map position (from Point-LIO)
+        self.current_map_x = 0.0
+        self.current_map_y = 0.0
+        self.odom_valid = False
+        
+        # Reference point (locked when mission starts)
+        self.ref_lat = None
+        self.ref_lon = None
+        self.ref_map_x = None
+        self.ref_map_y = None
         
         # Subscribers
         self.gps_sub = self.create_subscription(
             UBXNavHPPosLLH,
             '/ubx_nav_hp_pos_llh',
             self.gps_callback,
+            10
+        )
+        
+        # Subscribe to Point-LIO odometry to get current map position
+        self.odom_sub = self.create_subscription(
+            Odometry,
+            '/Odometry',
+            self.odom_callback,
             10
         )
         
@@ -80,73 +90,53 @@ class GPSWaypointManager(Node):
         )
         
         self.get_logger().info('GPS Waypoint Manager started')
-        self.get_logger().info('Waiting for GPS fix to set datum...')
+        self.get_logger().info('Waiting for GPS and odometry data...')
     
     def gps_callback(self, msg: UBXNavHPPosLLH):
-        """Store current GPS position and set datum if needed"""
+        """Store current GPS position"""
         # Convert ublox format: lat/lon in deg * 1e-7, hp in deg * 1e-9
         if not msg.invalid_lat and not msg.invalid_lon:
             self.current_lat = (msg.lat + msg.lat_hp * 0.01) * 1e-7
             self.current_lon = (msg.lon + msg.lon_hp * 0.01) * 1e-7
             self.gps_valid = True
-            
-            # Set datum from first GPS fix if not already set
-            if not self.datum_set:
-                self.datum_lat = self.current_lat
-                self.datum_lon = self.current_lon
-                self.datum_set = True
-                self.get_logger().info(
-                    f'GPS Datum set: lat={self.datum_lat:.8f}, '
-                    f'lon={self.datum_lon:.8f}'
-                )
         else:
             self.gps_valid = False
     
-    def gps_to_map(self, lat: float, lon: float) -> Tuple[float, float]:
+    def odom_callback(self, msg: Odometry):
+        """Store current map position from Point-LIO"""
+        self.current_map_x = msg.pose.pose.position.x
+        self.current_map_y = msg.pose.pose.position.y
+        self.odom_valid = True
+    
+    def gps_to_map(self, target_lat: float, target_lon: float) -> Tuple[float, float]:
         """
-        Convert GPS coordinates to local map coordinates
-        Uses simple equirectangular projection (good for small areas)
+        Convert target GPS coordinates to map coordinates
+        Uses LOCKED reference point (set when mission starts)
         
-        Returns: (x, y) in meters from datum
+        Returns: (x, y) in Point-LIO's map frame
         """
-        if not self.datum_set:
-            self.get_logger().error('GPS datum not set! Cannot convert coordinates.')
+        if self.ref_lat is None or self.ref_lon is None:
+            self.get_logger().error('Reference point not set! Cannot convert coordinates.')
             return (0.0, 0.0)
         
         # Earth radius in meters
         R = 6378137.0
         
         # Convert to radians
-        lat1 = math.radians(self.datum_lat)
-        lon1 = math.radians(self.datum_lon)
-        lat2 = math.radians(lat)
-        lon2 = math.radians(lon)
+        lat1 = math.radians(self.ref_lat)
+        lon1 = math.radians(self.ref_lon)
+        lat2 = math.radians(target_lat)
+        lon2 = math.radians(target_lon)
         
-        # Calculate distances
-        x = R * (lon2 - lon1) * math.cos((lat1 + lat2) / 2.0)
-        y = R * (lat2 - lat1)
+        # Calculate GPS offset in meters (relative to REFERENCE point)
+        dx = R * (lon2 - lon1) * math.cos((lat1 + lat2) / 2.0)
+        dy = R * (lat2 - lat1)
         
-        return (x, y)
-    
-    def map_to_gps(self, x: float, y: float) -> Tuple[float, float]:
-        """
-        Convert map coordinates back to GPS
-        Inverse of gps_to_map()
+        # Add offset to REFERENCE map position
+        target_x = self.ref_map_x + dx
+        target_y = self.ref_map_y + dy
         
-        Returns: (latitude, longitude)
-        """
-        if not self.datum_set:
-            return (0.0, 0.0)
-        
-        R = 6378137.0
-        
-        lat1 = math.radians(self.datum_lat)
-        lon1 = math.radians(self.datum_lon)
-        
-        lat2 = lat1 + (y / R)
-        lon2 = lon1 + (x / R) / math.cos((lat1 + lat2) / 2.0)
-        
-        return (math.degrees(lat2), math.degrees(lon2))
+        return (target_x, target_y)
     
     def waypoints_callback(self, msg: String):
         """
@@ -168,7 +158,21 @@ class GPSWaypointManager(Node):
                 self.get_logger().warn('No waypoints in message')
                 return
             
+            # LOCK reference point (current position when mission starts)
+            if not self.gps_valid or not self.odom_valid:
+                self.get_logger().error('GPS or odometry not valid! Cannot start mission.')
+                return
+            
+            self.ref_lat = self.current_lat
+            self.ref_lon = self.current_lon
+            self.ref_map_x = self.current_map_x
+            self.ref_map_y = self.current_map_y
+            
             self.get_logger().info(f'Received {len(waypoints)} GPS waypoints')
+            self.get_logger().info(
+                f'Reference locked: GPS({self.ref_lat:.8f}, {self.ref_lon:.8f}) = '
+                f'Map({self.ref_map_x:.2f}, {self.ref_map_y:.2f})'
+            )
             
             # Convert GPS to map coordinates
             poses = []
@@ -197,7 +201,7 @@ class GPSWaypointManager(Node):
                 poses.append(pose)
                 
                 self.get_logger().info(
-                    f'{name}: GPS({lat:.6f}, {lon:.6f}) → '
+                    f'{name}: GPS({lat:.8f}, {lon:.8f}) → '
                     f'Map({x:.2f}m, {y:.2f}m)'
                 )
             

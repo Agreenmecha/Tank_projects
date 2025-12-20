@@ -1,23 +1,23 @@
 /**:
   ros__parameters:
     topics:
-      # Priority 1: Manual gamepad control (highest priority)
-      gamepad:
-        topic: /cmd_vel_joy
-        timeout: 0.5  # 500ms timeout - if no gamepad input, allow autonomous
-        priority: 100  # Highest priority
+      # Priority 1: Manual gamepad control (DISABLED - removed override)
+      # gamepad:
+      #   topic: /cmd_vel_joy
+      #   timeout: 0.5
+      #   priority: 100
         
-      # Priority 2: Autonomous navigation (Nav2)
+      # Priority 2: Autonomous navigation (Nav2) - now primary control
       navigation:
         topic: /cmd_vel_nav
         timeout: 1.0  # 1 second timeout
-        priority: 10  # Lower priority than gamepad
+        priority: 10
       
       # Priority 3: Safety override (e.g., emergency stop button)
       safety:
         topic: /cmd_vel_safety
         timeout: 0.5
-        priority: 200  # Even higher than gamepad for emergency stops
+        priority: 200  # Highest priority for emergency stops
     
     # Output topic (goes to ODrive)
     cmd_vel_out: /cmd_vel

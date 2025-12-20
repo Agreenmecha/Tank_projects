@@ -279,16 +279,14 @@ scripts/sensors/setup_lidar_network.sh
 - [x] Workspace structure
 
 ### ⏳ In Progress
-- [ ] URDF robot model (OnShape export)
-- [ ] Gazebo simulation setup
-- [ ] Nav2 configuration
-- [ ] Autonomous navigation testing
-
-### 📅 Planned
-- [ ] Point-LIO sensor fusion
+- [ ] Nav2 autonomous navigation
+- [ ] GPS waypoint navigation
 - [ ] Camera integration
-- [ ] Mission planning
-- [ ] Field testing
+
+### ✅ Recently Completed
+- [x] Point-LIO sensor fusion
+- [x] URDF robot model
+- [x] Nav2 configuration
 
 ---
 
@@ -322,5 +320,5 @@ This is a personal project, but feel free to:
 
 ---
 
-**Last Updated:** December 4, 2025  
-**Version:** 1.0
+**Last Updated:** December 19, 2025  
+**Version:** 1.1

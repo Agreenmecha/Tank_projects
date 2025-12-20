@@ -60,5 +60,9 @@ log/
 credentials/
 scripts/rover_config.json
 
+# Generated TF frame visualizations
+*.gv
+frames_*.pdf
+
 # External repos (cloned, not owned)
 tank_ws/src/point_lio/
