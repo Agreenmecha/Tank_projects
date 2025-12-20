@@ -15,6 +15,7 @@
   <depend>sensor_msgs</depend>
   <depend>std_msgs</depend>
   <depend>tank_msgs</depend>
+  <depend>topic_tools</depend>
   
   <!-- Nav2 dependencies -->
   <exec_depend>navigation2</exec_depend>

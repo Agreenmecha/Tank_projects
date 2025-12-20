@@ -6,9 +6,10 @@ Publishes TF transforms for all sensors based on URDF.
 
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
-from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
+from launch.substitutions import LaunchConfiguration, PathJoinSubstitution, Command
 from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
+from launch_ros.parameter_descriptions import ParameterValue
 
 
 def generate_launch_description():
@@ -26,6 +27,12 @@ def generate_launch_description():
         'tank.urdf.xacro'
     ])
     
+    # Process xacro file to get robot description
+    robot_description_content = ParameterValue(
+        Command(['xacro ', urdf_file]),
+        value_type=str
+    )
+    
     # Robot state publisher node
     robot_state_publisher = Node(
         package='robot_state_publisher',
@@ -33,7 +40,7 @@ def generate_launch_description():
         name='robot_state_publisher',
         output='screen',
         parameters=[{
-            'robot_description': urdf_file,
+            'robot_description': robot_description_content,
             'use_sim_time': LaunchConfiguration('use_sim_time'),
             'publish_frequency': 50.0,  # Hz
         }]

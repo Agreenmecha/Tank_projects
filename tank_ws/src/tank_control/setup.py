@@ -1,4 +1,6 @@
 from setuptools import setup
+import os
+from glob import glob
 
 package_name = 'tank_control'
 
@@ -10,10 +12,8 @@ setup(
         ('share/ament_index/resource_index/packages',
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
-        ('share/' + package_name + '/launch', ['launch/odrive_interface.launch.py',
-                                                 'launch/motor_control.launch.py',
-                                                 'launch/teleop_gamepad.launch.py']),
-        ('share/' + package_name + '/config', ['config/odrive_params.yaml']),
+        (os.path.join('share', package_name, 'launch'), glob('launch/*.py')),
+        (os.path.join('share', package_name, 'config'), glob('config/*.yaml')),
     ],
     install_requires=['setuptools'],
     zip_safe=True,
@@ -24,10 +24,9 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'odrive_interface_node = tank_control.odrive_interface_node:main',
-            'safety_monitor_node = tank_control.safety_monitor_node:main',
-            'teleop_gamepad_node = tank_control.teleop_gamepad_node:main',
+            'odrive_interface_node.py = tank_control.odrive_interface_node:main',
+            'safety_monitor_node.py = tank_control.safety_monitor_node:main',
+            'teleop_gamepad_node.py = tank_control.teleop_gamepad_node:main',
         ],
     },
 )
-

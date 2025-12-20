@@ -63,8 +63,8 @@ def generate_launch_description():
                 height=LaunchConfiguration('height'),
                 framerate=LaunchConfiguration('framerate')
             ),
-            'sync_sink': True,
-            'use_gst_timestamps': False,
+            'sync_sink': 'true',
+            'use_gst_timestamps': 'false',
             'image_encoding': 'bgr8',
         }],
         remappings=[

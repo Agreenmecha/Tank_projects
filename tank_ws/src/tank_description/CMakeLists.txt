@@ -10,7 +10,7 @@ find_package(rclcpp REQUIRED)
 
 # Install directories
 install(DIRECTORY
-  launch config
+  launch config urdf
   DESTINATION share/${PROJECT_NAME}/
 )
 

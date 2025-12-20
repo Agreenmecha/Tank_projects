@@ -1,219 +1,411 @@
-# Tank Autonomous Navigation - Topic Connections
+# Topic Connections - Full Autonomous System with Gamepad Override
 
-This document maps all ROS2 topics, their publishers, subscribers, and data flow through the autonomous navigation system.
+Complete data flow from sensors → localization → navigation → motors, with manual override.
 
-## System Architecture Overview
+**Last Updated:** Dec 19, 2025
+
+---
+
+## System Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                     AUTONOMOUS NAVIGATION STACK                 │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                 │
-│  ┌──────────┐    ┌──────────┐    ┌──────────┐    ┌──────────┐│
-│  │ Sensors  │───▶│Localiz.  │───▶│  Nav2    │───▶│  Motors  ││
-│  │(LiDAR+GPS)│    │Point-LIO │    │  Stack   │    │  ODrive  ││
-│  └──────────┘    └──────────┘    └──────────┘    └──────────┘│
-│                                                                 │
-└─────────────────────────────────────────────────────────────────┘
-```
-
----
-
-## 1. Sensor Topics
-
-### LiDAR (Unitree L2 Dual Setup)
-
-| Topic | Type | Publisher | Subscriber | Hz | Description |
-|-------|------|-----------|------------|----|----|
-| `/lidar_front/cloud` | `sensor_msgs/PointCloud2` | `unitree_lidar_ros2` | Point-LIO, Nav2 Costmap | ~10 | Front LiDAR point cloud |
-| `/lidar_front/imu` | `sensor_msgs/Imu` | `unitree_lidar_ros2` | Point-LIO, Safety Monitor | ~100 | Front LiDAR IMU |
-| `/lidar_rear/cloud` | `sensor_msgs/PointCloud2` | `unitree_lidar_ros2` | Nav2 Costmap | ~10 | Rear LiDAR point cloud |
-| `/lidar_rear/imu` | `sensor_msgs/Imu` | `unitree_lidar_ros2` | Safety Monitor | ~100 | Rear LiDAR IMU |
-
-### GPS (u-blox ZED-F9P)
-
-| Topic | Type | Publisher | Subscriber | Hz | Description |
-|-------|------|-----------|------------|----|----|
-| `/gnss/fix` | `sensor_msgs/NavSatFix` | `ublox_dgnss_node` | navsat_transform | ~5 | GPS position (lat/lon/alt) |
-| `/gnss/navpvt` | `ublox_ubx_msgs/UBX_NAV_PVT` | `ublox_dgnss_node` | GPS Waypoint Manager | ~5 | Full navigation solution |
-| `/ubx_nav_hp_pos_llh` | `ublox_ubx_msgs/UBX_NAV_HPPOSLLH` | `ublox_nav_sat_fix_hp_node` | navsat_transform | ~5 | High-precision GPS |
-
-### Camera (e-CAM25 - Optional)
-
-| Topic | Type | Publisher | Subscriber | Hz | Description |
-|-------|------|-----------|------------|----|----|
-| `/camera/image_raw` | `sensor_msgs/Image` | `argus_camera_node` | (future perception) | ~30 | Raw camera image |
-
----
-
-## 2. Localization Topics
-
-### Point-LIO Outputs
-
-| Topic | Type | Publisher | Subscriber | Hz | Description |
-|-------|------|-----------|------------|----|----|
-| `/Odometry` | `nav_msgs/Odometry` | `laserMapping` | Nav2, Safety Monitor | ~10 | LiDAR-Inertial odometry |
-| `/point_lio/cloud_registered` | `sensor_msgs/PointCloud2` | `laserMapping` | RViz | ~10 | Registered point cloud (map frame) |
-| `/point_lio/path` | `nav_msgs/Path` | `laserMapping` | RViz | ~1 | Robot trajectory history |
-
-### TF Frames (Published by Point-LIO)
-
-| Frame | Parent | Publisher | Description |
-|-------|--------|-----------|-------------|
-| `map` | - | `laserMapping` | Global fixed frame |
-| `base_link` | `map` | `laserMapping` | Robot base frame |
-
----
-
-## 3. Navigation Topics (Nav2)
-
-### Nav2 Inputs
-
-| Topic | Type | Publisher | Subscriber | Hz | Description |
-|-------|------|-----------|------------|----|----|
-| `/Odometry` | `nav_msgs/Odometry` | Point-LIO | Nav2 Controller | ~10 | Robot odometry |
-| `/lidar_front/cloud` | `sensor_msgs/PointCloud2` | LiDAR Driver | Nav2 Costmap | ~10 | Front obstacles |
-| `/lidar_rear/cloud` | `sensor_msgs/PointCloud2` | LiDAR Driver | Nav2 Costmap | ~10 | Rear obstacles |
-
-### Nav2 Outputs
-
-| Topic | Type | Publisher | Subscriber | Hz | Description |
-|-------|------|-----------|------------|----|----|
-| `/cmd_vel` | `geometry_msgs/Twist` | `controller_server` | ODrive Interface | ~20 | **Velocity commands to motors** |
-| `/local_costmap/costmap` | `nav_msgs/OccupancyGrid` | `controller_server` | RViz | ~5 | Local obstacle map |
-| `/global_costmap/costmap` | `nav_msgs/OccupancyGrid` | `planner_server` | RViz | ~1 | Global obstacle map |
-| `/plan` | `nav_msgs/Path` | `planner_server` | RViz, Controller | ~1 | Global path plan |
-
-### Nav2 Goal Input
-
-| Topic | Type | Publisher | Subscriber | Description |
-|-------|------|-----------|------------|-------------|
-| `/goal_pose` | `geometry_msgs/PoseStamped` | RViz, GPS Manager | Nav2 BT Navigator | Single navigation goal |
-| `/waypoints` | `nav_msgs/Path` | GPS Manager | Nav2 Waypoint Follower | Multi-waypoint mission |
-
----
-
-## 4. Motor Control Topics
-
-### ODrive Interface
-
-| Topic | Type | Publisher | Subscriber | Hz | Description |
-|-------|------|-----------|------------|----|----|
-| `/cmd_vel` | `geometry_msgs/Twist` | **Nav2 or Teleop** | ODrive Interface | ~20 | **Motor velocity commands** |
-| `/odrive/encoder_odom` | `nav_msgs/Odometry` | ODrive Interface | (future: EKF fusion) | ~50 | Wheel encoder odometry |
-| `/odrive/motor_status` | `sensor_msgs/JointState` | ODrive Interface | Safety Monitor | ~20 | Motor currents, velocities |
-| `/odrive/errors` | `std_msgs/Bool` | ODrive Interface | Safety Monitor | ~20 | ODrive error status |
-| `/emergency_stop` | `std_msgs/Bool` | Safety Monitor, E-Stop Button | ODrive Interface | event | Emergency stop trigger |
-
----
-
-## 5. GPS Waypoint Navigation Topics
-
-### GPS Coordinate Conversion
-
-| Topic | Type | Publisher | Subscriber | Hz | Description |
-|-------|------|-----------|------------|----|----|
-| `/gnss/fix` | `sensor_msgs/NavSatFix` | ublox_dgnss | navsat_transform | ~5 | GPS position |
-| `/gps/filtered` | `sensor_msgs/NavSatFix` | navsat_transform | GPS Manager | ~5 | Filtered GPS in map frame |
-| `/gps/odom` | `nav_msgs/Odometry` | navsat_transform | GPS Manager | ~5 | GPS as odometry (map frame) |
-
-### GPS Waypoint Input (Web Interface)
-
-| Topic | Type | Publisher | Subscriber | Hz | Description |
-|-------|------|-----------|------------|----|----|
-| `/gps_waypoints` | `geographic_msgs/GeoPath` | ROSBridge (web) | GPS Manager | event | GPS waypoint list from map |
-
----
-
-## 6. Safety & Monitoring Topics
-
-| Topic | Type | Publisher | Subscriber | Hz | Description |
-|-------|------|-----------|------------|----|----|
-| `/safety/status` | `std_msgs/String` | Safety Monitor | RViz, Logger | ~10 | Safety system status |
-| `/safety/warnings` | `std_msgs/String` | Safety Monitor | Logger | event | Warning messages |
-| `/emergency_stop` | `std_msgs/Bool` | Safety Monitor | ODrive Interface | event | E-stop trigger |
-
----
-
-## Critical Data Flow
-
-### For Autonomous Navigation:
-
-```
-1. LiDAR → Point-LIO → /Odometry → Nav2
-2. LiDAR → Nav2 Costmaps (obstacles)
-3. Nav2 → /cmd_vel → ODrive → Motors
-4. Motors → /odrive/encoder_odom → (future: sensor fusion)
-```
-
-### For GPS Waypoint Missions:
-
-```
-1. GPS → navsat_transform → map coordinates
-2. Web Interface → ROSBridge → /gps_waypoints → GPS Manager
-3. GPS Manager → /goal_pose or /waypoints → Nav2
-4. Nav2 → /cmd_vel → ODrive → Motors
+┌─────────────────────────────────────────────────────────────────────┐
+│                        SENSOR LAYER                                 │
+├─────────────────────────────────────────────────────────────────────┤
+│  LiDAR Front      LiDAR Rear       GPS/GNSS         IMU             │
+│  (/lidar_front)   (/lidar_rear)    (/gnss)          (in LiDAR)      │
+└────────┬──────────────┬─────────────┬──────────────────┬────────────┘
+         │              │             │                  │
+         │ point clouds │             │ NavSatFix        │ IMU data
+         │              │             │                  │
+         ▼              ▼             ▼                  ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│                    LOCALIZATION LAYER                               │
+├─────────────────────────────────────────────────────────────────────┤
+│  Point-LIO                         navsat_transform                 │
+│  (LiDAR-inertial odometry)         (GPS → map coords)               │
+│                                                                      │
+│  Publishes:                        Publishes:                       │
+│  • /Odometry                       • /gps/filtered                  │
+│  • TF: map → base_link             • TF: map → odom (correction)    │
+└────────┬───────────────────────────────────────────────────────────┘
+         │
+         │ /Odometry, TFs
+         │
+         ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│                     NAVIGATION LAYER                                │
+├─────────────────────────────────────────────────────────────────────┤
+│  Nav2 Stack:                                                        │
+│  • Global Costmap (from both LiDARs)                                │
+│  • Local Costmap (obstacle avoidance)                               │
+│  • Path Planner (NavFn)                                             │
+│  • Controller (DWB)                                                 │
+│                                                                      │
+│  Subscribes:                                                        │
+│  • /Odometry (localization)                                         │
+│  • /lidar_front/cloud, /lidar_rear/cloud (obstacles)                │
+│  • TF tree (map → base_link)                                        │
+│                                                                      │
+│  Publishes:                                                         │
+│  • /cmd_vel_nav (velocity commands) ────────────┐                   │
+└─────────────────────────────────────────────────┼───────────────────┘
+                                                  │
+         ┌────────────────────────────────────────┘
+         │
+         │ /cmd_vel_nav (priority: 10)
+         │
+         ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│                   COMMAND MUX LAYER (NEW!)                          │
+├─────────────────────────────────────────────────────────────────────┤
+│  Twist Mux (Priority-based command selector)                        │
+│                                                                      │
+│  Inputs (by priority):                                              │
+│  1. /cmd_vel_safety   (priority: 200) ◄── Emergency stop            │
+│  2. /cmd_vel_joy      (priority: 100) ◄── Remote gamepad (laptop)   │
+│  3. /cmd_vel_nav      (priority: 10)  ◄── Nav2 autonomous           │
+│                                                                      │
+│  Output:                                                            │
+│  • /cmd_vel ─────────────────────────────────────┐                  │
+│                                                   │                  │
+│  Status:                                          │                  │
+│  • /twist_mux/selected (shows active input)       │                  │
+└───────────────────────────────────────────────────┼──────────────────┘
+                                                    │
+         ┌──────────────────────────────────────────┘
+         │
+         │ /cmd_vel
+         │
+         ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│                      CONTROL LAYER                                  │
+├─────────────────────────────────────────────────────────────────────┤
+│  Safety Monitor          ODrive Interface                           │
+│  (limits, E-stop)        (motor controller)                         │
+│                                                                      │
+│  Subscribes:             Subscribes:                                │
+│  • /cmd_vel              • /cmd_vel                                 │
+│  • /Odometry             • /odom (optional)                         │
+│                                                                      │
+│  Publishes:              Publishes:                                 │
+│  • /cmd_vel_safe         • /odom (wheel odometry)                   │
+│  • /estop_status         • /motor_status                            │
+└────────┬────────────────────────┬───────────────────────────────────┘
+         │                        │
+         │ Motor commands         │ Encoder feedback
+         │                        │
+         ▼                        ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│                      HARDWARE LAYER                                 │
+├─────────────────────────────────────────────────────────────────────┤
+│  ODrive Motor Controllers                                           │
+│  Left Track Motor (axis0)   Right Track Motor (axis1)               │
+└─────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## Topic Remappings
+## New Gamepad Override Flow
 
-### In Point-LIO Launch:
-- Point-LIO's `/aft_mapped_to_init` **→** `/Odometry`
+```
+┌────────────────────────────────────────────────────────┐
+│                    LAPTOP                              │
+│                                                        │
+│  ┌──────────┐        ┌───────────────┐               │
+│  │ Gamepad  │───────►│  joy_node     │               │
+│  │ (Xbox)   │        │               │               │
+│  └──────────┘        └───────┬───────┘               │
+│                              │                        │
+│                              ▼                        │
+│                      ┌───────────────┐               │
+│                      │ teleop_twist  │               │
+│                      │     _joy      │               │
+│                      └───────┬───────┘               │
+│                              │                        │
+│                              │ /cmd_vel_joy           │
+│                              │ (over ROS2 network)    │
+└──────────────────────────────┼────────────────────────┘
+                               │
+           Network (ROS_DOMAIN_ID=42)
+                               │
+┌──────────────────────────────┼────────────────────────┐
+│                    JETSON    │                        │
+│                              ▼                        │
+│                      ┌────────────────┐              │
+│   /cmd_vel_nav ─────►│   Twist Mux    │              │
+│   (from Nav2)        │   (Priority)   │              │
+│                      │                │              │
+│                      │  gamepad: 100  │              │
+│                      │  nav2: 10      │              │
+│                      └───────┬────────┘              │
+│                              │                        │
+│                              ▼                        │
+│                          /cmd_vel                     │
+│                              │                        │
+│                              ▼                        │
+│                      ┌────────────────┐              │
+│                      │ ODrive + Tank  │              │
+│                      └────────────────┘              │
+└────────────────────────────────────────────────────────┘
+```
 
-### In GPS Waypoint Launch:
-- ublox's `/fix` **→** `/gnss/fix`
-- ublox's high-precision **→** `/ubx_nav_hp_pos_llh`
+**Key:**
+- Gamepad input has **priority 100** (high)
+- Nav2 autonomous has **priority 10** (low)
+- If no gamepad input for **500ms**, Nav2 takes over
+- Hold **LB/L1 button** to enable gamepad control
 
-### In Nav2:
-- **No remapping needed** - Nav2 publishes directly to `/cmd_vel`
-- ODrive subscribes directly to `/cmd_vel`
+---
+
+## Topic List
+
+### Sensors
+
+| Topic | Type | Rate | Publisher | Description |
+|-------|------|------|-----------|-------------|
+| `/lidar_front/cloud` | `sensor_msgs/PointCloud2` | ~10 Hz | `unilidar_front_node` | Front LiDAR point cloud |
+| `/lidar_front/imu` | `sensor_msgs/Imu` | ~100 Hz | `unilidar_front_node` | Front LiDAR IMU |
+| `/lidar_rear/cloud` | `sensor_msgs/PointCloud2` | ~10 Hz | `unilidar_rear_node` | Rear LiDAR point cloud |
+| `/lidar_rear/imu` | `sensor_msgs/Imu` | ~100 Hz | `unilidar_rear_node` | Rear LiDAR IMU |
+| `/gnss/fix` | `sensor_msgs/NavSatFix` | ~5 Hz | `ublox_gps_node` | GPS position (lat/lon) |
+| `/gnss/fix_velocity` | `geometry_msgs/TwistWithCovarianceStamped` | ~5 Hz | `ublox_gps_node` | GPS velocity |
+
+### Localization
+
+| Topic | Type | Rate | Publisher | Description |
+|-------|------|------|-----------|-------------|
+| `/Odometry` | `nav_msgs/Odometry` | ~10 Hz | `pointlio_mapping` | LiDAR-inertial odometry (map frame) |
+| `/gps/filtered` | `sensor_msgs/NavSatFix` | ~5 Hz | `navsat_transform_node` | GPS with map alignment |
+| `/odometry/gps` | `nav_msgs/Odometry` | ~5 Hz | `navsat_transform_node` | GPS in map coordinates |
+
+### Navigation (Nav2)
+
+| Topic | Type | Rate | Publisher | Description |
+|-------|------|------|-----------|-------------|
+| `/cmd_vel_nav` | `geometry_msgs/Twist` | ~20 Hz | `controller_server` | Nav2 velocity commands (via relay) |
+| `/plan` | `nav_msgs/Path` | Variable | `planner_server` | Global path plan |
+| `/local_plan` | `nav_msgs/Path` | ~10 Hz | `controller_server` | Local path being followed |
+| `/goal_pose` | `geometry_msgs/PoseStamped` | On demand | User/GPS Manager | Goal position for Nav2 |
+| `/local_costmap/costmap` | `nav_msgs/OccupancyGrid` | ~5 Hz | `local_costmap` | Local obstacle map |
+| `/global_costmap/costmap` | `nav_msgs/OccupancyGrid` | ~1 Hz | `global_costmap` | Global obstacle map |
+
+### Command Multiplexer (NEW!)
+
+| Topic | Type | Rate | Publisher | Description |
+|-------|------|------|-----------|-------------|
+| `/cmd_vel_joy` | `geometry_msgs/Twist` | ~20 Hz | `teleop_twist_joy` (laptop) | Gamepad commands (priority: 100) |
+| `/cmd_vel_nav` | `geometry_msgs/Twist` | ~20 Hz | `controller_server` (Nav2) | Autonomous commands (priority: 10) |
+| `/cmd_vel_safety` | `geometry_msgs/Twist` | On demand | Safety systems | Emergency stop (priority: 200) |
+| `/cmd_vel` | `geometry_msgs/Twist` | ~20 Hz | `twist_mux` | **Final output to motors** |
+| `/twist_mux/selected` | `std_msgs/String` | ~10 Hz | `twist_mux` | Active input source name |
+
+### Motor Control
+
+| Topic | Type | Rate | Publisher | Description |
+|-------|------|------|-----------|-------------|
+| `/cmd_vel` | `geometry_msgs/Twist` | ~20 Hz | `twist_mux` | Velocity commands to ODrive |
+| `/odom` | `nav_msgs/Odometry` | ~50 Hz | `odrive_interface_node` | Wheel odometry (odom frame) |
+| `/motor_status` | Custom | ~1 Hz | `odrive_interface_node` | Motor health, current, temp |
+| `/estop_status` | `std_msgs/Bool` | ~10 Hz | `safety_monitor_node` | Emergency stop state |
+
+### GPS Waypoint Mission
+
+| Topic | Type | Rate | Publisher | Description |
+|-------|------|------|-----------|-------------|
+| `/gps_waypoint_manager/command` | `std_msgs/String` | On demand | Web interface | Mission commands (JSON) |
+| `/gps_waypoint_manager/status` | `std_msgs/String` | ~1 Hz | `gps_waypoint_manager` | Current mission status |
+
+---
+
+## TF Tree
+
+```
+map
+ ├─ odom (published by: navsat_transform_node)
+ │   └─ base_link (published by: Point-LIO)
+ │       ├─ base_footprint
+ │       ├─ lidar_front
+ │       │   └─ lidar_front_scan
+ │       ├─ lidar_rear
+ │       │   └─ lidar_rear_scan
+ │       ├─ gnss_link
+ │       └─ camera_link (if enabled)
+```
+
+**Frame Purposes:**
+- **`map`**: Global fixed frame (Point-LIO's world)
+- **`odom`**: Local odometry frame (drift-corrected by GPS)
+- **`base_link`**: Robot center
+- **`lidar_front/rear`**: LiDAR sensor positions
 
 ---
 
 ## Verification Commands
 
-### Check all topics are publishing:
+### Check All Topics Publishing
+
 ```bash
-ros2 topic list
+# Sensors
+ros2 topic hz /lidar_front/cloud        # Should be ~10 Hz
+ros2 topic hz /lidar_rear/cloud         # Should be ~10 Hz
+ros2 topic hz /gnss/fix                 # Should be ~5 Hz
+
+# Localization
+ros2 topic hz /Odometry                 # Should be ~10 Hz
+
+# Navigation
+ros2 topic hz /cmd_vel_nav              # Should be ~20 Hz (when Nav2 active)
+
+# Gamepad (if connected)
+ros2 topic hz /cmd_vel_joy              # Should be ~20 Hz (when gamepad active)
+
+# Final output
+ros2 topic hz /cmd_vel                  # Should be ~20 Hz
+
+# Check active mux input
+ros2 topic echo /twist_mux/selected
+# Should show: "gamepad" or "navigation"
+
+# Motors
+ros2 topic hz /odom                     # Should be ~50 Hz
+```
+
+### Visualize Topic Graph
+
+```bash
+rqt_graph
+```
+
+**Look for:**
+- `twist_mux` connected to `/cmd_vel`
+- `controller_server` → `/cmd_vel_nav` → `twist_mux`
+- `teleop_twist_joy` (laptop) → `/cmd_vel_joy` → `twist_mux`
+- `twist_mux` → `/cmd_vel` → `odrive_interface_node`
+
+### Check TF Tree
+
+```bash
+ros2 run tf2_tools view_frames
+# Generates frames.pdf
+```
+
+---
+
+## Integration Verification Checklist
+
+### Sensors ✓
+- [ ] Front LiDAR publishing point clouds
+- [ ] Rear LiDAR publishing point clouds
+- [ ] GPS publishing fix
+- [ ] IMU data from LiDAR
+
+### Localization ✓
+- [ ] Point-LIO publishing `/Odometry`
+- [ ] TF `map` → `base_link` available
+- [ ] `navsat_transform_node` running (for GPS missions)
+
+### Navigation ✓
+- [ ] Nav2 stack running (all lifecycle nodes active)
+- [ ] Costmaps populated from LiDAR data
+- [ ] Can set goal in RViz
+- [ ] `/cmd_vel_nav` published when navigating
+
+### Gamepad Override (NEW!) ✓
+- [ ] `twist_mux` node running
+- [ ] Gamepad connected on laptop
+- [ ] `/cmd_vel_joy` published when gamepad active
+- [ ] `/twist_mux/selected` shows "gamepad" when active
+- [ ] Nav2 resumes after gamepad timeout
+
+### Motor Control ✓
+- [ ] ODrive connected and calibrated
+- [ ] `/cmd_vel` received by ODrive
+- [ ] Robot responds to commands
+- [ ] Safety monitor active
+
+---
+
+## Troubleshooting
+
+### Gamepad Not Overriding Nav2
+
+**Check:**
+```bash
+# Is gamepad publishing?
+ros2 topic hz /cmd_vel_joy
+
+# Is twist_mux seeing it?
+ros2 topic echo /twist_mux/selected
+
+# Is twist_mux running?
+ros2 node list | grep twist_mux
+```
+
+**Fix:**
+- Ensure `ROS_DOMAIN_ID=42` on both machines
+- Check gamepad cable/wireless connection
+- Verify twist_mux config: `cat ~/Tank_projects/tank_ws/src/tank_control/config/twist_mux.yaml`
+
+### Nav2 Commands Not Reaching ODrive
+
+**Check:**
+```bash
+# Is Nav2 publishing?
+ros2 topic hz /cmd_vel_nav
+
+# Is twist_mux forwarding?
 ros2 topic hz /cmd_vel
-ros2 topic hz /Odometry
-ros2 topic hz /lidar_front/cloud
-ros2 topic hz /gnss/fix
+
+# What's the mux selection?
+ros2 topic echo /twist_mux/selected  # Should show "navigation"
 ```
 
-### Check Nav2 → ODrive connection:
+**Fix:**
+- Stop gamepad (to remove priority override)
+- Check relay: `ros2 node list | grep relay`
+- Verify Nav2 is navigating: `ros2 topic echo /plan`
+
+### Robot Not Responding
+
+**Check full chain:**
 ```bash
-# Should show Nav2 publishing, ODrive subscribing
-ros2 topic info /cmd_vel
+# 1. Nav2 output
+ros2 topic echo /cmd_vel_nav
+
+# 2. Mux output
 ros2 topic echo /cmd_vel
-```
 
-### Check Point-LIO → Nav2 connection:
-```bash
-ros2 topic info /Odometry
-ros2 topic echo /Odometry --once
-```
-
-### Visualize complete topic graph:
-```bash
-ros2 run rqt_graph rqt_graph
+# 3. ODrive receiving
+ros2 node info /odrive_interface_node | grep Subscriptions
 ```
 
 ---
 
-## Status
+## Summary
 
-- ✅ **Sensor Topics**: Configured and tested
-- ✅ **Localization Topics**: Working (Point-LIO)
-- ✅ **Motor Control Topics**: Tested with teleop
-- ✅ **Nav2 Topics**: Configured (needs integration test)
-- ✅ **GPS Topics**: Configured (needs hardware test)
-- ⏳ **Full Integration**: Ready for testing
+### Data Flow (Gamepad Override Mode)
+
+```
+Sensors → Point-LIO → /Odometry → Nav2 → /cmd_vel_nav ──┐
+                                                         │
+                                                         ▼
+                                                   ┌──────────┐
+Laptop Gamepad → /cmd_vel_joy ────────────────────►│Twist Mux │
+                                                   └────┬─────┘
+                                                        │
+                                                        ▼
+                                                    /cmd_vel
+                                                        │
+                                                        ▼
+                                              ODrive → Motors
+```
+
+**Priority:** Gamepad (100) > Nav2 (10)  
+**Timeout:** 500ms after last gamepad input  
+**Control:** Hold LB/L1 to enable gamepad
 
 ---
 
-**Last Updated**: Dec 19, 2025  
-**Next Step**: Launch `full_autonomy.launch.py` and verify all topic connections with `rqt_graph`
-
+**Last Updated:** Dec 19, 2025  
+**Status:** Fully integrated with gamepad override

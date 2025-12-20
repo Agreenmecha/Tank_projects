@@ -19,7 +19,7 @@ class SafetyMonitorNode(Node):
     
     Subscribes:
         /odrive/motor_status (sensor_msgs/JointState) - Motor temperatures, currents
-        /imu/data (sensor_msgs/Imu) - Pitch angle monitoring
+        /lidar_front/imu (sensor_msgs/Imu) - Pitch angle monitoring
         /cmd_vel (geometry_msgs/Twist) - Command watchdog
     
     Publishes:
@@ -84,7 +84,7 @@ class SafetyMonitorNode(Node):
             JointState, '/odrive/motor_status', self.motor_status_callback, 10
         )
         self.imu_sub = self.create_subscription(
-            Imu, '/imu/data', self.imu_callback, 10
+            Imu, '/lidar_front/imu', self.imu_callback, 10
         )
         self.cmd_vel_sub = self.create_subscription(
             Twist, '/cmd_vel', self.cmd_vel_callback, 10

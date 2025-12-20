@@ -53,21 +53,21 @@ def generate_launch_description():
     
     use_composition_arg = DeclareLaunchArgument(
         'use_composition',
-        default_value='false',
+        default_value='False',
         description='Use composed bringup for Nav2'
     )
     
     use_respawn_arg = DeclareLaunchArgument(
         'use_respawn',
-        default_value='false',
+        default_value='False',
         description='Whether to respawn if a node crashes'
     )
     
-    # Nav2 bringup
-    # This launches all Nav2 nodes with our custom params
+    # Nav2 navigation launch (for SLAM mode without pre-made map)
+    # This launches Nav2 without map_server or AMCL (Point-LIO provides localization)
     nav2_bringup = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
-            os.path.join(nav2_bringup_dir, 'launch', 'bringup_launch.py')
+            os.path.join(nav2_bringup_dir, 'launch', 'navigation_launch.py')
         ),
         launch_arguments={
             'use_sim_time': LaunchConfiguration('use_sim_time'),
@@ -76,6 +76,15 @@ def generate_launch_description():
             'use_composition': LaunchConfiguration('use_composition'),
             'use_respawn': LaunchConfiguration('use_respawn'),
         }.items()
+    )
+    
+    # Topic relay to remap Nav2's cmd_vel to cmd_vel_nav (for twist_mux)
+    nav_cmd_vel_relay = Node(
+        package='topic_tools',
+        executable='relay',
+        name='nav2_cmd_vel_relay',
+        output='screen',
+        arguments=['/cmd_vel', '/cmd_vel_nav']
     )
     
     return LaunchDescription([
@@ -88,5 +97,8 @@ def generate_launch_description():
         
         # Nav2 stack
         nav2_bringup,
+        
+        # Relay for twist_mux
+        nav_cmd_vel_relay,
     ])
 

@@ -1,0 +1,27 @@
+/**:
+  ros__parameters:
+    topics:
+      # Priority 1: Manual gamepad control (highest priority)
+      gamepad:
+        topic: /cmd_vel_joy
+        timeout: 0.5  # 500ms timeout - if no gamepad input, allow autonomous
+        priority: 100  # Highest priority
+        
+      # Priority 2: Autonomous navigation (Nav2)
+      navigation:
+        topic: /cmd_vel_nav
+        timeout: 1.0  # 1 second timeout
+        priority: 10  # Lower priority than gamepad
+      
+      # Priority 3: Safety override (e.g., emergency stop button)
+      safety:
+        topic: /cmd_vel_safety
+        timeout: 0.5
+        priority: 200  # Even higher than gamepad for emergency stops
+    
+    # Output topic (goes to ODrive)
+    cmd_vel_out: /cmd_vel
+    
+    # Lock topic (optional - can force a specific input)
+    lock_topic: /twist_mux/lock
+
