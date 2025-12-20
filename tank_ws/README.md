@@ -23,8 +23,8 @@ tank_ws/src/
     ├── isaac_ros_common/
     ├── isaac_ros_dnn_inference/
     ├── isaac_ros_image_pipeline/
-    ├── patchwork-plusplus/ (Phase 2)
-    └── odrive_ros2_control/ (optional USB)
+    
+   
 ```
 
 ## Setup
