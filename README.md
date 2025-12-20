@@ -318,14 +318,29 @@ asgreenmecha@gmail.com
 
 ---
 
-##  References
+## Acknowledgments
+
+This project uses the following open-source packages:
+
+| Package | Author | Description |
+|---------|--------|-------------|
+| [Point-LIO](https://github.com/hku-mars/Point-LIO) | HKU-MARS Lab | LiDAR-inertial odometry algorithm |
+| [point_lio_ros2](https://github.com/dfloreaa/point_lio_ros2) | @dfloreaa | ROS2 Humble port of Point-LIO |
+| [unilidar_sdk2](https://github.com/unitreerobotics/unilidar_sdk2) | Unitree Robotics | Unitree L2 LiDAR SDK and ROS2 driver |
+| [ublox_dgnss](https://github.com/aussierobots/ublox_dgnss) | Aussie Robots | u-blox ZED-F9P GNSS driver for ROS2 |
+| [Nav2](https://github.com/ros-planning/navigation2) | Open Navigation LLC | ROS2 Navigation Stack |
+
+---
+
+## References
 
 - **ROS2 Humble:** https://docs.ros.org/en/humble/
 - **Nav2:** https://navigation.ros.org/
 - **ODrive:** https://docs.odriverobotics.com/v/0.5.6/
-- **Gazebo:** https://gazebosim.org/
+- **Point-LIO:** https://github.com/hku-mars/Point-LIO
+- **Unitree L2:** https://github.com/unitreerobotics/unilidar_sdk2
 
 ---
 
 **Last Updated:** December 19, 2025  
-**Version:** 1.1
+**Version:** 1.2
