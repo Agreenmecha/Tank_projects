@@ -264,19 +264,17 @@ class ODriveInterfaceNode(Node):
         # Check for direction change in EITHER wheel (using COMMANDED velocities)
         # Use higher threshold (0.15 m/s) to filter out small commands
         VELOCITY_THRESHOLD = 0.15  # m/s - must be commanding at least this fast to detect change
+        
+        # Only trigger transitions for BOTH wheels changing direction (forward/backward reversal)
+        # Don't trigger for turn-on-dime where wheels go opposite directions
         left_direction_change = (self.last_cmd_wheel_vel_left * vel_left < 0) and (abs(self.last_cmd_wheel_vel_left) > VELOCITY_THRESHOLD)
         right_direction_change = (self.last_cmd_wheel_vel_right * vel_right < 0) and (abs(self.last_cmd_wheel_vel_right) > VELOCITY_THRESHOLD)
-        any_wheel_direction_change = left_direction_change or right_direction_change
-        
-        # Check for high angular velocity (turning on dime) after forward motion
-        was_moving_forward = (self.last_cmd_wheel_vel_left > VELOCITY_THRESHOLD) or (self.last_cmd_wheel_vel_right > VELOCITY_THRESHOLD)
-        high_angular = abs(angular_vel) > 1.0 and abs(linear_vel) < 0.1
-        sharp_turn = high_angular and was_moving_forward
+        both_wheels_direction_change = left_direction_change and right_direction_change  # Only trigger if BOTH change
         
         # Cooldown: Don't allow new transitions too soon after previous one
         current_time = time.time()
         time_since_last_transition = current_time - self.last_transition_end_time
-        in_cooldown = time_since_last_transition < 0.5  # 0.5s cooldown between transitions
+        in_cooldown = time_since_last_transition < 0.3  # 0.3s cooldown (reduced from 0.5s)
         
         # If transitioning, force stop for fixed duration
         if self.transitioning:
@@ -286,26 +284,18 @@ class ODriveInterfaceNode(Node):
             vel_left = 0.0
             vel_right = 0.0
             
-            # End transition after 0.5s
-            if elapsed >= 0.5:
+            # End transition after 0.3s (reduced from 0.5s)
+            if elapsed >= 0.3:
                 self.transitioning = False
                 self.last_transition_end_time = current_time
         
-        # Start new transition if direction changed or sharp turn detected (and not in cooldown)
-        elif (any_wheel_direction_change or sharp_turn) and not in_cooldown:
+        # Start new transition ONLY if BOTH wheels changed direction (forward/backward reversal)
+        elif both_wheels_direction_change and not in_cooldown:
             self.transitioning = True
             self.transition_start_time = time.time()
             vel_left = 0.0
             vel_right = 0.0
-            if any_wheel_direction_change:
-                if left_direction_change and right_direction_change:
-                    self.get_logger().info('Both wheels changing direction - stopping before reversing')
-                elif left_direction_change:
-                    self.get_logger().info('Left wheel changing direction - stopping both wheels')
-                else:
-                    self.get_logger().info('Right wheel changing direction - stopping both wheels')
-            else:
-                self.get_logger().info('Sharp turn detected - slowing down first')
+            self.get_logger().info('Both wheels reversing direction - brief stop for drivetrain safety')
         
         # Store commanded wheel velocities for next iteration
         if not self.transitioning:

@@ -199,6 +199,7 @@
             </div>
             <ul id="waypointList"></ul>
             <button onclick="sendWaypoints()" class="success">🚀 Send Mission to Robot</button>
+            <button onclick="stopMission()" class="danger" style="width: 100%; margin-top: 10px; font-size: 18px; padding: 15px; font-weight: bold;">🛑 STOP MISSION</button>
             <button onclick="exportWaypoints()">💾 Export Waypoints</button>
         </div>
         
@@ -471,6 +472,56 @@
             waypointTopic.publish(message);
             
             alert(`Sent ${waypoints.length} waypoints to robot!`);
+        }
+        
+        // Stop mission and cancel navigation
+        function stopMission() {
+            if (!ros || !ros.isConnected) {
+                alert('Not connected to ROS!');
+                return;
+            }
+            
+            // Cancel Nav2 goal
+            const cancelGoalClient = new ROSLIB.Service({
+                ros: ros,
+                name: '/navigate_to_pose/_action/cancel_goal',
+                serviceType: 'action_msgs/srv/CancelGoal'
+            });
+            
+            const request = new ROSLIB.ServiceRequest({});
+            
+            cancelGoalClient.callService(request, (result) => {
+                console.log('Nav2 goal cancelled:', result);
+            });
+            
+            // Send stop command to waypoint manager
+            const commandTopic = new ROSLIB.Topic({
+                ros: ros,
+                name: '/gps_waypoint_manager/command',
+                messageType: 'std_msgs/String'
+            });
+            
+            const stopMessage = new ROSLIB.Message({
+                data: JSON.stringify({type: 'stop_mission'})
+            });
+            
+            commandTopic.publish(stopMessage);
+            
+            // Send zero velocity command
+            const cmdVelTopic = new ROSLIB.Topic({
+                ros: ros,
+                name: '/cmd_vel',
+                messageType: 'geometry_msgs/Twist'
+            });
+            
+            const stopCmd = new ROSLIB.Message({
+                linear: {x: 0.0, y: 0.0, z: 0.0},
+                angular: {x: 0.0, y: 0.0, z: 0.0}
+            });
+            
+            cmdVelTopic.publish(stopCmd);
+            
+            alert('🛑 MISSION STOPPED! Robot should halt.');
         }
         
         // Export waypoints

@@ -48,7 +48,7 @@ class TeleopGamepadNode(Node):
         publish_rate = self.get_parameter('publish_rate').value
         
         # Publishers
-        self.cmd_vel_pub = self.create_publisher(Twist, '/cmd_vel', 10)
+        self.cmd_vel_pub = self.create_publisher(Twist, '/cmd_vel_joy', 10)  # Changed to /cmd_vel_joy for twist_mux
         self.estop_pub = self.create_publisher(Bool, '/emergency_stop', 10)
         
         # State

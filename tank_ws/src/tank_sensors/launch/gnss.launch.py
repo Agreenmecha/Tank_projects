@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Launch file for ZED-F9P GNSS
-Uses aussierobots/ublox_dgnss driver
+Uses aussierobots/ublox_dgnss driver with UBX protocol
 """
 
 from launch import LaunchDescription
@@ -25,7 +25,7 @@ def generate_launch_description():
         description='GNSS serial device'
     )
     
-    # GNSS node (aussierobots driver)
+    # GNSS node (aussierobots driver) - publishes UBX messages
     gnss_node = Node(
         package='ublox_dgnss_node',
         executable='ublox_dgnss_node',
@@ -38,7 +38,8 @@ def generate_launch_description():
     )
     
     # NavSatFix converter (UBX → /fix topic)
-    # Requires: /ubx_nav_hp_pos_llh, /ubx_nav_cov, /ubx_nav_status
+    # Subscribes to: /ubx_nav_hp_pos_llh, /ubx_nav_cov, /ubx_nav_status
+    # Publishes: /fix (sensor_msgs/NavSatFix)
     navsatfix_node = Node(
         package='ublox_nav_sat_fix_hp_node',
         executable='ublox_nav_sat_fix_hp',
@@ -51,4 +52,3 @@ def generate_launch_description():
         gnss_node,
         navsatfix_node,
     ])
-
